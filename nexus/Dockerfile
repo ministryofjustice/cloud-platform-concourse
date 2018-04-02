@@ -8,5 +8,3 @@ wget -O /opt/sonatype/nexus/system/com/larscheidschmitzhermes/nexus3-github-oaut
 unzip /opt/sonatype/nexus/system/com/larscheidschmitzhermes/nexus3-github-oauth-plugin.zip -d /opt/sonatype/nexus/system/com/larscheidschmitzhermes/ &&\
 echo "mvn\:com.larscheidschmitzhermes/nexus3-github-oauth-plugin/2.0.1 = 200" >> /opt/sonatype/nexus/etc/karaf/startup.properties
 COPY githuboauth.properties /opt/sonatype/nexus/etc/githuboauth.properties
-
-USER nexus
