@@ -16,4 +16,4 @@ CI for Kubernetes cluster CP
    * `helm delete --purge concourse`
  * Docker registry:
    * Artifactory: `helm install --namespace $ns --name artifactory --set ingress.enabled=true --set ingress.hosts[0]="artifactory.$domain" --set nginx.enabled=false --set artifactory.externalPort=80 --set artifactory.image.repository=docker.bintray.io/jfrog/artifactory-oss stable/artifactory`
-   * Nexus (from its folder): `helm install --namespace development --name nexus -f values.yaml stable/sonatype-nexus`
+   * Nexus: see its subfolder
