@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "concourse-webhook.fullname" . }}
+  labels:
+    app: {{ template "concourse-webhook.name" . }}
+    chart: {{ template "concourse-webhook.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "concourse-webhook.name" . }}
+    release: {{ .Release.Name }}
