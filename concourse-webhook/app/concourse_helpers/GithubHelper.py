@@ -39,7 +39,7 @@ class GithubHelper(object):
     with tempfile.NamedTemporaryFile() as temp:
       temp.write(yaml)
       temp.flush()
-      out = subprocess.getoutput("echo y | fly -t hello set-pipeline -p {}-{} -c {} --var \"the-private-key=$(cat concourse)\"".format(repo, branch, temp.name))
+      out = subprocess.getoutput("echo y | /root/fly -t demo set-pipeline -p {}-{} -c {}".format(repo, branch, temp.name))
       print(out)
       temp.close()
     return responseHelper.create_response('posted to Concourse', 200)

@@ -5,7 +5,7 @@ from flask import Flask, request
 from concourse_helpers import ResponseHelper, GithubHelper
 
 config = configparser.ConfigParser()
-config.read('github_concourse.ini')
+config.read('/webhook/github_concourse.ini')
 
 app = Flask(__name__)
 app.debug = True
