@@ -49,3 +49,8 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
+      persistentVolume:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.persistentVolume }}
+

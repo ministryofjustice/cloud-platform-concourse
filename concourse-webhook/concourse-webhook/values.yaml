@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: 
+  repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/github-webhook
   tag: stable
   pullPolicy: IfNotPresent
 
@@ -13,7 +13,7 @@ service:
   type: ClusterIP
   port: 80
 
-externalURL: https://concourse-webhook.apps.cloud-platforms-sandbox.k8s.integration.dsd.io
+# externalURL: https://concourse-webhook.apps.cloud-platforms-sandbox.k8s.integration.dsd.io
 
 ingress:
   enabled: true
@@ -27,6 +27,14 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+  #  metrics:
+  #   ## Enable the prometheus metrics?
+  #   ## Port is per https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+  #   ##
+  #   prometheus:
+  #     enabled: false
+  #     port: 9391
 
 resources:
   limits:
