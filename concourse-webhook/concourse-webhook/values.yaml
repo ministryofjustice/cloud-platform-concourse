@@ -11,7 +11,7 @@ image:
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8080
 
 # externalURL: https://concourse-webhook.apps.cloud-platforms-sandbox.k8s.integration.dsd.io
 
