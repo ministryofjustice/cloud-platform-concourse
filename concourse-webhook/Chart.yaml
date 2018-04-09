@@ -1,8 +1,0 @@
-apiVersion: v1
-appVersion: "1.0"
-description: A Concourse-Webhook Helm chart for Kubernetes
-name: concourse-webhook
-version: 0.1.0
-maintainers: 
-  - name: Cloud Platforms Team
-    slack: \#cloud-platforms
