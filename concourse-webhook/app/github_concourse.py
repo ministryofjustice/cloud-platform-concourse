@@ -8,7 +8,6 @@ config = configparser.ConfigParser()
 config.read('/webhook/github_concourse.ini')
 
 app = Flask(__name__)
-app.debug = True
 
 app.config.update(dict(
   PORT=config['DEFAULT'].getint('port', 8080),
@@ -45,4 +44,4 @@ def webhook():
   return responseHelper.create_response("doesn't look like a Github event", 501)
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=app.config.get('PORT'))
+  app.run(host='0.0.0.0', port=app.config.get('PORT'), debug=False, threaded=True)

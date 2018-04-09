@@ -1,0 +1,10 @@
+FROM 926803513772.dkr.ecr.eu-west-1.amazonaws.com/concourse-workers:aws-latest
+# FROM concourse/concourse
+RUN apt-get update
+RUN apt-get -y install awscli git pwgen python python-pip jq wget curl
+RUN pip install --upgrade pip && pip install kubernetes
+RUN wget -q -O /usr/local/bin/kops https://github.com/kubernetes/kops/releases/download/1.8.0/kops-linux-amd64 && chmod +x /usr/local/bin/kops
+RUN wget -q -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x /usr/local/bin/kubectl
+COPY check.sh /opt/resource/check
+COPY in.sh /opt/resource/in
+COPY out.sh /opt/resource/out
