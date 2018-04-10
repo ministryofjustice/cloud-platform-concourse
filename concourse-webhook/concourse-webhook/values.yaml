@@ -22,7 +22,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   path: /
   hosts:
-    - https://concourse-webhook.apps.cloud-platforms-sandbox.k8s.integration.dsd.io
+    - concourse-webhook.apps.cloud-platforms-sandbox.k8s.integration.dsd.io
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
