@@ -3,6 +3,7 @@ import hmac, json
 from hashlib import sha1
 import subprocess
 import tempfile
+import re
 
 class GithubHelper(object):
   def __init__(self, secret, token, org, concourse):
@@ -35,11 +36,19 @@ class GithubHelper(object):
       return responseHelper.create_response('this was a push to {} in {}'.format(branch,repo), 200)
     return responseHelper.create_response("we don't do event {} yet".format(event), 501)
 
+  def fix_fly_out(self, line):
+    ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]|\n')
+    line = ansi_escape.sub('', line)
+    return line
+
   def post_to_concourse(self, yaml, repo, branch, responseHelper):
     with tempfile.NamedTemporaryFile() as temp:
       temp.write(yaml)
       temp.flush()
-      out = subprocess.getoutput("echo y | /root/fly -t demo set-pipeline -p {}-{} -c {}".format(repo, branch, temp.name))
-      print(out)
+      (err, out) = subprocess.getstatusoutput("echo y | /root/fly -t demo set-pipeline -p {}-{} -c {}".format(repo, branch, temp.name))
+      out = self.fix_fly_out(out)
       temp.close()
-    return responseHelper.create_response('posted to Concourse', 200)
+      if(err):
+        return responseHelper.create_response('Concourse didn\'t like this: {}'.format(out), 400)
+    out = subprocess.getoutput("/root/fly -t demo unpause-pipeline -p {}-{}".format(repo, branch))
+    return responseHelper.create_response('Posted to Concourse: {}'.format(out), 200)
