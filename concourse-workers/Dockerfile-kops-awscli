@@ -1,4 +1,5 @@
 FROM 926803513772.dkr.ecr.eu-west-1.amazonaws.com/concourse-workers:aws-latest
+# FROM concourse/concourse
 RUN apt-get update
 RUN apt-get -y install awscli git pwgen python python-pip jq wget curl
 RUN pip install --upgrade pip && pip install kubernetes
