@@ -11,9 +11,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: https
       protocol: TCP
-      name: https
+      name: wh-svc-port
   selector:
     app: {{ template "concourse-webhook.name" . }}
     release: {{ .Release.Name }}

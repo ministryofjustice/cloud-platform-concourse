@@ -21,36 +21,19 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+          imagePullPolicy: {{ .Values.imagepullPolicy }}
           ports:
-            - name: https
+            - name: wh-cont-port
               containerPort: {{ .Values.service.port }}
-              # 80
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
-              port: https
+              path: /health
+              port: {{ .Values.service.port }}
           readinessProbe:
             httpGet:
-              path: /
-              port: https
+              path: /health
+              port: {{ .Values.service.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.persistentVolume }}
-      persistentVolume:
-{{ toYaml . | indent 8 }}
-    {{- end }}
