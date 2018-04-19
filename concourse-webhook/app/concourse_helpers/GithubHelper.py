@@ -45,7 +45,7 @@ class GithubHelper(object):
     with tempfile.NamedTemporaryFile() as temp:
       temp.write(yaml)
       temp.flush()
-      (err, out) = subprocess.getstatusoutput("echo y | /root/fly -t demo set-pipeline -p {}-{} -c {}".format(repo, branch, temp.name))
+      (err, out) = subprocess.getstatusoutput("echo y | /root/fly -t sandbox set-pipeline -p {}-{} -c {}".format(repo, branch, temp.name))
       out = self.fix_fly_out(out)
       temp.close()
       if(err):
