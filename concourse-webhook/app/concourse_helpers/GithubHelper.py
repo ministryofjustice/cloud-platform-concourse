@@ -50,5 +50,5 @@ class GithubHelper(object):
       temp.close()
       if(err):
         return responseHelper.create_response('Concourse didn\'t like this: {}'.format(out), 400)
-    out = subprocess.getoutput("/root/fly -t demo unpause-pipeline -p {}-{}".format(repo, branch))
+    out = subprocess.getoutput("/root/fly -t sandbox unpause-pipeline -p {}-{}".format(repo, branch))
     return responseHelper.create_response('Posted to Concourse: {}'.format(out), 200)
