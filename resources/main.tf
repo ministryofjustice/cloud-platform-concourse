@@ -8,9 +8,9 @@ provider "aws" {
  */
 
 resource "aws_security_group" "concourse" {
-  name        = "main_rds_sg"
-  description = "Allow all inbound traffic"
-  vpc_id      = "${var.vpc_id}"
+  name        = "${terraform.workspace}-concourse-rds"
+  description = "Allow all inbound traffic from the VPC"
+  vpc_id      = "172.20.0.0/16"
 
   ingress {
     from_port   = 0
@@ -27,26 +27,36 @@ resource "aws_security_group" "concourse" {
   }
 
   tags {
-    Name = "${var.sg_name}"
+    Name = "${terraform.workspace}-concourse-rds"
+  }
+}
+
+data "terraform_remote_state" "cluster" {
+  backend = "s3"
+
+  config {
+    bucket = "moj-cp-k8s-investigation-global-terraform"
+    region = "eu-west-1"
+    key    = "terraform.tfstate"
   }
 }
 
 resource "aws_db_subnet_group" "concourse" {
-  name        = "main_subnet_group"
-  description = "Our main group of subnets"
-  subnet_ids  = ["${var.subnet_1_id}", "${var.subnet_2_id}"]
+  name        = "${terraform.workspace}-concourse"
+  description = "Internal subnet groups"
+  subnet_ids  = ["${data.terraform_remote_state.cluster.internal_subnets_ids}"]
 }
 
 resource "aws_db_instance" "concourse" {
   depends_on             = ["aws_security_group.concourse"]
-  identifier             = "${var.identifier}"
-  allocated_storage      = "${var.storage}"
-  engine                 = "${var.engine}"
-  engine_version         = "${lookup(var.engine_version, var.engine)}"
-  instance_class         = "${var.instance_class}"
+  identifier             = "${terraform.workspace}-concourse"
+  allocated_storage      = "${var.rds_storage}"
+  engine                 = "postgres"
+  engine_version         = "${var.rds_postgresql_version}"
+  instance_class         = "${var.rds_instance_class}"
   name                   = "${var.db_name}"
-  username               = "${var.username}"
-  password               = "${var.password}"
+  username               = "${var.db_username}"
+  password               = "${var.db_password}"
   vpc_security_group_ids = ["${aws_security_group.concourse.id}"]
   db_subnet_group_name   = "${aws_db_subnet_group.concourse.id}"
   skip_final_snapshot    = true
