@@ -1,3 +1,12 @@
+provider "aws" {
+  region = "eu-west-1"
+}
+
+/*
+ * Create RDS database for concourse.
+ *
+ */
+
 resource "aws_security_group" "concourse" {
   name        = "main_rds_sg"
   description = "Allow all inbound traffic"
@@ -41,4 +50,50 @@ resource "aws_db_instance" "concourse" {
   vpc_security_group_ids = ["${aws_security_group.concourse.id}"]
   db_subnet_group_name   = "${aws_db_subnet_group.concourse.id}"
   skip_final_snapshot    = true
+}
+
+/*
+ * Generate the `values.yaml` configuration for the concourse helm chart.
+ *
+ */
+
+resource "tls_private_key" "host_key" {
+  algorithm = "RSA"
+  rsa_bits  = "2048"
+}
+
+resource "tls_private_key" "session_signing_key" {
+  algorithm = "RSA"
+  rsa_bits  = "2048"
+}
+
+resource "tls_private_key" "worker_key" {
+  algorithm = "RSA"
+  rsa_bits  = "2048"
+}
+
+data "template_file" "values" {
+  template = "${file("${path.module}/templates/values.yaml")}"
+
+  vars {
+    concourse_image_tag       = "${var.concourse_image_tag}"
+    github_auth_client_id     = "${var.github_auth_client_id}"
+    github_auth_client_secret = "${var.github_auth_client_secret}"
+    concourse_hostname        = "${var.concourse_hostname}"
+    github_users              = "${join(",", var.github_users)}"
+    postgresql_user           = "${aws_db_instance.concourse.username}"
+    postgresql_password       = "${aws_db_instance.concourse.password}"
+    postgresql_host           = "${aws_db_instance.concourse.address}"
+    postgresql_sslmode        = false
+    host_key_priv             = "${indent(4, tls_private_key.host_key.private_key_pem)}"
+    host_key_pub              = "${tls_private_key.host_key.public_key_openssh}"
+    session_signing_key_priv  = "${indent(4, tls_private_key.session_signing_key.private_key_pem)}"
+    worker_key_priv           = "${indent(4, tls_private_key.worker_key.private_key_pem)}"
+    worker_key_pub            = "${tls_private_key.worker_key.public_key_openssh}"
+  }
+}
+
+resource "local_file" "values" {
+  content  = "${data.template_file.values.rendered}"
+  filename = "${path.module}/../concourse/values.yaml"
 }
