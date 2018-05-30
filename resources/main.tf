@@ -1,3 +1,11 @@
+terraform {
+  backend "s3" {
+    bucket = "moj-cp-k8s-investigation-concourse-terraform"
+    region = "eu-west-1"
+    key    = "terraform.tfstate"
+  }
+}
+
 provider "aws" {
   region = "eu-west-1"
 }
