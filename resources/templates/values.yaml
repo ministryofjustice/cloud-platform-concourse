@@ -454,7 +454,7 @@ credentialManager:
     ## the Release name hyphen, e.g. "my-release-" produces namespace "my-release-main" for the
     ## "main" Concourse team.
     ##
-    namespacePrefix: development-concourse-
+    ## namespacePrefix:
 
     ## Teams to create namespaces for to hold secrets.
     teams:

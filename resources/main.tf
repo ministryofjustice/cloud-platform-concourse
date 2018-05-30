@@ -28,7 +28,7 @@ data "terraform_remote_state" "cluster" {
 resource "aws_security_group" "concourse" {
   name        = "${terraform.workspace}-concourse-rds"
   description = "Allow all inbound traffic from the VPC"
-  vpc_id      = "172.20.0.0/16"
+  vpc_id      = "${data.terraform_remote_state.cluster.vpc_id}"
 
   ingress {
     from_port   = 0
