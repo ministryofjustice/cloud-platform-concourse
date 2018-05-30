@@ -111,11 +111,11 @@ concourse:
 
     ## GitHub teams (comma separated) whose members will have access.
     ##
-    # team: WebOps
+    team: ${github_teams}
 
     ## GitHub users (comma separated) to permit access.
     ##
-    user: ${github_users}
+    # user:
 
     ## Override default endpoint AuthURL for Github Enterprise.
     ##

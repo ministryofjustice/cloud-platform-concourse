@@ -18,34 +18,9 @@ variable "db_name" {
   description = "PostgreSQL DB name"
 }
 
-variable "db_username" {
-  description = "PostgreSQL DB username"
-}
-
-variable "db_password" {
-  description = "PostgreSQL DB password"
-}
-
 variable "concourse_image_tag" {
   default     = "3.11.0"
   description = "The docker image tag to use"
-}
-
-variable "concourse_hostname" {
-  description = "Where Concourse is accessible"
-}
-
-variable "github_auth_client_id" {
-  description = "For GitHub OAuth"
-}
-
-variable "github_auth_client_secret" {
-  description = "For GitHub OAuth"
-}
-
-variable "github_users" {
-  type        = "list"
-  description = "List of github users who are allowed to authenticate with Concourse"
 }
 
 variable "concourse_hostname_prefix" {

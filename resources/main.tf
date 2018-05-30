@@ -63,8 +63,8 @@ resource "aws_db_instance" "concourse" {
   engine_version         = "${var.rds_postgresql_version}"
   instance_class         = "${var.rds_instance_class}"
   name                   = "${var.db_name}"
-  username               = "${var.db_username}"
-  password               = "${var.db_password}"
+  username               = "${local.secrets["db_username"]}"
+  password               = "${local.secrets["db_password"]}"
   vpc_security_group_ids = ["${aws_security_group.concourse.id}"]
   db_subnet_group_name   = "${aws_db_subnet_group.concourse.id}"
   skip_final_snapshot    = true
@@ -95,10 +95,10 @@ data "template_file" "values" {
 
   vars {
     concourse_image_tag       = "${var.concourse_image_tag}"
-    github_auth_client_id     = "${var.github_auth_client_id}"
-    github_auth_client_secret = "${var.github_auth_client_secret}"
+    github_auth_client_id     = "${local.secrets["github_auth_client_id"]}"
+    github_auth_client_secret = "${local.secrets["github_auth_client_secret"]}"
     concourse_hostname        = "${var.concourse_hostname_prefix}.${data.terraform_remote_state.cluster.cluster_domain_name}"
-    github_users              = "${join(",", var.github_users)}"
+    github_teams              = "${local.secrets["github_teams"]}"
     postgresql_user           = "${aws_db_instance.concourse.username}"
     postgresql_password       = "${aws_db_instance.concourse.password}"
     postgresql_host           = "${aws_db_instance.concourse.address}"
@@ -113,5 +113,5 @@ data "template_file" "values" {
 
 resource "local_file" "values" {
   content  = "${data.template_file.values.rendered}"
-  filename = "${path.module}/../config/${terraform.workspace}-values.yaml"
+  filename = "${path.module}/.helm-config/${terraform.workspace}/values.yaml"
 }
