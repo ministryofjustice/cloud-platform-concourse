@@ -2,6 +2,16 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+data "terraform_remote_state" "cluster" {
+  backend = "s3"
+
+  config {
+    bucket = "moj-cp-k8s-investigation-platform-terraform"
+    region = "eu-west-1"
+    key    = "/env:/${terraform.workspace}/terraform.tfstate"
+  }
+}
+
 /*
  * Create RDS database for concourse.
  *
@@ -16,7 +26,7 @@ resource "aws_security_group" "concourse" {
     from_port   = 0
     to_port     = 65535
     protocol    = "TCP"
-    cidr_blocks = ["${var.cidr_blocks}"]
+    cidr_blocks = ["${data.terraform_remote_state.cluster.internal_subnets}"]
   }
 
   egress {
@@ -28,16 +38,6 @@ resource "aws_security_group" "concourse" {
 
   tags {
     Name = "${terraform.workspace}-concourse-rds"
-  }
-}
-
-data "terraform_remote_state" "cluster" {
-  backend = "s3"
-
-  config {
-    bucket = "moj-cp-k8s-investigation-global-terraform"
-    region = "eu-west-1"
-    key    = "terraform.tfstate"
   }
 }
 
@@ -89,7 +89,7 @@ data "template_file" "values" {
     concourse_image_tag       = "${var.concourse_image_tag}"
     github_auth_client_id     = "${var.github_auth_client_id}"
     github_auth_client_secret = "${var.github_auth_client_secret}"
-    concourse_hostname        = "${var.concourse_hostname}"
+    concourse_hostname        = "${var.concourse_hostname_prefix}.${data.terraform_remote_state.cluster.cluster_domain_name}"
     github_users              = "${join(",", var.github_users)}"
     postgresql_user           = "${aws_db_instance.concourse.username}"
     postgresql_password       = "${aws_db_instance.concourse.password}"
@@ -105,5 +105,5 @@ data "template_file" "values" {
 
 resource "local_file" "values" {
   content  = "${data.template_file.values.rendered}"
-  filename = "${path.module}/../concourse/values.yaml"
+  filename = "${path.module}/../config/${terraform.workspace}-values.yaml"
 }

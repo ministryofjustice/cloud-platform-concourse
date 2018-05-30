@@ -4,7 +4,7 @@ variable "rds_storage" {
 }
 
 variable "rds_postgresql_version" {
-  postgres    = "9.6.8"
+  default     = "9.6.8"
   description = "Version of PostgreSQL RDS to use"
 }
 
@@ -46,4 +46,9 @@ variable "github_auth_client_secret" {
 variable "github_users" {
   type        = "list"
   description = "List of github users who are allowed to authenticate with Concourse"
+}
+
+variable "concourse_hostname_prefix" {
+  default     = "concourse.apps."
+  description = "With the cluster domain appended, it should form the hostname where concourse is exposed"
 }
