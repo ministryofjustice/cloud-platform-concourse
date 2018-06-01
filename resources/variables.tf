@@ -24,6 +24,6 @@ variable "concourse_image_tag" {
 }
 
 variable "concourse_hostname_prefix" {
-  default     = "concourse.apps."
+  default     = "concourse.apps"
   description = "With the cluster domain appended, it should form the hostname where concourse is exposed"
 }

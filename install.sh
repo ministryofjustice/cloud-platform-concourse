@@ -18,7 +18,7 @@ terraform init
 terraform workspace select "${1}"
 terraform apply -auto-approve
 
-helm \
+helm install \
   --namespace concourse \
   --name concourse \
   -f ".helm-config/${1}/values.yaml" \

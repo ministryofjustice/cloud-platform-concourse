@@ -32,8 +32,8 @@ resource "aws_security_group" "concourse" {
 
   ingress {
     from_port   = 0
-    to_port     = 65535
-    protocol    = "TCP"
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["${data.terraform_remote_state.cluster.internal_subnets}"]
   }
 
