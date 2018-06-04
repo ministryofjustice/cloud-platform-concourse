@@ -306,9 +306,7 @@ worker:
 
   ## Configure additional environment variables for the
   ## worker container(s)
-  env:
-    - name: CONCOURSE_TSA_HOST
-      value: concourse-web:2222
+  # env:
   #   - name: http_proxy
   #     value: "http://proxy.your-domain.com:3128"
   #   - name: https_proxy
