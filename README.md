@@ -2,12 +2,14 @@
 
 Concourse CI for the Cloud Platform
 
-## Install
+## Install / Upgrade
 In order to setup concourse initially on a cluster, you will need to have `terraform`, `kubectl` and `helm` installed.
 
 1. Edit `resources/secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
 
-2. `./setup <cluster-name>` where `cluster-name` is the name of the cluster you want to install Concourse CI on, as it appears in the terraform workspaces [here](https://github.com/ministryofjustice/kubernetes-investigations/tree/master/terraform/cloud-platform).
+2. Create `concourse` namespace and setup RBAC for `tiller` (see example [here](https://github.com/ministryofjustice/cloud-platform-environments/blob/master/namespaces/cloud-platform-live-0.k8s.integration.dsd.io/concourse/rbac-config-tiller.yaml))
+
+3. `./setup <cluster-name>` where `cluster-name` is the name of the cluster you want to install Concourse CI on, as it appears in the terraform workspaces [here](https://github.com/ministryofjustice/kubernetes-investigations/tree/master/terraform/cloud-platform).
 
 ## Removing
 Currently a manual task:
