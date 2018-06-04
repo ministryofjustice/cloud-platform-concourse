@@ -13,17 +13,7 @@ variable "rds_instance_class" {
   description = "RDS instance class"
 }
 
-variable "db_name" {
-  default     = "concourse"
-  description = "PostgreSQL DB name"
-}
-
 variable "concourse_image_tag" {
   default     = "3.11.0"
   description = "The docker image tag to use"
-}
-
-variable "concourse_hostname_prefix" {
-  default     = "concourse.apps"
-  description = "With the cluster domain appended, it should form the hostname where concourse is exposed"
 }

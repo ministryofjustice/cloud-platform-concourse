@@ -62,7 +62,7 @@ resource "aws_db_instance" "concourse" {
   engine                 = "postgres"
   engine_version         = "${var.rds_postgresql_version}"
   instance_class         = "${var.rds_instance_class}"
-  name                   = "${var.db_name}"
+  name                   = "concourse"
   username               = "${local.secrets["db_username"]}"
   password               = "${local.secrets["db_password"]}"
   vpc_security_group_ids = ["${aws_security_group.concourse.id}"]
@@ -97,7 +97,7 @@ data "template_file" "values" {
     concourse_image_tag       = "${var.concourse_image_tag}"
     github_auth_client_id     = "${local.secrets["github_auth_client_id"]}"
     github_auth_client_secret = "${local.secrets["github_auth_client_secret"]}"
-    concourse_hostname        = "${var.concourse_hostname_prefix}.${data.terraform_remote_state.cluster.cluster_domain_name}"
+    concourse_hostname        = "concourse.apps.${data.terraform_remote_state.cluster.cluster_domain_name}"
     github_teams              = "${local.secrets["github_teams"]}"
     postgresql_user           = "${aws_db_instance.concourse.username}"
     postgresql_password       = "${aws_db_instance.concourse.password}"
