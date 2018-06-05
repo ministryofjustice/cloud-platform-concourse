@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 terraform {
   backend "s3" {
     bucket = "moj-cp-k8s-investigation-concourse-terraform"
@@ -114,4 +116,48 @@ data "template_file" "values" {
 resource "local_file" "values" {
   content  = "${data.template_file.values.rendered}"
   filename = "${path.module}/.helm-config/${terraform.workspace}/values.yaml"
+}
+
+resource "aws_iam_user" "concourse-user" {
+  name = "concourse-user"
+  path = "/tools/concourse/"
+}
+
+resource "aws_iam_access_key" "iam_access_key" {
+  user = "${aws_iam_user.concourse-user.name}"
+}
+
+data "aws_iam_policy_document" "policy" {
+  statement {
+    actions = [
+      "s3:CreateBucket",
+    ]
+
+    resources = [
+      "arn:aws:s3:::*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreateUser",
+    ]
+
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "policy" {
+  name        = "concourse-account-policy"
+  path        = "/tools/concourse/"
+  policy      = "${data.aws_iam_policy_document.policy.json}"
+  description = "Policy for concourse-account"
+}
+
+resource "aws_iam_policy_attachment" "attach-policy" {
+  name       = "attached-policy"
+  users      = ["${aws_iam_user.concourse-user.name}"]
+  policy_arn = "${aws_iam_policy.policy.arn}"
 }
