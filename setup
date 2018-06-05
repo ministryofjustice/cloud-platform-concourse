@@ -22,7 +22,7 @@ cd resources
 
 terraform init
 terraform workspace new "${1}" || terraform workspace select "${1}"
-terraform apply -auto-approve
+terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'
 
 _helm="helm --kube-context=${_kctx} --tiller-namespace concourse"
 
