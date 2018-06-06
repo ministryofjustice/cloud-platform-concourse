@@ -119,7 +119,7 @@ resource "local_file" "values" {
 }
 
 resource "aws_iam_user" "concourse-user" {
-  name = "concourse-user"
+  name = "${terraform.workspace}-concourse-user"
   path = "/tools/concourse/"
 }
 
@@ -153,7 +153,7 @@ resource "aws_iam_policy" "policy" {
   name        = "concourse-account-policy"
   path        = "/tools/concourse/"
   policy      = "${data.aws_iam_policy_document.policy.json}"
-  description = "Policy for concourse-account"
+  description = "Policy for ${terraform.workspace}-concourse-user"
 }
 
 resource "aws_iam_policy_attachment" "attach-policy" {
