@@ -162,14 +162,14 @@ resource "aws_iam_policy_attachment" "attach-policy" {
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
-resource "kubernetes_secret" "concourse_user_credentials"{
+resource "kubernetes_secret" "concourse_user_credentials" {
   metadata {
-    name = "${terraform.workspace}-concourse-user"
+    name      = "${terraform.workspace}-concourse-user"
     namespace = "concourse-main"
   }
 
   data {
-    access_key_id  = "${aws_iam_access_key.iam_access_key.id}"
+    access_key_id     = "${aws_iam_access_key.iam_access_key.id}"
     secret_access_key = "${aws_iam_access_key.iam_access_key.secret}"
   }
 }
