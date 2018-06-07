@@ -97,6 +97,7 @@ data "template_file" "values" {
 
   vars {
     concourse_image_tag       = "${var.concourse_image_tag}"
+    concourse_chart_version   = "${var.concourse_chart_version}"
     github_auth_client_id     = "${local.secrets["github_auth_client_id"]}"
     github_auth_client_secret = "${local.secrets["github_auth_client_secret"]}"
     concourse_hostname        = "concourse.apps.${data.terraform_remote_state.cluster.cluster_domain_name}"
@@ -162,7 +163,7 @@ resource "aws_iam_policy_attachment" "attach-policy" {
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
-resource "kubernetes_secret" "concourse_user_credentials" {
+/* resource "kubernetes_secret" "concourse_user_credentials" {
   metadata {
     name      = "aws"
     namespace = "concourse-main"
@@ -172,4 +173,4 @@ resource "kubernetes_secret" "concourse_user_credentials" {
     access_key_id     = "${aws_iam_access_key.iam_access_key.id}"
     secret_access_key = "${aws_iam_access_key.iam_access_key.secret}"
   }
-}
+} */

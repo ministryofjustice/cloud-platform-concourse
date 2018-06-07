@@ -27,6 +27,7 @@ terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/
 _helm="helm --kube-context=${_kctx} --tiller-namespace concourse"
 
 $_helm init --service-account tiller
+$_helm repo update
 
 if $_helm get concourse >/dev/null 2>&1; then
   $_helm upgrade \
