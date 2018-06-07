@@ -150,7 +150,7 @@ data "aws_iam_policy_document" "policy" {
 }
 
 resource "aws_iam_policy" "policy" {
-  name        = "concourse-account-policy"
+  name        = "${terraform.workspace}-concourse-user-policy"
   path        = "/tools/concourse/"
   policy      = "${data.aws_iam_policy_document.policy.json}"
   description = "Policy for ${terraform.workspace}-concourse-user"
@@ -164,7 +164,7 @@ resource "aws_iam_policy_attachment" "attach-policy" {
 
 resource "kubernetes_secret" "concourse_user_credentials" {
   metadata {
-    name      = "${terraform.workspace}-concourse-user"
+    name      = "aws"
     namespace = "concourse-main"
   }
 
