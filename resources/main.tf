@@ -92,12 +92,24 @@ resource "tls_private_key" "worker_key" {
   rsa_bits  = "2048"
 }
 
+resource "random_string" "basic_auth_username" {
+  length  = 16
+  special = false
+}
+
+resource "random_string" "basic_auth_password" {
+  length  = 32
+  special = false
+}
+
 data "template_file" "values" {
   template = "${file("${path.module}/templates/values.yaml")}"
 
   vars {
     concourse_image_tag       = "${var.concourse_image_tag}"
     concourse_chart_version   = "${var.concourse_chart_version}"
+    basic_auth_username       = "${random_string.basic_auth_username.result}"
+    basic_auth_password       = "${random_string.basic_auth_password.result}"
     github_auth_client_id     = "${local.secrets["github_auth_client_id"]}"
     github_auth_client_secret = "${local.secrets["github_auth_client_secret"]}"
     concourse_hostname        = "concourse.apps.${data.terraform_remote_state.cluster.cluster_domain_name}"
@@ -174,3 +186,15 @@ resource "aws_iam_policy_attachment" "attach-policy" {
     secret_access_key = "${aws_iam_access_key.iam_access_key.secret}"
   }
 } */
+
+resource "kubernetes_secret" "concourse_basic_auth_credentials" {
+  metadata {
+    name      = "concourse-basic-auth"
+    namespace = "concourse-main"
+  }
+
+  data {
+    username = "${random_string.basic_auth_username.result}"
+    password = "${random_string.basic_auth_password.result}"
+  }
+}

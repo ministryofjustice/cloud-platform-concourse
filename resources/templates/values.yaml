@@ -97,7 +97,7 @@ concourse:
   ## See https://concourse-ci.org/teams.html#basic-auth
   ##
   basicAuth:
-    enabled: false
+    enabled: true
 
   ## Enable GitHub auth for the "main" Concourse team.
   ## See https://concourse-ci.org/teams.html#github-auth
@@ -564,8 +564,8 @@ secrets:
 
   ## Secrets for Concourse basic auth
   ##
-  basicAuthUsername: concourse
-  basicAuthPassword: concourse
+  basicAuthUsername: ${basic_auth_username}
+  basicAuthPassword: ${basic_auth_password}
 
   ## Secrets for GitHub OAuth.
   ##
