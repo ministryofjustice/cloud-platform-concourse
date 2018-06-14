@@ -54,4 +54,8 @@ for i in $(cat git_pipelines); do
     -n \
     -p "${i}" \
     -c "pipelines/${CONCOURSE_TEAM}/${i}.yaml"
+  fly \
+    -t current \
+    unpause-pipeline \
+    -p "${i}"
 done
