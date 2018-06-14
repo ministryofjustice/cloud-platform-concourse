@@ -5,7 +5,7 @@ set -o pipefail
 
 checkenv(){
   missing=""
-  for v in URL TEAM BASIC_AUTH_USERNAME BASIC_AUTH_PASSWORD FLY_VERSION; do
+  for v in URL TEAM BASIC_AUTH_USERNAME BASIC_AUTH_PASSWORD FLY_VERSION CLUSTER; do
     vn="CONCOURSE_${v}"
     fv=""
     eval fv="\$$vn"
@@ -40,7 +40,7 @@ fly \
 
 fly -t current pipelines -a | awk '{ print $1; }' | sort > current_pipelines
 
-find "pipelines/${CONCOURSE_TEAM}" -iname '*.yaml' -exec basename {} \; | cut -d'.' -f1 | sort > git_pipelines
+find "pipelines/${CONCOURSE_CLUSTER}/${CONCOURSE_TEAM}" -iname '*.yaml' -exec basename {} \; | cut -d'.' -f1 | sort > git_pipelines
 
 for i in $(comm -23 current_pipelines git_pipelines); do
   echo ">>> deleting pipeline '${i}'... (skipped)"
@@ -53,7 +53,7 @@ for i in $(cat git_pipelines); do
     set-pipeline \
     -n \
     -p "${i}" \
-    -c "pipelines/${CONCOURSE_TEAM}/${i}.yaml"
+    -c "pipelines/${CONCOURSE_CLUSTER}/${CONCOURSE_TEAM}/${i}.yaml"
   fly \
     -t current \
     unpause-pipeline \

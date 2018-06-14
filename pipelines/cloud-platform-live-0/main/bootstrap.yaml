@@ -30,6 +30,7 @@ jobs:
             CONCOURSE_FLY_VERSION: v3.14.0
             CONCOURSE_URL: 'http://concourse-web.concourse.svc.cluster.local:8080'
             CONCOURSE_TEAM: 'main'
+            CONCOURSE_CLUSTER: 'cloud-platform-live-0'
             CONCOURSE_BASIC_AUTH_USERNAME: ((concourse-basic-auth.username))
             CONCOURSE_BASIC_AUTH_PASSWORD: ((concourse-basic-auth.password))
           inputs:
