@@ -4,20 +4,21 @@ resources:
   source:
     branch: bootstrap
     uri: https://github.com/ministryofjustice/cloud-platform-concourse
-- name: 15m
+- name: every-15m
   type: time
   source:
     interval: 15m
 
 jobs:
-  - name: ensure-pipelines
+  - name: bootstrap-pipelines
+    serial: true
     plan:
       - aggregate:
-        - get: 15m
+        - get: every-15m
           trigger: true
         - get: cloud-platform-concourse
           trigger: true
-      - task: apply-pipelines
+      - task: force-pipeline-state
         config:
           platform: linux
           image_resource:
