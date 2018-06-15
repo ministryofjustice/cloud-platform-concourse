@@ -175,7 +175,7 @@ resource "aws_iam_policy_attachment" "attach-policy" {
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
-/* resource "kubernetes_secret" "concourse_user_credentials" {
+resource "kubernetes_secret" "concourse_aws_credentials" {
   metadata {
     name      = "aws"
     namespace = "concourse-main"
@@ -185,7 +185,7 @@ resource "aws_iam_policy_attachment" "attach-policy" {
     access_key_id     = "${aws_iam_access_key.iam_access_key.id}"
     secret_access_key = "${aws_iam_access_key.iam_access_key.secret}"
   }
-} */
+}
 
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   metadata {
