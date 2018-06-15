@@ -44,6 +44,11 @@ find "pipelines/${CONCOURSE_CLUSTER}/${CONCOURSE_TEAM}" -iname '*.yaml' -exec ba
 
 for i in $(comm -23 current_pipelines git_pipelines); do
   echo ">>> deleting pipeline '${i}'... (skipped)"
+  fly \
+    -t current \
+    delete-pipeline \
+    -n \
+    -p "${i}"
 done
 
 for i in $(cat git_pipelines); do
