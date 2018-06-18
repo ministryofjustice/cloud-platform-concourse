@@ -2,7 +2,7 @@ resources:
 - name: cloud-platform-concourse
   type: git
   source:
-    branch: bootstrap
+    branch: master
     uri: https://github.com/ministryofjustice/cloud-platform-concourse
 - name: every-15m
   type: time
