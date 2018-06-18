@@ -57,6 +57,11 @@ resource "aws_db_subnet_group" "concourse" {
   subnet_ids  = ["${data.terraform_remote_state.cluster.internal_subnets_ids}"]
 }
 
+resource "random_string" "db_password" {
+  length  = 32
+  special = false
+}
+
 resource "aws_db_instance" "concourse" {
   depends_on             = ["aws_security_group.concourse"]
   identifier             = "${terraform.workspace}-concourse"
@@ -65,8 +70,8 @@ resource "aws_db_instance" "concourse" {
   engine_version         = "${var.rds_postgresql_version}"
   instance_class         = "${var.rds_instance_class}"
   name                   = "concourse"
-  username               = "${local.secrets["db_username"]}"
-  password               = "${local.secrets["db_password"]}"
+  username               = "concourse"
+  password               = "${random_string.db_password.result}"
   vpc_security_group_ids = ["${aws_security_group.concourse.id}"]
   db_subnet_group_name   = "${aws_db_subnet_group.concourse.id}"
   skip_final_snapshot    = true
