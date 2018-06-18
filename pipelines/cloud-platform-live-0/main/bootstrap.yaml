@@ -1,0 +1,40 @@
+resources:
+- name: cloud-platform-concourse
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/ministryofjustice/cloud-platform-concourse
+- name: every-15m
+  type: time
+  source:
+    interval: 15m
+
+jobs:
+  - name: bootstrap-pipelines
+    serial: true
+    plan:
+      - aggregate:
+        - get: every-15m
+          trigger: true
+        - get: cloud-platform-concourse
+          trigger: true
+      - task: force-pipeline-state
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: alpine
+              tag: 3.7
+          params:
+            CONCOURSE_FLY_VERSION: v3.14.0
+            CONCOURSE_URL: 'http://concourse-web.concourse.svc.cluster.local:8080'
+            CONCOURSE_TEAM: main
+            CONCOURSE_CLUSTER: cloud-platform-live-0
+            CONCOURSE_BASIC_AUTH_USERNAME: ((concourse-basic-auth.username))
+            CONCOURSE_BASIC_AUTH_PASSWORD: ((concourse-basic-auth.password))
+          inputs:
+          - name: cloud-platform-concourse
+            path: ./
+          run:
+            path: ./bin/force-pipeline-state

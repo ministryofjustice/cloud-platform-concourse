@@ -26,3 +26,6 @@ terraform destroy
 terraform select workspace default
 terraform workspace delete <cluster-name>
 ```
+
+## Pipelines
+Pipeline configuration can be managed in this repository, please read the documentation [here](pipelines/README.md).
