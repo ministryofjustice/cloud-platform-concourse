@@ -136,13 +136,13 @@ resource "local_file" "values" {
   filename = "${path.module}/.helm-config/${terraform.workspace}/values.yaml"
 }
 
-resource "aws_iam_user" "concourse-user" {
+resource "aws_iam_user" "concourse_user" {
   name = "${terraform.workspace}-concourse-user"
   path = "/tools/concourse/"
 }
 
 resource "aws_iam_access_key" "iam_access_key" {
-  user = "${aws_iam_user.concourse-user.name}"
+  user = "${aws_iam_user.concourse_user.name}"
 }
 
 data "aws_iam_policy_document" "policy" {
@@ -174,9 +174,9 @@ resource "aws_iam_policy" "policy" {
   description = "Policy for ${terraform.workspace}-concourse-user"
 }
 
-resource "aws_iam_policy_attachment" "attach-policy" {
+resource "aws_iam_policy_attachment" "attach_policy" {
   name       = "attached-policy"
-  users      = ["${aws_iam_user.concourse-user.name}"]
+  users      = ["${aws_iam_user.concourse_user.name}"]
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
