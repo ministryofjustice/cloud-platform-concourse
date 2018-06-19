@@ -24,21 +24,16 @@ terraform init
 terraform workspace new "${1}" || terraform workspace select "${1}"
 terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'
 
-_helm="helm --kube-context=${_kctx} --tiller-namespace concourse"
+_helm="helm --kube-context=${_kctx} --tiller-namespace kube-system"
 
 $_helm init --service-account tiller
 $_helm repo update
 
-if $_helm get concourse >/dev/null 2>&1; then
-  $_helm upgrade \
-    concourse \
-    stable/concourse \
-    --recreate-pods \
-    -f ".helm-config/${1}/values.yaml"
-else
-  $_helm install \
-    --namespace concourse \
-    --name concourse \
-    stable/concourse \
-    -f ".helm-config/${1}/values.yaml"
-fi
+$_helm upgrade \
+  concourse \
+  stable/concourse \
+  --install \
+  --force \
+  --recreate-pods \
+  --namespace concourse \
+  -f ".helm-config/${1}/values.yaml"

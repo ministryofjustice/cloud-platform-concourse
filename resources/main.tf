@@ -180,7 +180,21 @@ resource "aws_iam_policy_attachment" "attach_policy" {
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
+resource "kubernetes_namespace" "concourse" {
+  metadata {
+    name = "concourse"
+  }
+}
+
+resource "kubernetes_namespace" "concourse_main" {
+  metadata {
+    name = "concourse-main"
+  }
+}
+
 resource "kubernetes_secret" "concourse_aws_credentials" {
+  depends_on = ["kubernetes_namespace.concourse_main"]
+
   metadata {
     name      = "aws"
     namespace = "concourse-main"
@@ -193,6 +207,8 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
 }
 
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
+  depends_on = ["kubernetes_namespace.concourse_main"]
+
   metadata {
     name      = "concourse-basic-auth"
     namespace = "concourse-main"
