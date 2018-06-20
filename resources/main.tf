@@ -57,6 +57,11 @@ resource "aws_db_subnet_group" "concourse" {
   subnet_ids  = ["${data.terraform_remote_state.cluster.internal_subnets_ids}"]
 }
 
+resource "random_string" "db_password" {
+  length  = 32
+  special = false
+}
+
 resource "aws_db_instance" "concourse" {
   depends_on             = ["aws_security_group.concourse"]
   identifier             = "${terraform.workspace}-concourse"
@@ -65,8 +70,8 @@ resource "aws_db_instance" "concourse" {
   engine_version         = "${var.rds_postgresql_version}"
   instance_class         = "${var.rds_instance_class}"
   name                   = "concourse"
-  username               = "${local.secrets["db_username"]}"
-  password               = "${local.secrets["db_password"]}"
+  username               = "concourse"
+  password               = "${random_string.db_password.result}"
   vpc_security_group_ids = ["${aws_security_group.concourse.id}"]
   db_subnet_group_name   = "${aws_db_subnet_group.concourse.id}"
   skip_final_snapshot    = true
@@ -131,13 +136,13 @@ resource "local_file" "values" {
   filename = "${path.module}/.helm-config/${terraform.workspace}/values.yaml"
 }
 
-resource "aws_iam_user" "concourse-user" {
+resource "aws_iam_user" "concourse_user" {
   name = "${terraform.workspace}-concourse-user"
   path = "/tools/concourse/"
 }
 
 resource "aws_iam_access_key" "iam_access_key" {
-  user = "${aws_iam_user.concourse-user.name}"
+  user = "${aws_iam_user.concourse_user.name}"
 }
 
 data "aws_iam_policy_document" "policy" {
@@ -169,13 +174,27 @@ resource "aws_iam_policy" "policy" {
   description = "Policy for ${terraform.workspace}-concourse-user"
 }
 
-resource "aws_iam_policy_attachment" "attach-policy" {
+resource "aws_iam_policy_attachment" "attach_policy" {
   name       = "attached-policy"
-  users      = ["${aws_iam_user.concourse-user.name}"]
+  users      = ["${aws_iam_user.concourse_user.name}"]
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
+resource "kubernetes_namespace" "concourse" {
+  metadata {
+    name = "concourse"
+  }
+}
+
+resource "kubernetes_namespace" "concourse_main" {
+  metadata {
+    name = "concourse-main"
+  }
+}
+
 resource "kubernetes_secret" "concourse_aws_credentials" {
+  depends_on = ["kubernetes_namespace.concourse_main"]
+
   metadata {
     name      = "aws"
     namespace = "concourse-main"
@@ -188,6 +207,8 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
 }
 
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
+  depends_on = ["kubernetes_namespace.concourse_main"]
+
   metadata {
     name      = "concourse-basic-auth"
     namespace = "concourse-main"
