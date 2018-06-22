@@ -1,2 +1,3 @@
 .terraform/
 .helm-config/
+terraform.tfstate.d/
