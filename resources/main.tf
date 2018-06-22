@@ -165,6 +165,16 @@ data "aws_iam_policy_document" "policy" {
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
     ]
   }
+
+  statement {
+    actions = [
+      "ecr:*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "policy" {
@@ -201,8 +211,8 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   }
 
   data {
-    access_key_id     = "${aws_iam_access_key.iam_access_key.id}"
-    secret_access_key = "${aws_iam_access_key.iam_access_key.secret}"
+    access-key-id     = "${aws_iam_access_key.iam_access_key.id}"
+    secret-access-key = "${aws_iam_access_key.iam_access_key.secret}"
   }
 }
 
