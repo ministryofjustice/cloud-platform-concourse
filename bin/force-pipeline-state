@@ -3,7 +3,7 @@
 set -o errexit
 set -o pipefail
 
-checkenv(){
+_checkenv(){
   missing=""
   for v in URL TEAM BASIC_AUTH_USERNAME BASIC_AUTH_PASSWORD FLY_VERSION CLUSTER; do
     vn="CONCOURSE_${v}"
@@ -19,7 +19,21 @@ checkenv(){
   fi
 }
 
-checkenv
+_tf() {
+  if [ "${#}" != 2 ]; then return 1; fi
+  if [ "${1}" != "apply" ] && [ "${1}" != "destroy" ]; then return 1; fi
+  if [ ! -d "${2}" ]; then return 0; fi
+  cd "${2}"
+  echo ">>> creating pipeline resources for $(basename ${2})"
+  (
+    set -x
+    terraform init
+    terraform "${1}" -auto-approve
+  )
+  cd $OLDPW
+}
+
+_checkenv
 
 apk add \
   --no-cache \
@@ -40,27 +54,39 @@ fly \
 
 fly -t current pipelines -a | awk '{ print $1; }' | sort > current_pipelines
 
-find "pipelines/${CONCOURSE_CLUSTER}/${CONCOURSE_TEAM}" -iname '*.yaml' -exec basename {} \; | cut -d'.' -f1 | sort > git_pipelines
+_team_path="pipelines/${CONCOURSE_CLUSTER}/${CONCOURSE_TEAM}"
+
+find "${_team_path}" -iname '*.yaml' -exec basename {} \; | cut -d'.' -f1 | sort > git_pipelines
 
 for i in $(comm -23 current_pipelines git_pipelines); do
-  echo ">>> deleting pipeline '${i}'... (skipped)"
-  fly \
-    -t current \
-    delete-pipeline \
-    -n \
-    -p "${i}"
+  echo ">>> deleting pipeline '${i}'"
+  (
+    set -x
+    fly \
+      -t current \
+      delete-pipeline \
+      -n \
+      -p "${i}"
+  )
+
+  _tf destroy "${_team_path}/${i}"
 done
 
 for i in $(cat git_pipelines); do
-  echo ">>> setting pipeline '${i}'..."
-  fly \
-    -t current \
-    set-pipeline \
-    -n \
-    -p "${i}" \
-    -c "pipelines/${CONCOURSE_CLUSTER}/${CONCOURSE_TEAM}/${i}.yaml"
-  fly \
-    -t current \
-    unpause-pipeline \
-    -p "${i}"
+  _tf apply "${_team_path}/${i}"
+
+  echo ">>> setting pipeline '${i}'"
+  (
+    set -x
+    fly \
+      -t current \
+      set-pipeline \
+      -n \
+      -p "${i}" \
+      -c "${_team_path}/${i}.yaml"
+    fly \
+      -t current \
+      unpause-pipeline \
+      -p "${i}"
+  )
 done
