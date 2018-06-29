@@ -52,7 +52,7 @@ jobs:
               - -c
               - |
                 aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig .
-                ./whichNamespace.sh
+                /bin/sh ./whichNamespace.sh
         on_success:
           put: slack-alert
           params:
