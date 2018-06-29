@@ -24,6 +24,7 @@ jobs:
           trigger: true
         - get: cloud-platform-concourse
           trigger: true
+        - get: tools-image
       - task: force-pipeline-state
         image: tools-image
         config:
