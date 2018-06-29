@@ -30,7 +30,7 @@ _tf() {
     terraform init
     terraform "${1}" -auto-approve
   )
-  cd $OLDPW
+  cd $OLDPWD
 }
 
 _checkenv

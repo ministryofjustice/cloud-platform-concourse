@@ -4,6 +4,7 @@ resources:
   source:
     branch: master
     uri: https://github.com/ministryofjustice/cloud-platform-concourse
+    git_crypt_key: ((cloud-platform-concourse-git-crypt.key))
 - name: every-15m
   type: time
   source:

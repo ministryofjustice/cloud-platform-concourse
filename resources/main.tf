@@ -148,7 +148,7 @@ resource "aws_iam_access_key" "iam_access_key" {
 data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
-      "s3:CreateBucket",
+      "s3:*",
     ]
 
     resources = [
