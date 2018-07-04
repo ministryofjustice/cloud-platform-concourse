@@ -28,7 +28,7 @@ _tf() {
   (
     set -x
     terraform init
-    terraform "${1}" -auto-approve
+    terraform "${1}" -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'
   )
   cd $OLDPWD
 }
@@ -64,7 +64,7 @@ for i in $(comm -23 current_pipelines git_pipelines); do
     set -x
     fly \
       -t current \
-      delete-pipeline \
+      destroy-pipeline \
       -n \
       -p "${i}"
   )
