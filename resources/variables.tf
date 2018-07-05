@@ -22,4 +22,3 @@ variable "concourse_chart_version" {
   default     = "1.7.0"
   description = "The Helm chart version"
 }
-
