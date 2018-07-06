@@ -74,6 +74,7 @@ jobs:
               - -c
               - |
                 git clone repo build-repo
+                # https://github.com/concourse/git-resource#additional-files-populated
                 echo "$(cat repo/.git/ref)" > build-repo/.git/ref
                 echo "$(cat repo/.git/ref)-circleci" > build-repo/.git/ref.circleci
                 (set -x; cat build-repo/.git/ref; cat build-repo/.git/ref.circleci)
