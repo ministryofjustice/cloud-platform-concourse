@@ -161,6 +161,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:CreateUser",
       "iam:CreateAccessKey",
       "iam:CreatePolicy",
+      "iam:AttachUserPolicy",
     ]
 
     resources = [
