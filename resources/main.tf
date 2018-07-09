@@ -163,6 +163,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:CreatePolicy",
       "iam:AttachUserPolicy",
       "iam:GetPolicy",
+      "iam:ListEntitiesForPolicy",
     ]
 
     resources = [
