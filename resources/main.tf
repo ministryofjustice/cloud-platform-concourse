@@ -158,8 +158,11 @@ data "aws_iam_policy_document" "policy" {
 
   statement {
     actions = [
+      "iam:GetUser",
       "iam:CreateUser",
+      "iam:ListAccessKeys",
       "iam:CreateAccessKey",
+      "iam:GetPolicyVersion",
       "iam:CreatePolicy",
       "iam:AttachUserPolicy",
       "iam:GetPolicy",
