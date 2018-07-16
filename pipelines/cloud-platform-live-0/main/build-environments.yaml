@@ -56,12 +56,14 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
             KUBECONFIG: .kubeconfig
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache"
           run:
             path: /bin/sh
             dir: cloud-platform-environments-repo
             args:
               - -c
               - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
                 aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig .kubeconfig
                 ./bin/apply
         on_success:

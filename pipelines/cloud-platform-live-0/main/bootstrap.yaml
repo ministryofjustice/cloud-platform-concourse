@@ -39,8 +39,14 @@ jobs:
             CONCOURSE_CLUSTER: cloud-platform-live-0
             CONCOURSE_BASIC_AUTH_USERNAME: ((concourse-basic-auth.username))
             CONCOURSE_BASIC_AUTH_PASSWORD: ((concourse-basic-auth.password))
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache"
           inputs:
           - name: cloud-platform-concourse
             path: ./
           run:
-            path: ./bin/force-pipeline-state
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                ./bin/force-pipeline-state
