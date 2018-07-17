@@ -66,13 +66,6 @@ jobs:
                 mkdir -p "${TF_PLUGIN_CACHE_DIR}"
                 aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig .kubeconfig
                 ./bin/apply
-        on_success:
-          put: slack-alert
-          params:
-            <<: *SLACK_NOTIFICATION_DEFAULTS
-            attachments:
-              - color: "good"
-                <<: *SLACK_ATTACHMENTS_DEFAULTS
         on_failure:
           put: slack-alert
           params:
