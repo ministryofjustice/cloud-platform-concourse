@@ -188,6 +188,25 @@ data "aws_iam_policy_document" "policy" {
 
   statement {
     actions = [
+      "rds:*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+  statement {
+    actions = [
+      "kms:*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
       "elasticache:*",
     ]
 
