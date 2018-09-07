@@ -228,6 +228,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "application-autoscaling:RegisterScalableTarget",
+      "application-autoscaling:DescribeScalableTargets"
     ]
 
     resources = [
@@ -238,6 +239,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "iam:CreateRole",
+      "iam:GetRole"
     ]
 
     resources = [
