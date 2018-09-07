@@ -172,7 +172,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/system/*",
     ]
   }
 
@@ -222,6 +222,32 @@ data "aws_iam_policy_document" "policy" {
 
     resources = [
       "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "application-autoscaling:RegisterScalableTarget",
+      "application-autoscaling:DescribeScalableTargets",
+      "application-autoscaling:PutScalingPolicy",
+      "application-autoscaling:DescribeScalingPolicies"
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreateRole",
+      "iam:GetRole",
+      "iam:PutRolePolicy",
+      "iam:GetRolePolicy"
+    ]
+
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*-autoscaler",
     ]
   }
 
