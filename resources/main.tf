@@ -225,6 +225,28 @@ data "aws_iam_policy_document" "policy" {
     ]
   }
 
+  statement {
+    actions = [
+      "application-autoscaling:RegisterScalableTarget",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreateRole",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  
+
 }
 
 resource "aws_iam_policy" "policy" {
