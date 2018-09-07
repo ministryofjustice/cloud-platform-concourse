@@ -172,7 +172,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/system/*",
     ]
   }
 
@@ -182,7 +182,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "*",
     ]
   }
 
@@ -192,7 +192,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "*",
     ]
   }
   statement {
@@ -201,7 +201,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "*",
     ]
   }
 
@@ -211,7 +211,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "*",
     ]
   }
 
@@ -221,7 +221,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "*",
     ]
   }
 
@@ -234,7 +234,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*",
+      "*",
     ]
   }
 
