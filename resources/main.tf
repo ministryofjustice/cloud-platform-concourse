@@ -242,7 +242,8 @@ data "aws_iam_policy_document" "policy" {
     actions = [
       "iam:CreateRole",
       "iam:GetRole",
-      "iam:PutRolePolicy"
+      "iam:PutRolePolicy",
+      "iam:GetRolePolicy"
     ]
 
     resources = [
