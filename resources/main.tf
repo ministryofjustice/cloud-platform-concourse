@@ -229,7 +229,8 @@ data "aws_iam_policy_document" "policy" {
     actions = [
       "application-autoscaling:RegisterScalableTarget",
       "application-autoscaling:DescribeScalableTargets",
-      "application-autoscaling:PutScalingPolicy"
+      "application-autoscaling:PutScalingPolicy",
+      "application-autoscaling:DescribeScalingPolicies"
     ]
 
     resources = [
