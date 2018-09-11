@@ -39,6 +39,7 @@ resource_types:
 
 jobs:
   - name: apply
+    serial: true
     plan:
       - aggregate:
         - get: every-15m
