@@ -160,15 +160,16 @@ data "aws_iam_policy_document" "policy" {
     actions = [
       "iam:GetUser",
       "iam:CreateUser",
+      "iam:DeleteUser",
       "iam:ListAccessKeys",
       "iam:CreateAccessKey",
-      "iam:GetPolicyVersion",
-      "iam:CreatePolicy",
-      "iam:AttachUserPolicy",
-      "iam:GetPolicy",
-      "iam:ListEntitiesForPolicy",
+      "iam:DeleteAccessKey",
       "iam:PutUserPolicy",
       "iam:GetUserPolicy",
+      "iam:DeleteUserPolicy",
+      "iam:ListGroupsForUser",
+      "iam:PutUserPermissionsBoundary",
+      "iam:DeleteUserPermissionsBoundary",
     ]
 
     resources = [
