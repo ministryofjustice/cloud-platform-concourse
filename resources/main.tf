@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 terraform {
   backend "s3" {
-    bucket = "moj-cp-k8s-investigation-concourse-terraform"
+    bucket = "cp-test-2-concourse"
     region = "eu-west-1"
     key    = "terraform.tfstate"
   }
@@ -16,9 +16,9 @@ data "terraform_remote_state" "cluster" {
   backend = "s3"
 
   config {
-    bucket = "moj-cp-k8s-investigation-platform-terraform"
+    bucket = "cp-test-2-terraform"
     region = "eu-west-1"
-    key    = "/env:/${terraform.workspace}/terraform.tfstate"
+    key    = "/env:/${terraform.workspace}/terraform-test-2.tfstate"
   }
 }
 
@@ -196,6 +196,7 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
+
   statement {
     actions = [
       "kms:*",
@@ -231,7 +232,7 @@ data "aws_iam_policy_document" "policy" {
       "application-autoscaling:RegisterScalableTarget",
       "application-autoscaling:DescribeScalableTargets",
       "application-autoscaling:PutScalingPolicy",
-      "application-autoscaling:DescribeScalingPolicies"
+      "application-autoscaling:DescribeScalingPolicies",
     ]
 
     resources = [
@@ -244,7 +245,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:CreateRole",
       "iam:GetRole",
       "iam:PutRolePolicy",
-      "iam:GetRolePolicy"
+      "iam:GetRolePolicy",
     ]
 
     resources = [
@@ -268,7 +269,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "*"
+      "*",
     ]
   }
 }
