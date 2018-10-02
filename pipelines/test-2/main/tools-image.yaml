@@ -1,0 +1,96 @@
+resources:
+- name: repo
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/ministryofjustice/cloud-platform-tools-image
+- name: image-base
+  type: docker-image
+  source:
+    repository: 754256621582.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform-tools-image
+    tag: latest
+    aws_access_key_id: ((aws.access-key-id))
+    aws_secret_access_key: ((aws.secret-access-key))
+- name: image-circleci
+  type: docker-image
+  source:
+    repository: 754256621582.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform-tools-image
+    tag: circleci
+    aws_access_key_id: ((aws.access-key-id))
+    aws_secret_access_key: ((aws.secret-access-key))
+
+jobs:
+  - name: build
+    serial: true
+    plan:
+      - aggregate:
+        - get: repo
+          trigger: true
+        - get: image-base
+      - task: ensure-repository-exists
+        image: image-base
+        config:
+          platform: linux
+          params:
+            AWS_DEFAULT_REGION: eu-west-1
+            AWS_ACCESS_KEY_ID: ((aws.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                aws ecr create-repository \
+                  --repository-name cloud-platform-tools-image || echo "error ignored"
+                aws ecr put-lifecycle-policy \
+                  --repository-name cloud-platform-tools-image \
+                  --lifecycle-policy-text '{
+                    "rules": [
+                      {
+                        "rulePriority": 10,
+                        "description": "remove-untagged",
+                        "selection": {
+                          "tagStatus": "untagged",
+                          "countType": "sinceImagePushed",
+                          "countUnit": "days",
+                          "countNumber": 1
+                        },
+                        "action": {
+                          "type": "expire"
+                        }
+                      }
+                    ]}'
+      - task: prepare-image-tags
+        image: image-base
+        config:
+          platform: linux
+          inputs:
+            - name: repo
+          outputs:
+            - name: build-repo
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                git clone repo build-repo
+                # https://github.com/concourse/git-resource#additional-files-populated
+                echo "$(cat repo/.git/ref)" > build-repo/.git/ref
+                echo "$(cat repo/.git/ref)-circleci" > build-repo/.git/ref.circleci
+                (set -x; cat build-repo/.git/ref; cat build-repo/.git/ref.circleci)
+      - put: image-base
+        params:
+          build: build-repo
+          dockerfile: build-repo/Dockerfile
+          additional_tags: build-repo/.git/ref
+          tag_as_latest: false
+          get_params:
+            skip_download: true
+      - put: image-circleci
+        params:
+          build: build-repo
+          dockerfile: build-repo/Dockerfile.circleci
+          additional_tags: build-repo/.git/ref.circleci
+          tag_as_latest: false
+          get_params:
+            skip_download: true
