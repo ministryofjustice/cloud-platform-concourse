@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket = "moj-cp-k8s-investigation-concourse-terraform"
+    bucket = "cp-test-2-environments"
     region = "eu-west-1"
 
-    key = "pipelines/cloud-platform-live-0/main/build-environments/terraform.tfstate"
+    key = "cloud-platform-test-2/main/build-environments/terraform.tfstate"
   }
 }
 
