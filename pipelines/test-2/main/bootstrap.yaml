@@ -2,7 +2,7 @@ resources:
 - name: cloud-platform-concourse
   type: git
   source:
-    branch: master
+    branch: add/test-2-pipeline
     uri: https://github.com/ministryofjustice/cloud-platform-concourse
     git_crypt_key: ((cloud-platform-concourse-git-crypt.key))
 - name: every-15m
