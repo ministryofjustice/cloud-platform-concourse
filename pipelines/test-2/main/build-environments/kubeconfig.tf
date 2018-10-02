@@ -36,7 +36,7 @@ data "template_file" "contexts" {
 }
 
 resource "aws_s3_bucket" "kubeconfig" {
-  bucket = "cloud-platform-concourse-build-environments"
+  bucket = "test-2-build-environments"
   acl    = "private"
 
   versioning {
