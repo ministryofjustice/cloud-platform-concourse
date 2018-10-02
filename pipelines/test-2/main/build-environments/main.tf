@@ -3,7 +3,7 @@ terraform {
     bucket = "cp-test-2-environments"
     region = "eu-west-1"
 
-    key = "cloud-platform-test-2/main/build-environments/terraform.tfstate"
+    key = "terraform.tfstate"
   }
 }
 
