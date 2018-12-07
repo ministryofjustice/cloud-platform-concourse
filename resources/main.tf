@@ -256,6 +256,7 @@ data "aws_iam_policy_document" "policy" {
     actions = [
       "ec2:CreateSecurityGroup",
       "ec2:DeleteSecurityGroup",
+      "ec2:DescribeNetworkInterfaces",
       "ec2:DescribeSecurityGroupReferences",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeStaleSecurityGroups",
