@@ -18,7 +18,7 @@ data "terraform_remote_state" "cluster" {
   config {
     bucket = "moj-cp-k8s-investigation-platform-terraform"
     region = "eu-west-1"
-    key    = "/env:/${terraform.workspace}/terraform.tfstate"
+    key    = "env:/${terraform.workspace}/terraform.tfstate"
   }
 }
 
@@ -256,6 +256,7 @@ data "aws_iam_policy_document" "policy" {
     actions = [
       "ec2:CreateSecurityGroup",
       "ec2:DeleteSecurityGroup",
+      "ec2:DescribeNetworkInterfaces",
       "ec2:DescribeSecurityGroupReferences",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeStaleSecurityGroups",
