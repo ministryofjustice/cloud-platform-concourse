@@ -161,6 +161,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:GetUser",
       "iam:CreateUser",
       "iam:DeleteUser",
+      "iam:UpdateUser",
       "iam:ListAccessKeys",
       "iam:CreateAccessKey",
       "iam:DeleteAccessKey",
