@@ -39,7 +39,6 @@ jobs:
       - get: every-week
         trigger: true
       - get: cloud-platform-environments-repo
-        trigger: true
       - get: tools-image
     - task: check-environments
       image: tools-image
