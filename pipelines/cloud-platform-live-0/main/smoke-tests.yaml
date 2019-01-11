@@ -12,7 +12,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ministryofjustice/cloud-platform-smoke-tests.git
-    branch: feature/concourse
+    branch: master
 - name: tools-image
   type: docker-image
   source:
