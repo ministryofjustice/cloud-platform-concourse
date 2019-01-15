@@ -192,8 +192,11 @@ web:
   ##
   resources:
     requests:
-      cpu: "256m"
-      memory: "512Mi"
+      cpu: "250m"
+      memory: "500Mi"
+    limits:
+      cpu: "250m"
+      memory: "500Mi"
 
   ## Additional affinities to add to the web pods.
   ##
@@ -301,8 +304,11 @@ worker:
   ##
   resources:
     requests:
-      cpu: "256m"
-      memory: "512Mi"
+      cpu: "250m"
+      memory: "2000Mi"
+    limits:
+      cpu: "500m"
+      memory: "3000Mi"
 
   ## Configure additional environment variables for the
   ## worker container(s)
