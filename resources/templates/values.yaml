@@ -687,7 +687,10 @@ web:
   resources:
     requests:
       cpu: "100m"
-      memory: "128Mi"
+      memory: "250Mi"
+    requests:
+      cpu: "100m"
+      memory: "250Mi"
 
   ## Configure additional environment variables for the
   ## web containers.
@@ -817,8 +820,11 @@ worker:
   ##
   resources:
     requests:
-      cpu: "100m"
-      memory: "512Mi"
+      cpu: "1000m"
+      memory: "4Gi"
+    limits:
+      cpu: "1000m"
+      memory: "4Gi"
 
   ## Configure additional environment variables for the
   ## worker container(s)
