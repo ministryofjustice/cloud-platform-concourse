@@ -33,7 +33,7 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
-            CONCOURSE_FLY_VERSION: v3.14.0
+            CONCOURSE_FLY_VERSION: v4.2.2
             CONCOURSE_URL: 'http://concourse-web.concourse.svc.cluster.local:8080'
             CONCOURSE_TEAM: main
             CONCOURSE_CLUSTER: cloud-platform-live-0
