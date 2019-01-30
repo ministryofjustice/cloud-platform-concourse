@@ -684,13 +684,12 @@ web:
   ## Configure resource requests and limits.
   ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
   ##
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "250Mi"
-    requests:
-      cpu: "100m"
-      memory: "250Mi"
+  requests:
+    cpu: "100m"
+    memory: "250Mi"
+  limits:
+    cpu: "100m"
+    memory: "250Mi"
 
   ## Configure additional environment variables for the
   ## web containers.
