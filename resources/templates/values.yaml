@@ -96,17 +96,17 @@ concourse:
     # defaultTaskMemoryLimit:
     postgres:
       ## The host to connect to.
-      host: 127.0.0.1
+      host: ${postgresql_host}
       ## The port to connect to.
       port: 5432
       ## Path to a UNIX domain socket to connect to.
       # socket:
       ## Whether or not to use SSL.
-      sslmode: disable
+      sslmode: ${postgresql_sslmode ? "enable" : "disable"}
       ## Dialing timeout. (0 means wait indefinitely)
       connectTimeout: 5m
       ## The name of the database to use.
-      database: atc
+      database: concourse
 
     kubernetes:
 
@@ -1031,7 +1031,7 @@ secrets:
   ## Create the secret resource from the following values. Set this to
   ## false to manage these secrets outside Helm.
   ##
-  create: false
+  create: true
 
   ## The TLS certificate and private key for the web component to be able to terminate
   ## TLS connections.
@@ -1063,8 +1063,8 @@ secrets:
     ${worker_key_pub}
 
   ## Secrets for DB access
-  # postgresUser:
-  # postgresPassword:
+  postgresUser: ${postgresql_user}
+  postgresPassword: ${postgresql_password}
   # postgresCaCert:
   # postgresClientCert:
   # postgresClientKey:
