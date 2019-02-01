@@ -6,7 +6,14 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
   title_link: 'https://concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
   footer: concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io
-
+slack-notification-defaults-pr: &SLACK_NOTIFICATION_DEFAULTS_PR
+  channel: '#cp-build-notifications'
+  silent: true
+slack-attachments-defaults-pr: &SLACK_ATTACHMENTS_DEFAULTS_PR
+  fallback: 'Finished testing Pull Request Build $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title_link: 'https://concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io
 resources:
 - name: cloud-platform-environments-repo
   type: git
@@ -14,6 +21,14 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
     branch: master
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+
+- name: gcloud-platform-environments-repo-pull-requests
+  type: pull-request
+  source:
+    repo: https://github.com/ministryofjustice/cloud-platform-environments.git
+    base: master
+    git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+      
 - name: tools-image
   type: docker-image
   source:
@@ -38,6 +53,62 @@ resource_types:
     tag: latest
 
 jobs:
+  - name: plan
+    serial: true
+    plan:
+      - aggregate:
+        - get: cloud-platform-environments-repo
+        - get: cloud-platform-environments-repo-pull-requests
+          trigger: true
+          version: every
+        - put: cloud-platform-environments-repo-pull-requests
+          params:
+            path: cloud-platform-environments-repo-pull-requests
+            status: pending
+        - get: tools-image
+      - task: plan-environments
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
+            KUBECONFIG: /tmp/kubeconfig
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache"
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
+                ./bin/plan
+        on_failure:
+          - put: cloud-platform-environments-repo-pull-requests
+            params:
+              path: cloud-platform-environments-repo-pull-requests
+              status: failure
+          - put: slack-alert
+            params:
+              <<: *SLACK_NOTIFICATION_DEFAULTS_PR
+              attachments:
+                - color: "danger"
+                  <<: *SLACK_ATTACHMENTS_DEFAULTS_PR
+        on_success:
+          - put: cloud-platform-environments-repo-pull-requests
+            params:
+              path: cloud-platform-environments-repo-pull-requests
+              status: success
+          - put: slack-alert
+            params:
+              <<: *SLACK_NOTIFICATION_DEFAULTS_PR
+              attachments:
+                - color: "green"
+                  <<: *SLACK_ATTACHMENTS_DEFAULTS_PR
+
   - name: apply
     serial: true
     plan:
