@@ -1,25 +1,18 @@
-slack-notification-defaults-pr: &SLACK_NOTIFICATION_DEFAULTS_PR
-  channel: '#cp-build-notifications'
-  silent: true
-slack-attachments-defaults-pr: &SLACK_ATTACHMENTS_DEFAULTS_PR
-  fallback: 'Finished testing Pull Request Build $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-  title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-  title_link: 'https://concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-  footer: concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: teliaoss/github-pr-resource
+    #repository: jtarchie/pr
+    # repository: drnic/pullrequest-resource
 
 resources:
-- name: cloud-platform-environments-repo
-  type: git
-  source:
-    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
-    branch: master
-    git_crypt_key: ((cloud-platform-environments-git-crypt.key))
 - name: cloud-platform-environments-repo-pull-requests
   type: pull-request
+  check_every: 1m
   source:
-    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
-    branch: master
-    git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+    repository: ministryofjustice/cloud-platform-environments
+    access_token: ((cloud-platform-environments-pr-git-access-token))
 - name: tools-image
   type: docker-image
   source:
@@ -27,27 +20,11 @@ resources:
     tag: latest
     aws_access_key_id: ((aws.access-key-id))
     aws_secret_access_key: ((aws.secret-access-key))
-# - name: slack-alert
-#   type: slack-notification
-#   source:
-#     url: https://hooks.slack.com/services/((slack-hook-id))
-# - name: every-15m
-#   type: time
-#   source:
-#     interval: 15m
-
-resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-    tag: latest
 
 jobs:
   - name: plan
     serial: true
     plan:
-      - get: cloud-platform-environments-repo
       - get: cloud-platform-environments-repo-pull-requests
         trigger: true
         version: every
@@ -61,7 +38,6 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: cloud-platform-environments-repo
             - name: cloud-platform-environments-repo-pull-requests
           params:
             AWS_ACCESS_KEY_ID: ((aws.access-key-id))
@@ -82,20 +58,9 @@ jobs:
             params:
               path: cloud-platform-environments-repo-pull-requests
               status: failure
-            # put: slack-alert
-            # params:
-            #   <<: *SLACK_NOTIFICATION_DEFAULTS_PR
-            #   attachments:
-            #     - color: "danger"
-            #       <<: *SLACK_ATTACHMENTS_DEFAULTS_PR
         on_success:
             put: cloud-platform-environments-repo-pull-requests
             params:
               path: cloud-platform-environments-repo-pull-requests
               status: success
-          # - put: slack-alert
-          #   params:
-          #     <<: *SLACK_NOTIFICATION_DEFAULTS_PR
-          #     attachments:
-          #       - color: "green"
-          #         <<: *SLACK_ATTACHMENTS_DEFAULTS_PR
+          
