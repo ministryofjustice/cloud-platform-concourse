@@ -46,7 +46,7 @@ jobs:
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache"
           run:
             path: /bin/sh
-            dir: cloud-platform-environments-repo
+            dir: cloud-platform-environments-repo-pull-requests
             args:
               - -c
               - |
