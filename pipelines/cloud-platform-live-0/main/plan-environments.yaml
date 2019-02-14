@@ -3,6 +3,7 @@ resource_types:
   type: docker-image
   source:
     repository: teliaoss/github-pr-resource
+
 resources:
 - name: cloud-platform-environments-repo-pull-requests
   type: pull-request
@@ -17,7 +18,7 @@ resources:
     tag: latest
     aws_access_key_id: ((aws.access-key-id))
     aws_secret_access_key: ((aws.secret-access-key))
-    
+
 jobs:
   - name: plan
     serial: true
@@ -49,31 +50,15 @@ jobs:
               - |
                 mkdir -p "${TF_PLUGIN_CACHE_DIR}"
                 aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
-                ./bin/plan | tee plan-out.txt
-                grep 'Plan:\|No terraform changes' plan-out.txt | tee comment.txt
-                echo $PWD
+                ./bin/plan
         on_failure:
-          put: cloud-platform-environments-repo-pull-requests
-          params:
-            path: cloud-platform-environments-repo-pull-requests
-            status: failure
-            comment: check logs for error
+            put: cloud-platform-environments-repo-pull-requests
+            params:
+              path: cloud-platform-environments-repo-pull-requests
+              status: failure
         on_success:
-          put: cloud-platform-environments-repo-pull-requests
-          params:
-            path: cloud-platform-environments-repo-pull-requests
-            status: success
-            comment_file: comment.txt
-      # - task: cleanup
-      #   image: tools-image
-      #   config:
-      #     platform: linux
-      #     inputs:
-      #       - name: cloud-platform-environments-repo-pull-requests
-      #     run:
-      #       path: /bin/sh
-      #       dir: cloud-platform-environments-repo-pull-requests
-      #       args:
-      #         - -c
-      #         - |
-      #           rm plan-out.txt comment.txt
+            put: cloud-platform-environments-repo-pull-requests
+            params:
+              path: cloud-platform-environments-repo-pull-requests
+              status: success
+          
