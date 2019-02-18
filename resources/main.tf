@@ -131,11 +131,6 @@ data "template_file" "values" {
   }
 }
 
-resource "local_file" "values" {
-  content  = "${data.template_file.values.rendered}"
-  filename = "${path.module}/.helm-config/${terraform.workspace}/values.yaml"
-}
-
 resource "aws_iam_user" "concourse_user" {
   name = "${terraform.workspace}-concourse-user"
   path = "/tools/concourse/"
@@ -325,5 +320,25 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   data {
     username = "${random_string.basic_auth_username.result}"
     password = "${random_string.basic_auth_password.result}"
+  }
+}
+
+resource "helm_release" "concourse_proxy" {
+  name          = "concourse_proxy"
+  namespace     = "concourse"
+  repository    = "stable"
+  chart         = "concourse"
+  recreate_pods = true
+
+  values = [
+    "${data.template_file.values.rendered}",
+  ]
+
+  depends_on = [
+    "kubernetes_namespace.concourse",
+  ]
+
+  lifecycle {
+    ignore_changes = ["keyring"]
   }
 }

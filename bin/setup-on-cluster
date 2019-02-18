@@ -1,39 +1,6 @@
 #!/bin/sh
 
-set -o errexit
-
-usage() {
-  printf "${0} <cluster-name>\n"
-}
-
-if [ $# != 1 ]; then
-  usage
-  exit 1
-fi
-
-_kctx="$(kubectl config get-contexts --no-headers -o name | grep ${1} | head -n1)"
-
-if [ -z "${_kctx}" ]; then
-  printf "error: cannot find a kube context for cluster ${1}\n"
-  exit 1
-fi
-
 cd resources
 
 terraform init
-terraform workspace new "${1}" || terraform workspace select "${1}"
 terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'
-
-_helm="helm --kube-context=${_kctx} --tiller-namespace kube-system"
-
-$_helm init --service-account tiller
-$_helm repo update
-
-$_helm upgrade \
-  concourse \
-  stable/concourse \
-  --install \
-  --force \
-  --recreate-pods \
-  --namespace concourse \
-  -f ".helm-config/${1}/values.yaml"
