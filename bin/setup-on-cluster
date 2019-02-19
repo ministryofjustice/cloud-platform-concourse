@@ -1,6 +1,0 @@
-#!/bin/sh
-
-cd resources
-
-terraform init
-terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'

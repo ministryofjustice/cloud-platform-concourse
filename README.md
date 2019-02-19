@@ -8,14 +8,15 @@ In order to setup concourse initially on a cluster, you will need to have `terra
 1. Edit `resources/secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
 
 ## Prerequisite before running step 2.
-a) Select the name of the cluster you want to install Concourse CI on, as it appears in the terraform workspaces [here](https://github.com/ministryofjustice/kubernetes-investigations/tree/master/terraform/cloud-platform).
+   Select the name of the cluster you want to install Concourse CI on, as it appears in the terraform workspaces [here](https://github.com/ministryofjustice/cloud-platform-infrastructure/tree/master/terraform/cloud-platform).
 
-kubectl config use-context <cluster-name>
+   kubectl config use-context <cluster-name>.k8s.integration.dsd.io
 
-b) now cd resources
-   terraform workspace select <cluster-name>
-
-2. `./bin/setup-on-cluster  
+2. Run below commands to apply the changes required to reach the desired state of the configuration.
+   cd resources
+   terraform workspace select <cluster-name> 
+   terraform init 
+   terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'  
 
 Two namespaces are created: `concourse` and `concourse-main`. Please make sure you define them in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 

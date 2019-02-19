@@ -323,8 +323,8 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   }
 }
 
-resource "helm_release" "concourse_proxy" {
-  name          = "concourse_proxy"
+resource "helm_release" "concourse" {
+  name          = "concourse"
   namespace     = "concourse"
   repository    = "stable"
   chart         = "concourse"
