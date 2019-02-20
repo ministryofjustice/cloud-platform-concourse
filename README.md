@@ -5,18 +5,20 @@ Concourse CI for the Cloud Platform
 ## Install / Upgrade
 In order to setup concourse initially on a cluster, you will need to have `terraform`, `kubectl` and `helm` installed.
 
-1. Edit `resources/secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
+1. Select the name of the cluster you want to install Concourse CI on, as it appears in the terraform workspaces [here](https://github.com/   ministryofjustice/cloud-platform-infrastructure/tree/master/terraform/cloud-platform).
+  
+  `kubectl config use-context <cluster-name>.k8s.integration.dsd.io`
 
-## Prerequisite before running step 2.
-   Select the name of the cluster you want to install Concourse CI on, as it appears in the terraform workspaces [here](https://github.com/ministryofjustice/cloud-platform-infrastructure/tree/master/terraform/cloud-platform).
+2. Select the workspace to match the cluster you want to nstall Concourse CI on
 
-   kubectl config use-context <cluster-name>.k8s.integration.dsd.io
+  `terraform workspace select <cluster-name>`
 
-2. Run below commands to apply the changes required to reach the desired state of the configuration.
-   cd resources
-   terraform workspace select <cluster-name> 
-   terraform init 
-   terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'  
+3. Edit `resources/secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
+
+
+4. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager.
+   
+   `terraform apply -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'`
 
 Two namespaces are created: `concourse` and `concourse-main`. Please make sure you define them in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 
