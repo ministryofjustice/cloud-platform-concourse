@@ -48,6 +48,8 @@ jobs:
             args:
               - -c
               - |
+                export branch_head_sha=`cat .git/resource/metadata.json | jq -r '.[3] | .value'`
+                export master_base_sha=`cat .git/resource/metadata.json | jq -r '.[5] | .value'`
                 mkdir -p "${TF_PLUGIN_CACHE_DIR}"
                 aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
                 ./bin/plan
