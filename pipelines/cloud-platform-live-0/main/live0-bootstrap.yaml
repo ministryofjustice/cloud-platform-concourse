@@ -13,11 +13,11 @@ resources:
   type: docker-image
   source:
     repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
-    aws_access_key_id: ((aws.access-key-id))
-    aws_secret_access_key: ((aws.secret-access-key))
+    aws_access_key_id: ((aws-live0.access-key-id))
+    aws_secret_access_key: ((aws-live0.secret-access-key))
 
 jobs:
-  - name: bootstrap-pipelines
+  - name: bootstrap-pipelines-live0
     serial: true
     plan:
       - aggregate:
@@ -31,8 +31,8 @@ jobs:
         config:
           platform: linux
           params:
-            AWS_ACCESS_KEY_ID: ((aws.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-live0.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live0.secret-access-key))
             CONCOURSE_FLY_VERSION: v4.2.2
             CONCOURSE_URL: 'http://concourse-web.concourse.svc.cluster.local:8080'
             CONCOURSE_TEAM: main
