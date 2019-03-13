@@ -64,7 +64,7 @@ jobs:
               - |
                 s3://cloud-platform-concourse-kubeconfig/live-1/kubeconfig /tmp/kubeconfig
                 kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
-                ./tests/resources/apply-live1.sh
+                ./tests-live1/resources/apply-live1.sh
         on_failure:
           put: slack-alert
           params:
