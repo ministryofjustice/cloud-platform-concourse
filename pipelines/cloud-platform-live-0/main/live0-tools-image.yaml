@@ -9,15 +9,15 @@ resources:
   source:
     repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
     tag: latest
-    aws_access_key_id: ((aws.access-key-id))
-    aws_secret_access_key: ((aws.secret-access-key))
+    aws_access_key_id: ((aws-live0.access-key-id))
+    aws_secret_access_key: ((aws-live0.secret-access-key))
 - name: image-circleci
   type: docker-image
   source:
     repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
     tag: circleci
-    aws_access_key_id: ((aws.access-key-id))
-    aws_secret_access_key: ((aws.secret-access-key))
+    aws_access_key_id: ((aws-live0.access-key-id))
+    aws_secret_access_key: ((aws-live0.secret-access-key))
 
 jobs:
   - name: build
@@ -33,8 +33,8 @@ jobs:
           platform: linux
           params:
             AWS_DEFAULT_REGION: eu-west-1
-            AWS_ACCESS_KEY_ID: ((aws.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-live0.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live0.secret-access-key))
           run:
             path: /bin/sh
             args:

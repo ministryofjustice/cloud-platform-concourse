@@ -37,7 +37,7 @@ resource_types:
     tag: latest
 
 jobs:
-  - name: smoke
+  - name: smoke-live1
     serial: true
     plan:
       - aggregate:
@@ -53,8 +53,8 @@ jobs:
           inputs:
             - name: cloud-platform-smoke-tests-repo
           params:
-            AWS_ACCESS_KEY_ID: ((aws-live0.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live0.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-live1.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
           run:
             path: /bin/sh
@@ -62,9 +62,9 @@ jobs:
             args:
               - -c
               - |
-                aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
-                kubectl config use-context cloud-platform-live-0.k8s.integration.dsd.io
-                ./tests/resources/apply.sh
+                s3://cloud-platform-concourse-kubeconfig/live-1/kubeconfig /tmp/kubeconfig
+                kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
+                ./tests/resources/apply-live1.sh
         on_failure:
           put: slack-alert
           params:

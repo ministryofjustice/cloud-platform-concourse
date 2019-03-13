@@ -45,8 +45,8 @@ jobs:
       config:
         platform: linux
         params:
-          AWS_ACCESS_KEY_ID: ((aws-live0.access-key-id))
-          AWS_SECRET_ACCESS_KEY: ((aws-live0.secret-access-key))
+          AWS_ACCESS_KEY_ID: ((aws-live1.access-key-id))
+          AWS_SECRET_ACCESS_KEY: ((aws-live1.secret-access-key))
           KUBECONFIG: /tmp/kubeconfig
           TF_PLUGIN_CACHE_DIR: "/tmp/terraform-plugin-cache"
         run:
@@ -55,10 +55,10 @@ jobs:
             - -ce
             - |
               mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-              aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
+              aws s3 cp s3://cloud-platform-concourse-kubeconfig/live-1/kubeconfig /tmp/kubeconfig
               cd cloud-platform-environments-repo
               # run script and then format output for slack notification
-              ./bin/check-inconsistent-state | tee ../results/check.txt && sed -i -e '1s/^/```\n/' -e '$a ```' -e 's/\[0;3//g' -e 's/\[0m//g' ../results/check.txt
+              ./bin/check-inconsistent-state-live1 | tee ../results/check.txt && sed -i -e '1s/^/```\n/' -e '$a ```' -e 's/\[0;3//g' -e 's/\[0m//g' ../results/check.txt
         inputs:
           - name: cloud-platform-environments-repo
         outputs:
@@ -78,7 +78,7 @@ jobs:
         - color: "danger"
           fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
           title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title_link: 'https://concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+          title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
           footer: concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io
 
 
