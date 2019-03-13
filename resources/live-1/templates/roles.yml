@@ -1,0 +1,10 @@
+roles:
+- name: owner
+  local:
+    users: ["${basic_auth_username}"]
+- name: member
+  github:
+    teams: ["${github_teams}"]
+- name: viewer
+  github:
+    orgs: ["${github_org}"]
