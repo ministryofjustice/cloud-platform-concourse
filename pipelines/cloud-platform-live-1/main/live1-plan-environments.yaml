@@ -25,11 +25,11 @@ jobs:
     plan:
       - get: cloud-platform-environments-repo-pull-requests
         trigger: true
-        # version: every
-      # - put: cloud-platform-environments-repo-pull-requests
-      #   params:
-      #     path: cloud-platform-environments-repo-pull-requests
-      #     status: pending
+        version: every
+      - put: cloud-platform-environments-repo-pull-requests
+        params:
+          path: cloud-platform-environments-repo-pull-requests
+          status: pending
       - get: tools-image
       - task: plan-environments
         image: tools-image
