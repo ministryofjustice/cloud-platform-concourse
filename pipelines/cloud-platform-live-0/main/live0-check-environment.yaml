@@ -78,7 +78,7 @@ jobs:
         - color: "danger"
           fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
           title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title_link: 'https://concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-          footer: concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io
+          title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+          footer: concourse.apps.live-1.cloud-platform.service.justice.gov.uk
 
 
