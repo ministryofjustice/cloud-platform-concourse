@@ -338,3 +338,25 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
     password = "${random_string.basic_auth_password.result}"
   }
 }
+
+resource "kubernetes_config_map" "concourse_mainteam_config_map" {
+  
+  metadata {
+    name      = "role-config"
+    namespace = "concourse"
+  }
+  data {
+    "roles.yml" = <<ROLES
+roles: 
+- name: owner
+  local:
+    users: [ "${random_string.basic_auth_username.result}" ]
+- name: member
+  github:
+    teams: [ "${local.secrets["github_teams"]}" ]
+- name: viewer
+  github:
+    orgs: [ "${local.secrets["github_org"]}" ]
+ROLES
+}
+}

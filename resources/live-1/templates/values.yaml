@@ -543,7 +543,7 @@ concourse:
         ## Configuration file for specifying team params.
         ## Ref: https://concourse-ci.org/managing-teams.html#setting-roles
         ##
-        config:
+        config: /concourse-roles/roles.yml
 
         ## List of local Concourse users to be included as members of the `main` team.
         ## Make sure you have local users support enabled (`concourse.web.localAuth.enabled`) and
@@ -595,7 +595,7 @@ concourse:
 
           ## List of whitelisted GitHub teams
           ##
-          team: ${github_teams}
+          team:
 
         ## Authentication (Main Team) (GitLab)
         ##
@@ -1163,7 +1163,11 @@ web:
   ##
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
   ##
-  additionalVolumes: []
+  additionalVolumes:
+
+  - name: main-team-roles
+    configMap:
+      name: role-config
 
   ## Configure additional volumeMounts for the
   ## web container(s)
@@ -1176,6 +1180,9 @@ web:
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
   ##
   additionalVolumeMounts:
+
+  - name: main-team-roles
+    mountPath: /concourse-roles
 
   ## Additional affinities to add to the web pods.
   ##
