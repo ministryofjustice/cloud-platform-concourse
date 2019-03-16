@@ -40,7 +40,8 @@ apk add \
   --no-progress \
   curl
 
-curl -Lso /usr/local/bin/fly https://github.com/concourse/concourse/releases/download/${CONCOURSE_FLY_VERSION}/fly_linux_amd64
+curl -Lso /tmp/fly-${CONCOURSE_FLY_VERSION}-linux-amd64.tgz https://github.com/concourse/concourse/releases/download/v${CONCOURSE_FLY_VERSION}/fly-${CONCOURSE_FLY_VERSION}-linux-amd64.tgz
+tar -xvf /tmp/fly-${CONCOURSE_FLY_VERSION}-linux-amd64.tgz -C /usr/local/bin
 chmod +x /usr/local/bin/fly
 
 fly \
@@ -52,7 +53,7 @@ fly \
   -u ${CONCOURSE_BASIC_AUTH_USERNAME} \
   -p ${CONCOURSE_BASIC_AUTH_PASSWORD}
 
-fly -t current pipelines -a | awk '{ print $1; }' | sort > current_pipelines
+fly -t current pipelines -a | grep live1 | awk '{ print $1; }' | sort > current_pipelines
 
 _team_path="pipelines/${CONCOURSE_CLUSTER}/${CONCOURSE_TEAM}"
 
