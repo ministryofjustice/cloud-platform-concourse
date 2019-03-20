@@ -1312,7 +1312,7 @@ web:
     ##
     tls:
     - hosts:
-      - concourse.apps.live-1.cloud-platform.service.justice.gov.uk
+      - ${concourse_hostname}
 ## Configuration values for Concourse Worker components.
 ## For more information regarding the characteristics of
 ## Concourse Workers, see https://concourse-ci.org/concourse-worker.html
