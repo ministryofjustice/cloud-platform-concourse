@@ -792,6 +792,9 @@ web:
     ## TLS configuration.
     ## Secrets must be manually created in the namespace.
     ##
+    tls:
+      - hosts:
+        - ${concourse_hostname}
     # tls:
     #   - secretName: concourse-web-tls
     #     hosts:
