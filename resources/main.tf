@@ -113,7 +113,6 @@ data "template_file" "values" {
 
   vars {
     concourse_image_tag       = "${var.concourse_image_tag}"
-    concourse_chart_version   = "${var.concourse_chart_version}"
     basic_auth_username       = "${random_string.basic_auth_username.result}"
     basic_auth_password       = "${random_string.basic_auth_password.result}"
     github_auth_client_id     = "${local.secrets["github_auth_client_id"]}"
@@ -324,6 +323,7 @@ resource "helm_release" "concourse" {
   namespace     = "concourse"
   repository    = "stable"
   chart         = "concourse"
+  version       = "3.5.1"
   recreate_pods = true
 
   values = [

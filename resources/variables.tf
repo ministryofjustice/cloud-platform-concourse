@@ -17,8 +17,3 @@ variable "concourse_image_tag" {
   default     = "4.2.2"
   description = "The docker image tag to use"
 }
-
-variable "concourse_chart_version" {
-  default     = "3.5.1"
-  description = "The Helm chart version"
-}

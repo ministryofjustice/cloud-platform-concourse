@@ -2,9 +2,6 @@
 ## This is a YAML-formatted file.
 ## Declare variables to be passed into your templates.
 
-## Chart version
-version: ${concourse_chart_version}
-
 ## Override the name of the Chart.
 ##
 # nameOverride:
