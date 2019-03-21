@@ -2,23 +2,24 @@ data "aws_caller_identity" "current" {}
 
 terraform {
   backend "s3" {
-    bucket = "moj-cp-k8s-investigation-concourse-terraform"
-    region = "eu-west-1"
-    key    = "terraform.tfstate"
+    bucket               = "cloud-platform-terraform-state"
+    region               = "eu-west-1"
+    key                  = "terraform.tfstate"
+    workspace_key_prefix = "concourse-terraform"
   }
 }
 
 provider "aws" {
-  region = "eu-west-1"
+  region = "eu-west-2"
 }
 
 data "terraform_remote_state" "cluster" {
   backend = "s3"
 
   config {
-    bucket = "moj-cp-k8s-investigation-platform-terraform"
+    bucket = "cloud-platform-terraform-state"
     region = "eu-west-1"
-    key    = "env:/${terraform.workspace}/terraform.tfstate"
+    key    = "cloud-platform/live-1/terraform.tfstate"
   }
 }
 
@@ -289,14 +290,8 @@ resource "kubernetes_namespace" "concourse" {
   }
 }
 
-resource "kubernetes_namespace" "concourse_main" {
-  metadata {
-    name = "concourse-main"
-  }
-}
-
 resource "kubernetes_secret" "concourse_aws_credentials" {
-  depends_on = ["kubernetes_namespace.concourse_main"]
+  depends_on = ["helm_release.concourse"]
 
   metadata {
     name      = "aws"
@@ -310,7 +305,7 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
 }
 
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
-  depends_on = ["kubernetes_namespace.concourse_main"]
+  depends_on = ["helm_release.concourse"]
 
   metadata {
     name      = "concourse-basic-auth"
