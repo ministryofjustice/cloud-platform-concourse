@@ -29,7 +29,7 @@ data "terraform_remote_state" "cluster" {
  */
 
 resource "aws_security_group" "concourse" {
-  name        = "${terraform.workspace}-concourse-rds"
+  name        = "${terraform.workspace}-concourse"
   description = "Allow all inbound traffic from the VPC"
   vpc_id      = "${data.terraform_remote_state.cluster.vpc_id}"
 
@@ -48,7 +48,7 @@ resource "aws_security_group" "concourse" {
   }
 
   tags {
-    Name = "${terraform.workspace}-concourse-rds"
+    Name = "${terraform.workspace}-concourse"
   }
 }
 
@@ -133,8 +133,8 @@ data "template_file" "values" {
 }
 
 resource "aws_iam_user" "concourse_user" {
-  name = "${terraform.workspace}-concourse-user"
-  path = "/tools/concourse/"
+  name = "${terraform.workspace}-concourse"
+  path = "/cloud-platform/"
 }
 
 resource "aws_iam_access_key" "iam_access_key" {
@@ -193,6 +193,7 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
+
   statement {
     actions = [
       "kms:*",
@@ -228,7 +229,7 @@ data "aws_iam_policy_document" "policy" {
       "application-autoscaling:RegisterScalableTarget",
       "application-autoscaling:DescribeScalableTargets",
       "application-autoscaling:PutScalingPolicy",
-      "application-autoscaling:DescribeScalingPolicies"
+      "application-autoscaling:DescribeScalingPolicies",
     ]
 
     resources = [
@@ -241,7 +242,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:CreateRole",
       "iam:GetRole",
       "iam:PutRolePolicy",
-      "iam:GetRolePolicy"
+      "iam:GetRolePolicy",
     ]
 
     resources = [
@@ -266,16 +267,16 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "*"
+      "*",
     ]
   }
 }
 
 resource "aws_iam_policy" "policy" {
   name        = "${terraform.workspace}-concourse-user-policy"
-  path        = "/tools/concourse/"
+  path        = "/cloud-platform/"
   policy      = "${data.aws_iam_policy_document.policy.json}"
-  description = "Policy for ${terraform.workspace}-concourse-user"
+  description = "Policy for ${terraform.workspace}-concourse"
 }
 
 resource "aws_iam_policy_attachment" "attach_policy" {
