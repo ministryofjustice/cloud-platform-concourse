@@ -14,6 +14,11 @@ variable "rds_instance_class" {
 }
 
 variable "concourse_image_tag" {
-  default     = "4.2.2"
+  default     = "5.0.0"
   description = "The docker image tag to use"
+}
+
+variable "concourse_chart_version" {
+  default     = "5.0.0"
+  description = "The Helm chart version"
 }
