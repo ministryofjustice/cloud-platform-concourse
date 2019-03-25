@@ -118,6 +118,7 @@ data "template_file" "values" {
     github_auth_client_id     = "${local.secrets["github_auth_client_id"]}"
     github_auth_client_secret = "${local.secrets["github_auth_client_secret"]}"
     concourse_hostname        = "concourse.apps.${data.terraform_remote_state.cluster.cluster_domain_name}"
+    github_org                = "${local.secrets["github_org"]}"
     github_teams              = "${local.secrets["github_teams"]}"
     postgresql_user           = "${aws_db_instance.concourse.username}"
     postgresql_password       = "${aws_db_instance.concourse.password}"
@@ -294,7 +295,7 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   depends_on = ["helm_release.concourse"]
 
   metadata {
-    name      = "aws"
+    name      = "aws-${terraform.workspace}"
     namespace = "concourse-main"
   }
 
@@ -323,7 +324,7 @@ resource "helm_release" "concourse" {
   namespace     = "concourse"
   repository    = "stable"
   chart         = "concourse"
-  version       = "3.5.1"
+  version       = "${var.concourse_chart_version}"
   recreate_pods = true
 
   values = [
@@ -336,5 +337,27 @@ resource "helm_release" "concourse" {
 
   lifecycle {
     ignore_changes = ["keyring"]
+  }
+}
+
+resource "kubernetes_config_map" "concourse_mainteam_config_map" {
+  metadata {
+    name      = "role-config"
+    namespace = "concourse"
+  }
+
+  data {
+    "roles.yml" = <<ROLES
+roles:
+- name: owner
+  local:
+    users: [ "${random_string.basic_auth_username.result}" ]
+- name: member
+  github:
+    teams: [ "${local.secrets["github_teams"]}" ]
+- name: viewer
+  github:
+    orgs: [ "${local.secrets["github_org"]}" ]
+ROLES
   }
 }
