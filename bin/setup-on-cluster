@@ -32,6 +32,7 @@ $_helm repo update
 $_helm upgrade \
   concourse \
   stable/concourse \
+  --version=3.8.0 \
   --install \
   --force \
   --recreate-pods \

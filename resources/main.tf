@@ -197,6 +197,7 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
+
   statement {
     actions = [
       "kms:*",
@@ -232,7 +233,7 @@ data "aws_iam_policy_document" "policy" {
       "application-autoscaling:RegisterScalableTarget",
       "application-autoscaling:DescribeScalableTargets",
       "application-autoscaling:PutScalingPolicy",
-      "application-autoscaling:DescribeScalingPolicies"
+      "application-autoscaling:DescribeScalingPolicies",
     ]
 
     resources = [
@@ -245,7 +246,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:CreateRole",
       "iam:GetRole",
       "iam:PutRolePolicy",
-      "iam:GetRolePolicy"
+      "iam:GetRolePolicy",
     ]
 
     resources = [
@@ -270,7 +271,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "*"
+      "*",
     ]
   }
 }
@@ -288,20 +289,20 @@ resource "aws_iam_policy_attachment" "attach_policy" {
   policy_arn = "${aws_iam_policy.policy.arn}"
 }
 
-resource "kubernetes_namespace" "concourse" {
-  metadata {
-    name = "concourse"
-  }
-}
+# resource "kubernetes_namespace" "concourse" {
+#   metadata {
+#     name = "concourse"
+#   }
+# }
 
-resource "kubernetes_namespace" "concourse_main" {
-  metadata {
-    name = "concourse-main"
-  }
-}
+# resource "kubernetes_namespace" "concourse_main" {
+#   metadata {
+#     name = "concourse-main"
+#   }
+# }
 
 resource "kubernetes_secret" "concourse_aws_credentials" {
-  depends_on = ["kubernetes_namespace.concourse_main"]
+  # depends_on = ["kubernetes_namespace.concourse_main"]
 
   metadata {
     name      = "aws"
@@ -315,7 +316,7 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
 }
 
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
-  depends_on = ["kubernetes_namespace.concourse_main"]
+  # depends_on = ["kubernetes_namespace.concourse_main"]
 
   metadata {
     name      = "concourse-basic-auth"

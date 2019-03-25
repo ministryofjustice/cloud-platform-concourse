@@ -4,7 +4,7 @@ variable "rds_storage" {
 }
 
 variable "rds_postgresql_version" {
-  default     = "9.6.8"
+  default     = "9.6.11"
   description = "Version of PostgreSQL RDS to use"
 }
 
@@ -19,6 +19,6 @@ variable "concourse_image_tag" {
 }
 
 variable "concourse_chart_version" {
-  default     = "3.5.1"
+  default     = "3.8.0"
   description = "The Helm chart version"
 }
