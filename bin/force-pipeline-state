@@ -38,9 +38,10 @@ _checkenv
 apk add \
   --no-cache \
   --no-progress \
-  curl
+  curl \
+  tar
 
-curl -Ls "https://github.com/concourse/concourse/releases/download/v${CONCOURSE_FLY_VERSION}/fly-${CONCOURSE_FLY_VERSION}-linux-amd64.tgz" | tar xf - -C /usr/local/bin
+curl -Ls "https://github.com/concourse/concourse/releases/download/v${CONCOURSE_FLY_VERSION}/fly-${CONCOURSE_FLY_VERSION}-linux-amd64.tgz" | tar zxf - -C /usr/local/bin
 
 fly \
   -t current \
