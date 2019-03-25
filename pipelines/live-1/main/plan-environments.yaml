@@ -43,7 +43,7 @@ jobs:
             KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
             KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
-            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache"
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
           run:
             path: /bin/sh
             dir: cloud-platform-environments-repo-pull-requests
