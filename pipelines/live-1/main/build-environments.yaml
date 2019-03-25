@@ -56,6 +56,8 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache"
           run:
@@ -65,7 +67,11 @@ jobs:
               - -c
               - |
                 mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-                aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
+                (
+                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
+                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
+                  aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
+                )
                 ./bin/apply
         on_failure:
           put: slack-alert
