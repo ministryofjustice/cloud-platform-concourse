@@ -67,7 +67,7 @@ jobs:
                 (
                   AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
                   AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
-                  aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 kubectl config use-context cloud-platform-live-0.k8s.integration.dsd.io
                 ./tests/resources/apply.sh
