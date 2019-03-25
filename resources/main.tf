@@ -150,6 +150,25 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   }
 }
 
+module "concourse_user_pi" {
+  source      = "concourse-aws-user"
+  aws_profile = "moj-pi"
+}
+
+resource "kubernetes_secret" "concourse_aws_credentials_pi" {
+  depends_on = ["helm_release.concourse"]
+
+  metadata {
+    name      = "aws-live-0"
+    namespace = "concourse-main"
+  }
+
+  data {
+    access-key-id     = "${module.concourse_user_pi.id}"
+    secret-access-key = "${module.concourse_user_pi.secret}"
+  }
+}
+
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   depends_on = ["helm_release.concourse"]
 
