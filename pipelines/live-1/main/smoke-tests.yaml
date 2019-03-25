@@ -4,31 +4,30 @@ slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
 slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
   title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-  title_link: 'https://concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-  footer: concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io
+  title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.apps.live-1.cloud-platform.service.justice.gov.uk
 
 resources:
-- name: cloud-platform-environments-repo
+- name: cloud-platform-smoke-tests-repo
   type: git
   source:
-    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
+    uri: https://github.com/ministryofjustice/cloud-platform-smoke-tests.git
     branch: master
-    git_crypt_key: ((cloud-platform-environments-git-crypt.key))
 - name: tools-image
   type: docker-image
   source:
     repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
     tag: latest
-    aws_access_key_id: ((aws.access-key-id))
-    aws_secret_access_key: ((aws.secret-access-key))
+    aws_access_key_id: ((aws-live-0.access-key-id))
+    aws_secret_access_key: ((aws-live-0.secret-access-key))
 - name: slack-alert
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
-- name: every-15m
+- name: every-1hr
   type: time
   source:
-    interval: 15m
+    interval: 1h
 
 resource_types:
 - name: slack-notification
@@ -38,35 +37,34 @@ resource_types:
     tag: latest
 
 jobs:
-  - name: apply
+  - name: smoke
     serial: true
     plan:
       - aggregate:
-        - get: every-15m
+        - get: every-1hr
           trigger: true
-        - get: cloud-platform-environments-repo
+        - get: cloud-platform-smoke-tests-repo
           trigger: true
         - get: tools-image
-      - task: apply-environments
+      - task: apply-smoke-tests
         image: tools-image
         config:
           platform: linux
           inputs:
-            - name: cloud-platform-environments-repo
+            - name: cloud-platform-smoke-tests-repo
           params:
-            AWS_ACCESS_KEY_ID: ((aws.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
-            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache"
           run:
             path: /bin/sh
-            dir: cloud-platform-environments-repo
+            dir: cloud-platform-smoke-tests-repo
             args:
               - -c
               - |
-                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
                 aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
-                ./bin/apply
+                kubectl config use-context cloud-platform-live-0.k8s.integration.dsd.io
+                ./tests/resources/apply.sh
         on_failure:
           put: slack-alert
           params:
