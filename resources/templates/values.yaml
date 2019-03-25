@@ -238,7 +238,7 @@ concourse:
 
       ## Create the Kubernetes namespace for each team listed under `concourse.web.kubernetes.teams`.
       ##
-      createTeamNamespaces: true
+      createTeamNamespaces: false
 
       ## When true, namespaces are not deleted when the release is deleted.
       ## Irrelevant if the namespaces are not created by this chart.

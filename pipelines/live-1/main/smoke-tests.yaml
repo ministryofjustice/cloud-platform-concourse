@@ -4,8 +4,8 @@ slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
 slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
   title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-  title_link: 'https://concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-  footer: concourse.apps.cloud-platform-live-0.k8s.integration.dsd.io
+  title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.apps.live-1.cloud-platform.service.justice.gov.uk
 
 resources:
 - name: cloud-platform-smoke-tests-repo
@@ -18,8 +18,8 @@ resources:
   source:
     repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
     tag: latest
-    aws_access_key_id: ((aws.access-key-id))
-    aws_secret_access_key: ((aws.secret-access-key))
+    aws_access_key_id: ((aws-live-0.access-key-id))
+    aws_secret_access_key: ((aws-live-0.secret-access-key))
 - name: slack-alert
   type: slack-notification
   source:
@@ -53,8 +53,10 @@ jobs:
           inputs:
             - name: cloud-platform-smoke-tests-repo
           params:
-            AWS_ACCESS_KEY_ID: ((aws.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
           run:
             path: /bin/sh
@@ -62,7 +64,11 @@ jobs:
             args:
               - -c
               - |
-                aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
+                (
+                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
+                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
+                  aws s3 cp s3://cloud-platform-concourse-build-environments/kubeconfig /tmp/kubeconfig
+                )
                 kubectl config use-context cloud-platform-live-0.k8s.integration.dsd.io
                 ./tests/resources/apply.sh
         on_failure:

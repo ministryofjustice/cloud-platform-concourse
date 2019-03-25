@@ -1,5 +1,3 @@
-data "aws_caller_identity" "current" {}
-
 terraform {
   backend "s3" {
     bucket               = "cloud-platform-terraform-state"
@@ -10,7 +8,8 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-west-2"
+  profile = "moj-cp"
+  region  = "eu-west-2"
 }
 
 data "terraform_remote_state" "cluster" {
@@ -132,163 +131,9 @@ data "template_file" "values" {
   }
 }
 
-resource "aws_iam_user" "concourse_user" {
-  name = "${terraform.workspace}-concourse"
-  path = "/cloud-platform/"
-}
-
-resource "aws_iam_access_key" "iam_access_key" {
-  user = "${aws_iam_user.concourse_user.name}"
-}
-
-data "aws_iam_policy_document" "policy" {
-  statement {
-    actions = [
-      "s3:*",
-    ]
-
-    resources = [
-      "arn:aws:s3:::*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "iam:GetUser",
-      "iam:CreateUser",
-      "iam:DeleteUser",
-      "iam:UpdateUser",
-      "iam:ListAccessKeys",
-      "iam:CreateAccessKey",
-      "iam:DeleteAccessKey",
-      "iam:PutUserPolicy",
-      "iam:GetUserPolicy",
-      "iam:DeleteUserPolicy",
-      "iam:ListGroupsForUser",
-      "iam:PutUserPermissionsBoundary",
-      "iam:DeleteUserPermissionsBoundary",
-    ]
-
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/system/*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "ecr:*",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "rds:*",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "kms:*",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "elasticache:*",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:*",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "application-autoscaling:RegisterScalableTarget",
-      "application-autoscaling:DescribeScalableTargets",
-      "application-autoscaling:PutScalingPolicy",
-      "application-autoscaling:DescribeScalingPolicies",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "iam:CreateRole",
-      "iam:GetRole",
-      "iam:PutRolePolicy",
-      "iam:GetRolePolicy",
-    ]
-
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*-autoscaler",
-    ]
-  }
-
-  statement {
-    actions = [
-      "ec2:CreateSecurityGroup",
-      "ec2:DeleteSecurityGroup",
-      "ec2:DescribeNetworkInterfaces",
-      "ec2:DescribeSecurityGroupReferences",
-      "ec2:DescribeSecurityGroups",
-      "ec2:DescribeStaleSecurityGroups",
-      "ec2:AuthorizeSecurityGroupEgress",
-      "ec2:AuthorizeSecurityGroupIngress",
-      "ec2:RevokeSecurityGroupEgress",
-      "ec2:RevokeSecurityGroupIngress",
-      "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
-      "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-}
-
-resource "aws_iam_policy" "policy" {
-  name        = "${terraform.workspace}-concourse-user-policy"
-  path        = "/cloud-platform/"
-  policy      = "${data.aws_iam_policy_document.policy.json}"
-  description = "Policy for ${terraform.workspace}-concourse"
-}
-
-resource "aws_iam_policy_attachment" "attach_policy" {
-  name       = "attached-policy"
-  users      = ["${aws_iam_user.concourse_user.name}"]
-  policy_arn = "${aws_iam_policy.policy.arn}"
-}
-
-resource "kubernetes_namespace" "concourse" {
-  metadata {
-    name = "concourse"
-  }
+module "concourse_user_cp" {
+  source      = "concourse-aws-user"
+  aws_profile = "moj-cp"
 }
 
 resource "kubernetes_secret" "concourse_aws_credentials" {
@@ -300,8 +145,27 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   }
 
   data {
-    access-key-id     = "${aws_iam_access_key.iam_access_key.id}"
-    secret-access-key = "${aws_iam_access_key.iam_access_key.secret}"
+    access-key-id     = "${module.concourse_user_cp.id}"
+    secret-access-key = "${module.concourse_user_cp.secret}"
+  }
+}
+
+module "concourse_user_pi" {
+  source      = "concourse-aws-user"
+  aws_profile = "moj-pi"
+}
+
+resource "kubernetes_secret" "concourse_aws_credentials_pi" {
+  depends_on = ["helm_release.concourse"]
+
+  metadata {
+    name      = "aws-live-0"
+    namespace = "concourse-main"
+  }
+
+  data {
+    access-key-id     = "${module.concourse_user_pi.id}"
+    secret-access-key = "${module.concourse_user_pi.secret}"
   }
 }
 
@@ -329,10 +193,6 @@ resource "helm_release" "concourse" {
 
   values = [
     "${data.template_file.values.rendered}",
-  ]
-
-  depends_on = [
-    "kubernetes_namespace.concourse",
   ]
 
   lifecycle {
