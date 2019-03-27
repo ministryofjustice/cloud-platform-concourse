@@ -48,6 +48,7 @@ jobs:
             PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
             PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
             PIPELINE_STATE_KEY_PREFIX: ""
+            PIPELINE_STATE_REGION: "eu-west-1"
             PIPELINE_CLUSTER_STATE_BUCKET: moj-cp-k8s-investigation-platform-terraform
             PIPELINE_CLUSTER_STATE_KEY_PREFIX: "env:/"
           run:
