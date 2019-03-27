@@ -38,7 +38,7 @@ resource_types:
     tag: latest
 
 jobs:
-  - name: apply
+  - name: apply-live-0
     serial: true
     plan:
       - aggregate:
@@ -60,6 +60,13 @@ jobs:
             KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            # the variables prefixed with PIPELINE_ are used by the apply script
+            PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
+            PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
+            PIPELINE_STATE_KEY_PREFIX: ""
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER_STATE_BUCKET: moj-cp-k8s-investigation-platform-terraform
+            PIPELINE_CLUSTER_STATE_KEY_PREFIX: "env:/"
           run:
             path: /bin/sh
             dir: cloud-platform-environments-repo
