@@ -101,8 +101,8 @@ jobs:
           inputs:
             - name: cloud-platform-environments-repo-pull-requests
           params:
-            AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
             KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
