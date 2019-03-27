@@ -37,13 +37,6 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
-
-groups:
-- name: live0
-  jobs: [apply-live-0]
-- name: live1
-  jobs: [apply-live-1]
-
 jobs:
   - name: apply-live-0
     serial: true
@@ -94,55 +87,3 @@ jobs:
             attachments:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
-
-  - name: apply-live-1
-    serial: true
-    plan:
-      - aggregate:
-        - get: every-30m
-          trigger: true
-        - get: cloud-platform-environments-repo
-          trigger: true
-        - get: tools-image
-      - task: apply-environments
-        image: tools-image
-        config:
-          platform: linux
-          inputs:
-            - name: cloud-platform-environments-repo
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-            # KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            # KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-            KUBECONFIG: /tmp/kubeconfig
-            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
-            # the variables prefixed with PIPELINE_ are used by the plan script
-            PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
-            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environment/"
-            PIPELINE_CLUSTER_STATE_BUCKET: cloud-platform-terraform-state
-            PIPELINE_CLUSTER_STATE_KEY_PREFIX: "cloud-platform/"
-            PIPELINE_STATE_REGION: eu-west-1
-          run:
-            path: /bin/sh
-            dir: cloud-platform-environments-repo
-            args:
-              - -c
-              - |
-                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-                aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-                # (
-                #   AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                #   AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
-                #   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-                # )
-                ./bin/apply
-        on_failure:
-          put: slack-alert
-          params:
-            <<: *SLACK_NOTIFICATION_DEFAULTS
-            attachments:
-              - color: "danger"
-                <<: *SLACK_ATTACHMENTS_DEFAULTS
-

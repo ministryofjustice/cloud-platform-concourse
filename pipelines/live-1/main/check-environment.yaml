@@ -51,6 +51,9 @@ jobs:
           KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
           KUBECONFIG: /tmp/kubeconfig
           TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+          # the variables prefixed with PIPELINE_ are used by the plan script
+          PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
+          PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
         run:
           path: /bin/bash
           args:
