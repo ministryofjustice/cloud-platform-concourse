@@ -69,8 +69,8 @@ jobs:
                   AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
-                export branch_head_sha=$(cat .git/resource/metadata.json | jq '.[] | select(.name == "head_sha") | .value')
-                export master_base_sha=$(cat .git/resource/metadata.json | jq '.[] | select(.name == "base_sha") | .value')
+                export branch_head_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "head_sha") | .value')
+                export master_base_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "base_sha") | .value')
                 ./bin/plan
         on_failure:
             put: cloud-platform-environments-repo-pull-requests
@@ -126,8 +126,8 @@ jobs:
                   AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
-                export branch_head_sha=$(cat .git/resource/metadata.json | jq '.[] | select(.name == "head_sha") | .value')
-                export master_base_sha=$(cat .git/resource/metadata.json | jq '.[] | select(.name == "base_sha") | .value')
+                export branch_head_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "head_sha") | .value')
+                export master_base_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "base_sha") | .value')
                 ./bin/plan
         on_failure:
             put: cloud-platform-environments-repo-pull-requests
