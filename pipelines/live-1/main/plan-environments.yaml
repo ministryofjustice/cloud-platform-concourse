@@ -19,8 +19,14 @@ resources:
     aws_access_key_id: ((aws-live-0.access-key-id))
     aws_secret_access_key: ((aws-live-0.secret-access-key))
 
+groups:
+- name: live-0
+  jobs: [plan-live-0]
+- name: live-1
+  jobs: [plan-live-1]
+
 jobs:
-  - name: plan
+  - name: plan-live-0
     serial: true
     plan:
       - get: cloud-platform-environments-repo-pull-requests
@@ -63,8 +69,65 @@ jobs:
                   AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
-                export branch_head_sha=$(cat .git/resource/metadata.json | jq '.[] | select(.name == "head_sha") | .value')
-                export master_base_sha=$(cat .git/resource/metadata.json | jq '.[] | select(.name == "base_sha") | .value')
+                export branch_head_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "head_sha") | .value')
+                export master_base_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "base_sha") | .value')
+                ./bin/plan
+        on_failure:
+            put: cloud-platform-environments-repo-pull-requests
+            params:
+              path: cloud-platform-environments-repo-pull-requests
+              status: failure
+        on_success:
+            put: cloud-platform-environments-repo-pull-requests
+            params:
+              path: cloud-platform-environments-repo-pull-requests
+              status: success
+
+  - name: plan-live-1
+    serial: true
+    plan:
+      - get: cloud-platform-environments-repo-pull-requests
+        trigger: true
+        version: every
+      - put: cloud-platform-environments-repo-pull-requests
+        params:
+          path: cloud-platform-environments-repo-pull-requests
+          status: pending
+      - get: tools-image
+      - task: plan-environments
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo-pull-requests
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            KUBECONFIG: /tmp/kubeconfig
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            # the variables prefixed with PIPELINE_ are used by the plan script
+            PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_CLUSTER_STATE_KEY_PREFIX: "cloud-platform/"
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo-pull-requests
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                (
+                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
+                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
+                )
+                export branch_head_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "head_sha") | .value')
+                export master_base_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "base_sha") | .value')
                 ./bin/plan
         on_failure:
             put: cloud-platform-environments-repo-pull-requests
