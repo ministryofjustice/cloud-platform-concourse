@@ -3,7 +3,7 @@ terraform {
     bucket               = "cloud-platform-terraform-state"
     region               = "eu-west-1"
     key                  = "terraform.tfstate"
-    workspace_key_prefix = "concourse-terraform"
+    workspace_key_prefix = "cloud-platform-concourse"
   }
 }
 
