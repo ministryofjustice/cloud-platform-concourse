@@ -19,6 +19,57 @@ resources:
     aws_access_key_id: ((aws-live-0.access-key-id))
     aws_secret_access_key: ((aws-live-0.secret-access-key))
 
+ensure-repository-exists: &ensure-repository-exists-config
+  platform: linux
+  run:
+    path: /bin/sh
+    args:
+      - -c
+      - |
+        aws ecr create-repository \
+          --repository-name cloud-platform/tools || echo "error ignored"
+        aws ecr put-lifecycle-policy \
+          --repository-name cloud-platform/tools \
+          --lifecycle-policy-text '{
+            "rules": [
+              {
+                "rulePriority": 10,
+                "description": "remove-untagged",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": 1
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]}'
+
+prepare-image-tags: &prepare-image-tags-config
+  platform: linux
+  inputs:
+    - name: repo
+  outputs:
+    - name: build-repo
+  run:
+    path: /bin/sh
+    args:
+      - -c
+      - |
+        git clone repo build-repo
+        # https://github.com/concourse/git-resource#additional-files-populated
+        echo "$(cat repo/.git/ref)" > build-repo/.git/ref
+        echo "$(cat repo/.git/ref)-circleci" > build-repo/.git/ref.circleci
+        (set -x; cat build-repo/.git/ref; cat build-repo/.git/ref.circleci)
+
+push-image: &push-image-params
+  build: build-repo
+  tag_as_latest: false
+  get_params:
+    skip_download: true
+
 jobs:
   - name: build
     serial: true
@@ -30,67 +81,24 @@ jobs:
       - task: ensure-repository-exists
         image: image-base-pi
         config:
-          platform: linux
           params:
             AWS_DEFAULT_REGION: eu-west-1
             AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
-          run:
-            path: /bin/sh
-            args:
-              - -c
-              - |
-                aws ecr create-repository \
-                  --repository-name cloud-platform/tools || echo "error ignored"
-                aws ecr put-lifecycle-policy \
-                  --repository-name cloud-platform/tools \
-                  --lifecycle-policy-text '{
-                    "rules": [
-                      {
-                        "rulePriority": 10,
-                        "description": "remove-untagged",
-                        "selection": {
-                          "tagStatus": "untagged",
-                          "countType": "sinceImagePushed",
-                          "countUnit": "days",
-                          "countNumber": 1
-                        },
-                        "action": {
-                          "type": "expire"
-                        }
-                      }
-                    ]}'
+          <<: *ensure-repository-exists-config
+
       - task: prepare-image-tags
         image: image-base-pi
         config:
-          platform: linux
-          inputs:
-            - name: repo
-          outputs:
-            - name: build-repo
-          run:
-            path: /bin/sh
-            args:
-              - -c
-              - |
-                git clone repo build-repo
-                # https://github.com/concourse/git-resource#additional-files-populated
-                echo "$(cat repo/.git/ref)" > build-repo/.git/ref
-                echo "$(cat repo/.git/ref)-circleci" > build-repo/.git/ref.circleci
-                (set -x; cat build-repo/.git/ref; cat build-repo/.git/ref.circleci)
+          <<: *prepare-image-tags-config
+
       - put: image-base-pi
         params:
-          build: build-repo
           dockerfile: build-repo/Dockerfile
           additional_tags: build-repo/.git/ref
-          tag_as_latest: false
-          get_params:
-            skip_download: true
+          <<: *push-image-params
       - put: image-circleci-pi
         params:
-          build: build-repo
           dockerfile: build-repo/Dockerfile.circleci
           additional_tags: build-repo/.git/ref.circleci
-          tag_as_latest: false
-          get_params:
-            skip_download: true
+          <<: *push-image-params
