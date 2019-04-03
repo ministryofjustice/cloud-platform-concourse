@@ -18,6 +18,20 @@ resources:
     tag: circleci
     aws_access_key_id: ((aws-live-0.access-key-id))
     aws_secret_access_key: ((aws-live-0.secret-access-key))
+- name: image-base-cp
+  type: docker-image
+  source:
+    repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tools
+    tag: latest
+    aws_access_key_id: ((aws-live-1.access-key-id))
+    aws_secret_access_key: ((aws-live-1.secret-access-key))
+- name: image-circleci-cp
+  type: docker-image
+  source:
+    repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tools
+    tag: circleci
+    aws_access_key_id: ((aws-live-1.access-key-id))
+    aws_secret_access_key: ((aws-live-1.secret-access-key))
 
 ensure-repository-exists: &ensure-repository-exists-config
   platform: linux
@@ -70,8 +84,14 @@ push-image: &push-image-params
   get_params:
     skip_download: true
 
+groups:
+- name: pi
+  jobs: [build-pi]
+- name: cp
+  jobs: [build-cp]
+
 jobs:
-  - name: build
+  - name: build-pi
     serial: true
     plan:
       - aggregate:
@@ -86,18 +106,46 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
           <<: *ensure-repository-exists-config
-
       - task: prepare-image-tags
         image: image-base-pi
         config:
           <<: *prepare-image-tags-config
-
       - put: image-base-pi
         params:
           dockerfile: build-repo/Dockerfile
           additional_tags: build-repo/.git/ref
           <<: *push-image-params
       - put: image-circleci-pi
+        params:
+          dockerfile: build-repo/Dockerfile.circleci
+          additional_tags: build-repo/.git/ref.circleci
+          <<: *push-image-params
+
+  - name: build-cp
+    serial: true
+    plan:
+      - aggregate:
+        - get: repo
+          trigger: true
+        - get: image-base-pi
+      - task: ensure-repository-exists
+        image: image-base-pi
+        config:
+          params:
+            AWS_DEFAULT_REGION: eu-west-2
+            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+          <<: *ensure-repository-exists-config
+      - task: prepare-image-tags
+        image: image-base-pi
+        config:
+          <<: *prepare-image-tags-config
+      - put: image-base-cp
+        params:
+          dockerfile: build-repo/Dockerfile
+          additional_tags: build-repo/.git/ref
+          <<: *push-image-params
+      - put: image-circleci-cp
         params:
           dockerfile: build-repo/Dockerfile.circleci
           additional_tags: build-repo/.git/ref.circleci
