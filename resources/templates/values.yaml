@@ -98,7 +98,7 @@ concourse:
     ##
     ## Example: http://ci.concourse-ci.org
     ##
-    externalUrl: ${concourse_hostname}
+    externalUrl: https://${concourse_hostname}
 
     ## URL used to reach this ATC from other ATCs in the cluster.
     ## By default, this corresponds to `$(POD_IP):$(CONCOURSE_BIND_PORT)`.
