@@ -116,7 +116,7 @@ data "template_file" "values" {
     basic_auth_password       = "${random_string.basic_auth_password.result}"
     github_auth_client_id     = "${local.secrets["github_auth_client_id"]}"
     github_auth_client_secret = "${local.secrets["github_auth_client_secret"]}"
-    concourse_hostname        = "concourse.apps.${data.terraform_remote_state.cluster.cluster_domain_name}"
+    concourse_hostname        = "${terraform.workspace == local.live_workspace ? format("%s.%s", "concourse", local.live_domain) : format("%s.%s", "concourse.apps", data.terraform_remote_state.cluster.cluster_domain_name)}"
     github_org                = "${local.secrets["github_org"]}"
     github_teams              = "${local.secrets["github_teams"]}"
     postgresql_user           = "${aws_db_instance.concourse.username}"
@@ -220,4 +220,11 @@ roles:
     orgs: [ "${local.secrets["github_org"]}" ]
 ROLES
   }
+}
+
+locals {
+  # This is the list of Route53 Hosted Zones in the DSD account that
+  # cert-manager and external-dns will be given access to.
+  live_workspace = "live-1"
+  live_domain    = "cloud-platform.service.justice.gov.uk"
 }
