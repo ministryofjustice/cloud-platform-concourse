@@ -66,6 +66,9 @@ jobs:
             KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            PINGDOM_USER: ((cloud-platform-environments-pingdom.pindom_user))
+            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
+            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
             # the variables prefixed with PIPELINE_ are used by the apply script
             PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
             PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
@@ -116,6 +119,9 @@ jobs:
             KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            PINGDOM_USER: ((cloud-platform-environments-pingdom.pindom_user))
+            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
+            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
             # the variables prefixed with PIPELINE_ are used by the apply script
             PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
