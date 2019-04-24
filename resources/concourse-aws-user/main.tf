@@ -148,6 +148,36 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
+
+  statement { 
+    actions = [
+      "route53:ChangeResourceRecordSets"
+    ]
+    
+    resources = [  
+       "arn:aws:route53:::hostedzone/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "route53:GetChange",
+    ]
+
+    resources = [
+      "arn:aws:route53:::change/*",
+    ]
+  }
+  
+  statement {
+    actions = [
+      "route53:ListHostedZonesByName",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "policy" {
