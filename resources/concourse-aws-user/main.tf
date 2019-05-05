@@ -149,13 +149,13 @@ data "aws_iam_policy_document" "policy" {
     ]
   }
 
-  statement { 
+  statement {
     actions = [
-      "route53:ChangeResourceRecordSets"
+      "route53:CreateHostedZone",
     ]
-    
-    resources = [  
-       "arn:aws:route53:::hostedzone/*"
+
+    resources = [
+       "*",
     ]
   }
 
@@ -165,21 +165,24 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "arn:aws:route53:::change/*",
+       "arn:aws:route53:::change/*",
     ]
   }
-  
+
   statement {
     actions = [
-      "route53:ListHostedZonesByName",
+      "route53:GetHostedZone",
+      "route53:ListTagsForResource",
+      "route53:ChangeTagsForResource",
+      "route53:DeleteHostedZone",
     ]
 
     resources = [
-      "*",
+       "arn:aws:route53:::hostedzone/*",
     ]
   }
 }
-
+  
 resource "aws_iam_policy" "policy" {
   name        = "${terraform.workspace}-concourse-user-policy"
   path        = "/cloud-platform/"
