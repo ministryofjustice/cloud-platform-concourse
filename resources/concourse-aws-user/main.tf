@@ -149,13 +149,14 @@ data "aws_iam_policy_document" "policy" {
     ]
   }
 
+  # Roles to Create/Edit/Delete Route53 Zone.
   statement {
     actions = [
       "route53:CreateHostedZone",
     ]
 
     resources = [
-       "*",
+      "*",
     ]
   }
 
@@ -165,7 +166,7 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-       "arn:aws:route53:::change/*",
+      "arn:aws:route53:::change/*",
     ]
   }
 
@@ -178,11 +179,11 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-       "arn:aws:route53:::hostedzone/*",
+      "arn:aws:route53:::hostedzone/*",
     ]
   }
 }
-  
+
 resource "aws_iam_policy" "policy" {
   name        = "${terraform.workspace}-concourse-user-policy"
   path        = "/cloud-platform/"
