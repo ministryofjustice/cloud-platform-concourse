@@ -5,12 +5,22 @@ resource_types:
     repository: teliaoss/github-pr-resource
 
 resources:
-- name: cloud-platform-environments-repo-pull-requests
+- name: cloud-platform-environments-live-0-pull-requests
   type: pull-request
   check_every: 1m
   source:
     repository: ministryofjustice/cloud-platform-environments
     access_token: ((cloud-platform-environments-pr-git-access-token))
+    paths:
+    - namespaces/cloud-platform-live-0.k8s.integration.dsd.io
+- name: cloud-platform-environments-live-1-pull-requests
+  type: pull-request
+  check_every: 1m
+  source:
+    repository: ministryofjustice/cloud-platform-environments
+    access_token: ((cloud-platform-environments-pr-git-access-token))
+    paths:
+    - namespaces/live-1.cloud-platform.service.justice.gov.uk
 - name: tools-image
   type: docker-image
   source:
@@ -29,12 +39,12 @@ jobs:
   - name: plan-live-0
     serial: true
     plan:
-      - get: cloud-platform-environments-repo-pull-requests
+      - get: cloud-platform-environments-live-0-pull-requests
         trigger: true
         version: every
-      - put: cloud-platform-environments-repo-pull-requests
+      - put: cloud-platform-environments-live-0-pull-requests
         params:
-          path: cloud-platform-environments-repo-pull-requests
+          path: cloud-platform-environments-live-0-pull-requests
           status: pending
       - get: tools-image
       - task: plan-environments
@@ -42,7 +52,7 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: cloud-platform-environments-repo-pull-requests
+            - name: cloud-platform-environments-live-0-pull-requests
           params:
             AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
@@ -62,7 +72,7 @@ jobs:
             PIPELINE_CLUSTER_STATE_KEY_PREFIX: "env:/"
           run:
             path: /bin/sh
-            dir: cloud-platform-environments-repo-pull-requests
+            dir: cloud-platform-environments-live-0-pull-requests
             args:
               - -c
               - |
@@ -76,25 +86,25 @@ jobs:
                 export master_base_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "base_sha") | .value')
                 ./bin/plan
         on_failure:
-            put: cloud-platform-environments-repo-pull-requests
+            put: cloud-platform-environments-live-0-pull-requests
             params:
-              path: cloud-platform-environments-repo-pull-requests
+              path: cloud-platform-environments-live-0-pull-requests
               status: failure
         on_success:
-            put: cloud-platform-environments-repo-pull-requests
+            put: cloud-platform-environments-live-0-pull-requests
             params:
-              path: cloud-platform-environments-repo-pull-requests
+              path: cloud-platform-environments-live-0-pull-requests
               status: success
 
   - name: plan-live-1
     serial: true
     plan:
-      - get: cloud-platform-environments-repo-pull-requests
+      - get: cloud-platform-environments-live-1-pull-requests
         trigger: true
         version: every
-      - put: cloud-platform-environments-repo-pull-requests
+      - put: cloud-platform-environments-live-1-pull-requests
         params:
-          path: cloud-platform-environments-repo-pull-requests
+          path: cloud-platform-environments-live-1-pull-requests
           status: pending
       - get: tools-image
       - task: plan-environments
@@ -102,7 +112,7 @@ jobs:
         config:
           platform: linux
           inputs:
-            - name: cloud-platform-environments-repo-pull-requests
+            - name: cloud-platform-environments-live-1-pull-requests
           params:
             AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
@@ -122,7 +132,7 @@ jobs:
             PIPELINE_CLUSTER_STATE_KEY_PREFIX: "cloud-platform/"
           run:
             path: /bin/sh
-            dir: cloud-platform-environments-repo-pull-requests
+            dir: cloud-platform-environments-live-1-pull-requests
             args:
               - -c
               - |
@@ -136,12 +146,12 @@ jobs:
                 export master_base_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "base_sha") | .value')
                 ./bin/plan
         on_failure:
-            put: cloud-platform-environments-repo-pull-requests
+            put: cloud-platform-environments-live-1-pull-requests
             params:
-              path: cloud-platform-environments-repo-pull-requests
+              path: cloud-platform-environments-live-1-pull-requests
               status: failure
         on_success:
-            put: cloud-platform-environments-repo-pull-requests
+            put: cloud-platform-environments-live-1-pull-requests
             params:
-              path: cloud-platform-environments-repo-pull-requests
+              path: cloud-platform-environments-live-1-pull-requests
               status: success
