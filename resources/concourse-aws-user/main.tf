@@ -148,6 +148,40 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
+
+  # Roles to Create/Edit/Delete Route53 Zone.
+  statement {
+    actions = [
+      "route53:CreateHostedZone",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "route53:GetChange",
+    ]
+
+    resources = [
+      "arn:aws:route53:::change/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "route53:GetHostedZone",
+      "route53:ListTagsForResource",
+      "route53:ChangeTagsForResource",
+      "route53:DeleteHostedZone",
+    ]
+
+    resources = [
+      "arn:aws:route53:::hostedzone/*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "policy" {
