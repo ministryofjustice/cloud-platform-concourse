@@ -142,6 +142,7 @@ data "aws_iam_policy_document" "policy" {
       "ec2:RevokeSecurityGroupIngress",
       "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
       "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+      "ec2:DescribeSubnets",
     ]
 
     resources = [
@@ -153,6 +154,20 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "route53:CreateHostedZone",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+  
+  # Roles to Create/Edit/Delete Route53 Zone.
+  statement {
+    actions = [
+      "mq:CreateBroker",
+      "mq:CreateConfiguration",
+      "mq:DescribeConfiguration",
+      "mq:DescribeBroker",
     ]
 
     resources = [
