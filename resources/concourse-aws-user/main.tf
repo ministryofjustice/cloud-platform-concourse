@@ -150,24 +150,21 @@ data "aws_iam_policy_document" "policy" {
     ]
   }
 
-  # Roles to Create/Edit/Delete Route53 Zone.
+ # Roles to Create/Edit/Delete MQ.
   statement {
     actions = [
-      "route53:CreateHostedZone",
+      "mq:*",
     ]
 
     resources = [
       "*",
     ]
   }
-  
+
   # Roles to Create/Edit/Delete Route53 Zone.
   statement {
     actions = [
-      "mq:CreateBroker",
-      "mq:CreateConfiguration",
-      "mq:DescribeConfiguration",
-      "mq:DescribeBroker",
+      "route53:CreateHostedZone",
     ]
 
     resources = [
