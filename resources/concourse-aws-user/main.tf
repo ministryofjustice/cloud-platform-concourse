@@ -130,14 +130,22 @@ data "aws_iam_policy_document" "policy" {
 
   statement {
     actions = [
+      "ec2:AuthorizeSecurityGroupEgress",
+      "ec2:AuthorizeSecurityGroupIngress",
+      "ec2:CreateNetworkInterface",
       "ec2:CreateSecurityGroup",
+      "ec2:DeleteNetworkInterface",
       "ec2:DeleteSecurityGroup",
+      "ec2:DeleteNetworkInterfacePermission",
+      "ec2:DescribeInternetGateways",
       "ec2:DescribeNetworkInterfaces",
+      "ec2:DescribeRouteTables",
       "ec2:DescribeSecurityGroupReferences",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeStaleSecurityGroups",
-      "ec2:AuthorizeSecurityGroupEgress",
-      "ec2:AuthorizeSecurityGroupIngress",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeVpcs",
+      "ec2:DetachNetworkInterface",
       "ec2:RevokeSecurityGroupEgress",
       "ec2:RevokeSecurityGroupIngress",
       "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
@@ -147,6 +155,27 @@ data "aws_iam_policy_document" "policy" {
     resources = [
       "*",
     ]
+  }
+
+   # Roles to Create/Edit/Delete MQ.
+  statement {
+    actions = [
+      "mq:*",
+      "ec2:CreateNetworkInterfacePermission",
+      "ec2:DescribeNetworkInterfacePermissions",
+    ]
+
+    resources = [
+      "*", ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:AuthorizedService"
+
+      values = [
+        "mq.amazonaws.com",
+      ]
+    }
   }
 
   # Roles to Create/Edit/Delete Route53 Zone.
