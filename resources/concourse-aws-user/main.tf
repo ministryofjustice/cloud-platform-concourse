@@ -157,7 +157,7 @@ data "aws_iam_policy_document" "policy" {
     ]
   }
 
-   # Roles to Create/Edit/Delete MQ.
+  # Roles to Create/Edit/Delete MQ.
   statement {
     actions = [
       "mq:*",
@@ -166,7 +166,8 @@ data "aws_iam_policy_document" "policy" {
     ]
 
     resources = [
-      "*", ]
+      "*",
+    ]
 
     condition {
       test     = "StringEquals"
@@ -209,6 +210,16 @@ data "aws_iam_policy_document" "policy" {
 
     resources = [
       "arn:aws:route53:::hostedzone/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "sns:*",
+    ]
+
+    resources = [
+      "*",
     ]
   }
 }
