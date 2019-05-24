@@ -23,8 +23,6 @@ resource_types:
 groups:
 - name: live-0
   jobs: [check-live-0]
-- name: live-1
-  jobs: [check-live-1]
 
 jobs:
 - name: check-live-0
