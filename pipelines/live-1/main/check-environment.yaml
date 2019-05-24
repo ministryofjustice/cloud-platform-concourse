@@ -29,12 +29,11 @@ jobs:
   serial: true
   plan:
     - aggregate:
-      - get: every-week
+      - get: every-30m
         trigger: true
-      - get: cloud-platform-environments-repo
-      - get: tools-image
+      - get: ruby-image
     - task: check-environments
-      image: tools-image
+      image: ruby-image
       config:
         platform: linux
         params:
@@ -43,40 +42,31 @@ jobs:
           KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
           KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
           KUBECONFIG: /tmp/kubeconfig
-          TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
-          # the variables prefixed with PIPELINE_ are used by the apply script
           PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
           PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
           PIPELINE_STATE_KEY_PREFIX: ""
         run:
-          path: /bin/bash
+          path: /bin/sh
           args:
             - -ce
             - |
-              mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-              (
-                AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
-                aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-              )
-              cd cloud-platform-environments-repo
               # run script and then format output for slack notification
-              ./bin/check-inconsistent-state | tee ../results/check.txt && sed -i -e '1s/^/```\n/' -e '$a ```' -e 's/\[0;3//g' -e 's/\[0m//g' ../results/check.txt
+              cd /app; ./bin/orphaned_namespaces.rb | tee /app/check.txt
+              ls
+              pwd
         inputs:
-          - name: cloud-platform-environments-repo
         outputs:
-          - name: results
+          - name: app
   on_success:
     do:
     - put: slack-alert
       params:
-        channel: '#cp-build-notifications'
-        text: ${TEXT_FILE_CONTENT}
-        text_file: results/check.txt
+        channel: '#cloud-platform-notify'
+        text_file: /app/check.txt
   on_failure:
     put: slack-alert
     params:
-      channel: '#cp-build-notifications'
+      channel: '#cloud-platform-notify'
       attachments:
         - color: "danger"
           fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
