@@ -161,6 +161,15 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "mq:*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+  
+  statement {
+    actions = [
       "ec2:CreateNetworkInterfacePermission",
       "ec2:DescribeNetworkInterfacePermissions",
     ]
