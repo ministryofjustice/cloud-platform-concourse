@@ -37,19 +37,19 @@ jobs:
       config:
         platform: linux
         params:
-          TFSTATE_AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
-          TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
-          TFSTATE_AWS_REGION: eu-west-1
+          BUCKET_PREFIX: cloud-platform-live-0.k8s.integration.dsd.io
           KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
           KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+          KUBECONFIG_AWS_REGION: eu-west-2
           KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
           KUBECONFIG_S3_KEY: kubeconfig
-          KUBECONFIG_AWS_REGION: eu-west-2
           KUBECONTEXT: cloud-platform-live-0.k8s.integration.dsd.io
           KUBECONFIG: /tmp/kubeconfig
           PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
           PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
-          BUCKET_PREFIX: cloud-platform-live-0.k8s.integration.dsd.io
+          TFSTATE_AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
+          TFSTATE_AWS_REGION: eu-west-1
+          TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
         run:
           path: /bin/sh
           args:
