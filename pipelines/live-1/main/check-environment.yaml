@@ -23,6 +23,8 @@ resource_types:
 groups:
 - name: live-0
   jobs: [check-live-0]
+- name: live-1
+  jobs: [check-live-1]
 
 jobs:
 - name: check-live-0
@@ -69,4 +71,50 @@ jobs:
           fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
           title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
           title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+          footer: concourse.cloud-platform.service.justice.gov.uk
+
+- name: check-live-1
+  serial: true
+  plan:
+    - aggregate:
+      - get: every-30m
+        trigger: true
+      - get: ruby-image
+    - task: check-environments
+      image: ruby-image
+      config:
+        platform: linux
+        params:
+          BUCKET_PREFIX: cloud-platform-environments/live-1.cloud-platform.service.justice.gov.uk
+          KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+          KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+          KUBECONFIG_AWS_REGION: eu-west-2
+          KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+          KUBECONFIG_S3_KEY: kubeconfig
+          KUBECONTEXT: live-1.cloud-platform.service.justice.gov.uk
+          KUBECONFIG: /tmp/kubeconfig
+          PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+          PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+          TFSTATE_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+          TFSTATE_AWS_REGION: eu-west-1
+          TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+        run:
+          path: /app/bin/orphaned_namespaces.rb
+        outputs:
+          - name: output
+  on_success:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#cloud-platform-notify'
+        text_file: output/check.txt
+  on_failure:
+    put: slack-alert
+    params:
+      channel: '#cloud-platform-notify'
+      attachments:
+        - color: "danger"
+          fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/          $BUILD_JOB_NAME#$BUILD_NAME'
+          title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+          title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.   gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/     builds/$BUILD_NAME'
           footer: concourse.cloud-platform.service.justice.gov.uk
