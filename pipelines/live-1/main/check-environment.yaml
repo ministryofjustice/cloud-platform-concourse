@@ -3,7 +3,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
-    tag: 1.19
+    tag: 1.21
 - name: slack-alert
   type: slack-notification
   source:
@@ -69,4 +69,4 @@ jobs:
           fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
           title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
           title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-          footer: concourse.apps.live-1.cloud-platform.service.justice.gov.uk
+          footer: concourse.cloud-platform.service.justice.gov.uk
