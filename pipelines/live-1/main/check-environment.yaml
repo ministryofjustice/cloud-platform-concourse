@@ -3,7 +3,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
-    tag: 1.9
+    tag: 1.19
 - name: slack-alert
   type: slack-notification
   source:
@@ -51,23 +51,15 @@ jobs:
           TFSTATE_AWS_REGION: eu-west-1
           TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
         run:
-          path: /bin/sh
-          args:
-            - -ce
-            - |
-              # run script and then format output for slack notification
-              cd /app; ./bin/orphaned_namespaces.rb | tee /app/check.txt
-              ls
-              pwd
-        inputs:
+          path: /app/bin/orphaned_namespaces.rb
         outputs:
-          - name: app
+          - name: output
   on_success:
     do:
     - put: slack-alert
       params:
         channel: '#cloud-platform-notify'
-        text_file: /app/check.txt
+        text_file: output/check.txt
   on_failure:
     put: slack-alert
     params:
