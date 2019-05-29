@@ -80,9 +80,9 @@ jobs:
     - aggregate:
       - get: every-week
         trigger: true
-      - get: ruby-image
+      - get: orphaned-namespace-checker-image
     - task: check-environments
-      image: ruby-image
+      image: orphaned-namespace-checker-image
       config:
         platform: linux
         params:
