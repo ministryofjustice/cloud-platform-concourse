@@ -11,8 +11,8 @@ resources:
 - name: every-week
   type: time
   source:
-    # number of minutes in a week
-    interval: 10080m
+    # one week in hours
+    interval: 168h
 
 resource_types:
 - name: slack-notification
@@ -36,7 +36,7 @@ jobs:
         trigger: true
       - get: orphaned-namespace-checker-image
     - task: check-environments
-      image: orphaned-namespace-checker-image
+      image: orphaned-namespace-checker-image 
       config:
         platform: linux
         params:
