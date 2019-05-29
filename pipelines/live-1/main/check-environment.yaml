@@ -1,5 +1,5 @@
 resources:
-- name: ruby-image
+- name: orphaned-namespace-checker-image
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
@@ -34,9 +34,9 @@ jobs:
     - aggregate:
       - get: every-week
         trigger: true
-      - get: ruby-image
+      - get: orphaned-namespace-checker-image
     - task: check-environments
-      image: ruby-image
+      image: orphaned-namespace-checker-image
       config:
         platform: linux
         params:
@@ -80,9 +80,9 @@ jobs:
     - aggregate:
       - get: every-week
         trigger: true
-      - get: ruby-image
+      - get: orphaned-namespace-checker-image
     - task: check-environments
-      image: ruby-image
+      image: orphaned-namespace-checker-image
       config:
         platform: linux
         params:
