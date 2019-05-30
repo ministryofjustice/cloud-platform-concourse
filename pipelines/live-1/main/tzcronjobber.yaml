@@ -10,7 +10,6 @@ resources:
   type: docker-image
   source:
     repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tzcronjobber
-    tag: 0.2.0
     aws_access_key_id: ((aws-live-1.access-key-id))
     aws_secret_access_key: ((aws-live-1.secret-access-key))
 jobs:
@@ -38,5 +37,5 @@ jobs:
         params:
           build: files
           dockerfile: files/Dockerfile
-          tag_as_latest: false
+          tag_as_latest: true
           cache: false
