@@ -9,8 +9,8 @@ resources:
 - name: cronjobber-image
   type: docker-image
   source:
-    repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tools
-    tag: cronjobber
+    repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tzcronjobber
+    tag: 0.2.0
     aws_access_key_id: ((aws-live-1.access-key-id))
     aws_secret_access_key: ((aws-live-1.secret-access-key))
 jobs:
@@ -39,35 +39,4 @@ jobs:
           build: files
           dockerfile: files/Dockerfile
           tag_as_latest: false
-          cache: true
-      - task: install
-        image: tools-image
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-            KUBECONFIG: /tmp/kubeconfig
-            ECR: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tools
-            RELEASE: 0.2.0
-          inputs:
-            - name: files
-          run:
-            path: /bin/bash
-            args:
-              - -exc
-              - |
-                apk add sed
-                pushd files
-                cp deploy/crd.yaml ../cronjobber-crd.yaml
-                cp deploy/deploy.yaml ../cronjobber-deploy.yaml
-                cp deploy/rbac.yaml ../cronjobber-rbac.yaml
-                popd
-                sed -i 's/^metadata:/metadata:\n  namespace: kube-system/g' cronjobber-crd.yaml
-                sed -i 's/^metadata:/metadata:\n  namespace: kube-system/g' cronjobber-deploy.yaml
-                sed -i 's/^metadata:/metadata:\n  namespace: kube-system/g' cronjobber-rbac.yaml
-                sed -i 's/namespace: default/namespace: kube-system/' cronjobber-rbac.yaml
-                sed -i "s#image: quay.io/hiddeco/cronjobber:${RELEASE}#image: ${ECR}:cronjobber#" cronjobber-deploy.yaml
-                aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-                kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
-                kubectl apply -f .
+          cache: false
