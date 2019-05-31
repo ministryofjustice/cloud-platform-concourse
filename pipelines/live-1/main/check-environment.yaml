@@ -1,3 +1,11 @@
+slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
+  channel: '#cloud-platform-notify'
+slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
+  fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.cloud-platform.service.justice.gov.uk
+
 resources:
 - name: orphaned-namespace-checker-image
   type: docker-image
@@ -57,22 +65,18 @@ jobs:
           path: /app/bin/orphaned_namespaces.rb
         outputs:
           - name: output
-  on_success:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#cloud-platform-notify'
-        text_file: output/check.txt
-  on_failure:
-    put: slack-alert
-    params:
-      channel: '#cloud-platform-notify'
-      attachments:
-        - color: "danger"
-          fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-          footer: concourse.cloud-platform.service.justice.gov.uk
+      on_success:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          text_file: output/check.txt
+      on_failure:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          attachments:
+            - color: "danger"
+              <<: *SLACK_ATTACHMENTS_DEFAULTS
 
 - name: check-live-1
   serial: true
@@ -103,19 +107,15 @@ jobs:
           path: /app/bin/orphaned_namespaces.rb
         outputs:
           - name: output
-  on_success:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#cloud-platform-notify'
-        text_file: output/check.txt
-  on_failure:
-    put: slack-alert
-    params:
-      channel: '#cloud-platform-notify'
-      attachments:
-        - color: "danger"
-          fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/          $BUILD_JOB_NAME#$BUILD_NAME'
-          title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.   gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/     builds/$BUILD_NAME'
-          footer: concourse.cloud-platform.service.justice.gov.uk
+      on_success:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          text_file: output/check.txt
+      on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
