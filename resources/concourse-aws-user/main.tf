@@ -231,6 +231,17 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
+
+  statement {
+    actions = [
+      "sqs:*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
 }
 
 resource "aws_iam_policy" "policy" {
