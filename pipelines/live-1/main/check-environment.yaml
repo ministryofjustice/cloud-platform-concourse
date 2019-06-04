@@ -1,17 +1,17 @@
+slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
+  channel: '#cloud-platform-notify'
+slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
+  fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.cloud-platform.service.justice.gov.uk
+
 resources:
-- name: cloud-platform-environments-repo
-  type: git
-  source:
-    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
-    branch: master
-    git_crypt_key: ((cloud-platform-environments-git-crypt.key))
-- name: tools-image
+- name: orphaned-namespace-checker-image
   type: docker-image
   source:
-    repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
-    tag: latest
-    aws_access_key_id: ((aws-live-0.access-key-id))
-    aws_secret_access_key: ((aws-live-0.secret-access-key))
+    repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
+    tag: 2.8
 - name: slack-alert
   type: slack-notification
   source:
@@ -19,10 +19,8 @@ resources:
 - name: every-week
   type: time
   source:
-    interval: 10m
-    days: [Wednesday]
-    start: 16:40
-    stop: 16:50
+    # one week in hours
+    interval: 168h
 
 resource_types:
 - name: slack-notification
@@ -44,58 +42,41 @@ jobs:
     - aggregate:
       - get: every-week
         trigger: true
-      - get: cloud-platform-environments-repo
-      - get: tools-image
+      - get: orphaned-namespace-checker-image
     - task: check-environments
-      image: tools-image
+      image: orphaned-namespace-checker-image
       config:
         platform: linux
         params:
-          AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
-          AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
           KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
           KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-          KUBECONFIG: /tmp/kubeconfig
-          TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
-          # the variables prefixed with PIPELINE_ are used by the apply script
-          PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
-          PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
-          PIPELINE_STATE_KEY_PREFIX: ""
+          KUBECONFIG_AWS_REGION: eu-west-2
+          KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+          KUBECONFIG_S3_KEY: kubeconfig
+          KUBE_CTX: cloud-platform-live-0.k8s.integration.dsd.io
+          KUBE_CONFIG: /tmp/kubeconfig
+          KUBERNETES_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
+          TFSTATE_AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
+          TFSTATE_AWS_REGION: eu-west-1
+          TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
+          TFSTATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
+          TFSTATE_BUCKET_PREFIX: cloud-platform-live-0.k8s.integration.dsd.io
         run:
-          path: /bin/bash
-          args:
-            - -ce
-            - |
-              mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-              (
-                AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
-                aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-              )
-              cd cloud-platform-environments-repo
-              # run script and then format output for slack notification
-              ./bin/check-inconsistent-state | tee ../results/check.txt && sed -i -e '1s/^/```\n/' -e '$a ```' -e 's/\[0;3//g' -e 's/\[0m//g' ../results/check.txt
-        inputs:
-          - name: cloud-platform-environments-repo
+          path: /app/bin/orphaned_namespaces.rb
         outputs:
-          - name: results
-  on_success:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#cp-build-notifications'
-        text: ${TEXT_FILE_CONTENT}
-        text_file: results/check.txt
-  on_failure:
-    put: slack-alert
-    params:
-      channel: '#cp-build-notifications'
-      attachments:
-        - color: "danger"
-          fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title_link: 'https://concourse.apps.live-1.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-          footer: concourse.apps.live-1.cloud-platform.service.justice.gov.uk
+          - name: output
+      on_success:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          text_file: output/check.txt
+      on_failure:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          attachments:
+            - color: "danger"
+              <<: *SLACK_ATTACHMENTS_DEFAULTS
 
 - name: check-live-1
   serial: true
@@ -103,55 +84,38 @@ jobs:
     - aggregate:
       - get: every-week
         trigger: true
-      - get: cloud-platform-environments-repo
-      - get: tools-image
+      - get: orphaned-namespace-checker-image
     - task: check-environments
-      image: tools-image
+      image: orphaned-namespace-checker-image
       config:
         platform: linux
         params:
-          AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-          AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
           KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
           KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-          KUBECONFIG: /tmp/kubeconfig
-          TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
-          # the variables prefixed with PIPELINE_ are used by the apply script
-          PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-          PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
-          PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+          KUBECONFIG_AWS_REGION: eu-west-2
+          KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+          KUBECONFIG_S3_KEY: kubeconfig
+          KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
+          KUBE_CONFIG: /tmp/kubeconfig
+          KUBERNETES_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+          TFSTATE_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+          TFSTATE_AWS_REGION: eu-west-1
+          TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+          TFSTATE_BUCKET: cloud-platform-terraform-state
+          TFSTATE_BUCKET_PREFIX: cloud-platform-environments/live-1.cloud-platform.service.justice.gov.uk
         run:
-          path: /bin/bash
-          args:
-            - -ce
-            - |
-              mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-              (
-                AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
-                aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-              )
-              cd cloud-platform-environments-repo
-              # run script and then format output for slack notification
-              ./bin/check-inconsistent-state | tee ../results/check.txt && sed -i -e '1s/^/```\n/' -e '$a ```' -e 's/\[0;3//g' -e 's/\[0m//g' ../results/check.txt
-        inputs:
-          - name: cloud-platform-environments-repo
+          path: /app/bin/orphaned_namespaces.rb
         outputs:
-          - name: results
-  on_success:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#cp-build-notifications'
-        text: ${TEXT_FILE_CONTENT}
-        text_file: results/check.txt
-  on_failure:
-    put: slack-alert
-    params:
-      channel: '#cp-build-notifications'
-      attachments:
-        - color: "danger"
-          fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-          title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-          footer: concourse.cloud-platform.service.justice.gov.uk
+          - name: output
+      on_success:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          text_file: output/check.txt
+      on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
