@@ -11,7 +11,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
-    tag: 2.10
+    tag: 2.11
 - name: slack-alert
   type: slack-notification
   source:
@@ -61,6 +61,7 @@ jobs:
           TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
           TFSTATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
           TFSTATE_BUCKET_PREFIX: cloud-platform-live-0.k8s.integration.dsd.io
+          GITHUB_TOKEN: ((cloud-platform-environments-pr-git-access-token))
         run:
           path: /app/bin/orphaned_namespaces.rb
         outputs:
@@ -103,6 +104,7 @@ jobs:
           TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
           TFSTATE_BUCKET: cloud-platform-terraform-state
           TFSTATE_BUCKET_PREFIX: cloud-platform-environments/live-1.cloud-platform.service.justice.gov.uk
+          GITHUB_TOKEN: ((cloud-platform-environments-pr-git-access-token))
         run:
           path: /app/bin/orphaned_namespaces.rb
         outputs:
