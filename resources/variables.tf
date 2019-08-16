@@ -1,5 +1,5 @@
 variable "rds_storage" {
-  default     = "10"
+  default     = "50"
   description = "RDS storage size in GB"
 }
 
