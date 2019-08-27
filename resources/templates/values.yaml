@@ -1512,7 +1512,7 @@ persistence:
 
     ## Persistent Volume Storage Size.
     ##
-    size: 20Gi
+    size: 100Gi
 
 ## Configuration values for the postgresql dependency.
 ## Ref: https://github.com/helm/charts/blob/master/stable/postgresql/README.md
