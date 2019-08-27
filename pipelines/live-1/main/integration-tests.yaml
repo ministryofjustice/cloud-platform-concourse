@@ -16,7 +16,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-smoke-tests
-    tag: 1.2
+    tag: latest
 - name: slack-alert
   type: slack-notification
   source:
