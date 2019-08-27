@@ -243,6 +243,42 @@ data "aws_iam_policy_document" "policy" {
     ]
   }
 
+  /*
+
+    The permissions below enable the concourse pipeline to run the cluster
+    integration tests.  The kiam tests depend on an AWS role, which the tests will
+    try to create if it doesn't exist. The ability to create roles is quite
+    powerful, so it is not granted here. This means, if the concourse pipeline runs
+    the integration tests and the required role is not present, they will fail,
+    with an error about being unable to create a role.  The fix for this is for a
+    member of the webops team to run the tests once, using their AWS credentials.
+    This will create the role, and leave it in place, so that subsequent pipeline
+    runs will succeed.
+
+   */
+
+  statement {
+    actions = [
+      "iam:GetRole",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListRoles",
+    ]
+
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*",
+    ]
+  }
+  statement {
+    actions = [
+      "iam:ListPolicies",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  /* End of permissions for concourse pipeline integration tests */
 }
 
 resource "aws_iam_policy" "policy" {
