@@ -16,7 +16,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-smoke-tests
-    tag: 1.2
+    tag: latest
 - name: slack-alert
   type: slack-notification
   source:
@@ -70,7 +70,7 @@ jobs:
             - |
               aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
               kubectl config use-context ${KUBE_CLUSTER}
-              cd ./smoke-tests; rspec 
+              cd ./smoke-tests; rspec
         outputs:
           - name: metadata
       on_failure:
