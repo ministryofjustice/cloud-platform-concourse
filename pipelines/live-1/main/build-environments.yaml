@@ -17,10 +17,8 @@ resources:
 - name: tools-image
   type: docker-image
   source:
-    repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
-    tag: latest
-    aws_access_key_id: ((aws-live-0.access-key-id))
-    aws_secret_access_key: ((aws-live-0.secret-access-key))
+    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools
+    tag: 1.0 
 - name: slack-alert
   type: slack-notification
   source:
