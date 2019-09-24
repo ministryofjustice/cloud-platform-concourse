@@ -215,6 +215,8 @@ data "aws_iam_policy_document" "policy" {
       "route53:ListTagsForResource",
       "route53:ChangeTagsForResource",
       "route53:DeleteHostedZone",
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets",
       "route53:UpdateHostedZoneComment",
     ]
 
