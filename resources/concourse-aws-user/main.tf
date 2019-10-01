@@ -211,10 +211,12 @@ data "aws_iam_policy_document" "policy" {
 
   statement {
     actions = [
-      "route53:GetHostedZone",
-      "route53:ListTagsForResource",
+      "route53:ChangeResourceRecordSets",
       "route53:ChangeTagsForResource",
       "route53:DeleteHostedZone",
+      "route53:GetHostedZone",
+      "route53:ListResourceRecordSets",
+      "route53:ListTagsForResource",
       "route53:UpdateHostedZoneComment",
     ]
 
