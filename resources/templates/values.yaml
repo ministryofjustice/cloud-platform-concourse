@@ -1119,8 +1119,8 @@ web:
   ##
   resources:
     requests:
-      cpu: "100m"
-      memory: "250Mi"
+      cpu: "20m"
+      memory: "100Mi"
     limits:
       cpu: "100m"
       memory: "250Mi"
@@ -1362,8 +1362,8 @@ worker:
   ##
   resources:
     requests:
-      cpu: "1000m"
-      memory: "4Gi"
+      cpu: "50m"
+      memory: "1Gi"
     limits:
       cpu: "1000m"
       memory: "4Gi"
