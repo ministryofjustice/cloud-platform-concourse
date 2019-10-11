@@ -8,7 +8,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools
-    tag: 1.4-test
+    tag: 1.4
     username: ((cloud-platform-environments-dockerhub.dockerhub_username))
     password: ((cloud-platform-environments-dockerhub.dockerhub_access_token))
 
@@ -23,7 +23,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools
-    tag: 1.4-test
+    tag: 1.4
     username: ((cloud-platform-environments-dockerhub.dockerhub_username))
     password: ((cloud-platform-environments-dockerhub.dockerhub_access_token))
 
