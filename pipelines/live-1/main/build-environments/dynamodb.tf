@@ -11,6 +11,8 @@ resource "aws_dynamodb_table" "cloud-platform-environments-terraform-lock" {
   read_capacity = 20
   write_capacity = 20
 
+  provider = "aws.ireland"
+
   attribute {
     name = "LockID"
     type = "S"
