@@ -127,6 +127,7 @@ jobs:
             PIPELINE_STATE_REGION: "eu-west-1"
             PIPELINE_CLUSTER_STATE_BUCKET: cloud-platform-terraform-state
             PIPELINE_CLUSTER_STATE_KEY_PREFIX: "cloud-platform/"
+            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
           run:
             path: /bin/sh
             dir: cloud-platform-environments-repo
