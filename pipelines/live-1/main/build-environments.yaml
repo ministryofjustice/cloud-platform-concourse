@@ -23,10 +23,10 @@ resources:
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
-- name: every-30m
+- name: every-60m
   type: time
   source:
-    interval: 30m
+    interval: 60m
 
 resource_types:
 - name: slack-notification
@@ -46,7 +46,7 @@ jobs:
     serial: true
     plan:
       - aggregate:
-        - get: every-30m
+        - get: every-60m
           trigger: true
         - get: cloud-platform-environments-repo
           trigger: false
@@ -100,7 +100,7 @@ jobs:
     serial: true
     plan:
       - aggregate:
-        - get: every-30m
+        - get: every-60m
           trigger: true
         - get: cloud-platform-environments-repo
           trigger: false
