@@ -36,14 +36,6 @@ resource "aws_security_group" "concourse" {
     from_port = 0
     to_port   = 0
     protocol  = "-1"
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibility in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
     cidr_blocks = data.terraform_remote_state.cluster.outputs.internal_subnets
   }
 
@@ -62,14 +54,6 @@ resource "aws_security_group" "concourse" {
 resource "aws_db_subnet_group" "concourse" {
   name        = "${terraform.workspace}-concourse"
   description = "Internal subnet groups"
-  # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-  # force an interpolation expression to be interpreted as a list by wrapping it
-  # in an extra set of list brackets. That form was supported for compatibility in
-  # v0.11, but is no longer supported in Terraform v0.12.
-  #
-  # If the expression in the following list itself returns a list, remove the
-  # brackets to avoid interpretation as a list of lists. If the expression
-  # returns a single list item then leave it as-is and remove this TODO comment.
   subnet_ids = data.terraform_remote_state.cluster.outputs.internal_subnets_ids
 }
 
@@ -152,13 +136,6 @@ data "template_file" "values" {
 }
 
 module "concourse_user_cp" {
-  # TF-UPGRADE-TODO: In Terraform v0.11 and earlier, it was possible to
-  # reference a relative module source without a preceding ./, but it is no
-  # longer supported in Terraform v0.12.
-  #
-  # If the below module source is indeed a relative local path, add ./ to the
-  # start of the source string. If that is not the case, then leave it as-is
-  # and remove this TODO comment.
   source      = "./concourse-aws-user"
   aws_profile = "moj-cp"
 }
@@ -178,13 +155,6 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
 }
 
 module "concourse_user_pi" {
-  # TF-UPGRADE-TODO: In Terraform v0.11 and earlier, it was possible to
-  # reference a relative module source without a preceding ./, but it is no
-  # longer supported in Terraform v0.12.
-  #
-  # If the below module source is indeed a relative local path, add ./ to the
-  # start of the source string. If that is not the case, then leave it as-is
-  # and remove this TODO comment.
   source      = "./concourse-aws-user"
   aws_profile = "moj-pi"
 }
