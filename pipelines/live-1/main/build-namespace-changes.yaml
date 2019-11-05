@@ -1,5 +1,5 @@
 slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
-  channel: '#cloud-platform-notify'
+  channel: '#lower-priority-alarms'
   silent: true
 slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
@@ -23,10 +23,6 @@ resources:
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
-- name: every-30m
-  type: time
-  source:
-    interval: 30m
 
 resource_types:
 - name: slack-notification
@@ -37,21 +33,19 @@ resource_types:
 
 groups:
 - name: live-0
-  jobs: [apply-live-0]
+  jobs: [apply-namespace-changes-live-0]
 - name: live-1
-  jobs: [apply-live-1]
+  jobs: [apply-namespace-changes-live-1]
 
 jobs:
-  - name: apply-live-0
+  - name: apply-namespace-changes-live-0
     serial: true
     plan:
       - aggregate:
-        - get: every-30m
-          trigger: true
         - get: cloud-platform-environments-repo
-          trigger: false
+          trigger: true
         - get: tools-image
-      - task: apply-environments
+      - task: apply-namespace-changes
         image: tools-image
         config:
           platform: linux
@@ -87,7 +81,7 @@ jobs:
                   AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
-                ./bin/apply
+                ./bin/apply-namespace-changes
         on_failure:
           put: slack-alert
           params:
@@ -96,16 +90,14 @@ jobs:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
 
-  - name: apply-live-1
+  - name: apply-namespace-changes-live-1
     serial: true
     plan:
       - aggregate:
-        - get: every-30m
-          trigger: true
         - get: cloud-platform-environments-repo
-          trigger: false
+          trigger: true
         - get: tools-image
-      - task: apply-environments
+      - task: apply-namespace-changes
         image: tools-image
         config:
           platform: linux
@@ -141,7 +133,7 @@ jobs:
                   AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
-                ./bin/apply
+                ./bin/apply-namespace-changes
         on_failure:
           put: slack-alert
           params:
