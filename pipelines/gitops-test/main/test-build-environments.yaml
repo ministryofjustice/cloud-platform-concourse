@@ -1,0 +1,72 @@
+resources:
+- name: cloud-platform-environments-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
+    branch: add/gitops
+- name: cloud-platform-terraform-gitops-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-terraform-gitops.git
+    branch: master
+- name: tools-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-tools
+    tag: concourse
+- name: every-30m
+  type: time
+  source:
+    interval: 30m
+
+groups:
+- name: gitops-test
+  jobs: [apply-gitops-test]
+
+jobs:
+
+  - name: apply-gitops-test
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-30m
+          trigger: true
+        - get: cloud-platform-environments-repo
+          trigger: true
+        - get: cloud-platform-terraform-gitops-repo
+          trigger: true
+        - get: tools-image
+      - task: apply-environments
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            KUBECONFIG: /tmp/kubeconfig
+            # the variables prefixed with PIPELINE_ are used by the apply script
+            PIPELINE_CLUSTER: gitops-test.cloud-platform.service.justice.gov.uk
+            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_CLUSTER_STATE_KEY_PREFIX: "cloud-platform/"
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            TF_VAR_concourse_url: "https://concourse.apps.gitops-test.cloud-platform.service.justice.gov.uk"
+            TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
+            TF_VAR_concourse_basic_auth_password: ((concourse-basic-auth.password))
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                (
+                  AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+                  AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/gitops-config /tmp/kubeconfig
+                )
+                ./bin/apply
