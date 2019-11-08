@@ -5,6 +5,7 @@ terraform {
     key                  = "terraform.tfstate"
     workspace_key_prefix = "cloud-platform-concourse"
   }
+  required_version = "0.11.14"
 }
 
 provider "aws" {
@@ -18,7 +19,7 @@ data "terraform_remote_state" "cluster" {
   config {
     bucket = "cloud-platform-terraform-state"
     region = "eu-west-1"
-    key    = "cloud-platform/live-1/terraform.tfstate"
+    key    = "cloud-platform/dstest-2/terraform.tfstate"
   }
 }
 
