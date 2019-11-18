@@ -8,7 +8,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-tools
-    tag: 1.4
+    tag: concourse
 
 groups:
 - name: gitops-test
@@ -31,8 +31,6 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
             # the variables prefixed with PIPELINE_ are used by the apply script
             PIPELINE_CLUSTER: gitops-test.cloud-platform.service.justice.gov.uk
