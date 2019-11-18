@@ -61,6 +61,6 @@ jobs:
                 (
                   AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
                   AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
-                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/gitops-config /tmp/kubeconfig
                 )
                 ./bin/apply-namespace-changes
