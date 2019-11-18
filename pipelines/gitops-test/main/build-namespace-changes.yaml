@@ -59,8 +59,8 @@ jobs:
               - |
                 mkdir -p "${TF_PLUGIN_CACHE_DIR}"
                 (
-                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
+                  AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+                  AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 ./bin/apply-namespace-changes
