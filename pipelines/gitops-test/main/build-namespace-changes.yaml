@@ -1,0 +1,59 @@
+resources:
+- name: cloud-platform-environments-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
+    branch: ruby-apply-changes
+- name: tools-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-tools
+    tag: 1.4
+
+groups:
+- name: gitops-test
+  jobs: [apply-namespace-changes-gitops-test]
+
+jobs:
+  - name: apply-namespace-changes-gitops-test
+    serial: true
+    plan:
+      - aggregate:
+        - get: cloud-platform-environments-repo
+          trigger: true
+        - get: tools-image
+      - task: apply-namespace-changes
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            KUBECONFIG: /tmp/kubeconfig
+            # the variables prefixed with PIPELINE_ are used by the apply script
+            PIPELINE_CLUSTER: gitops-test.cloud-platform.service.justice.gov.uk
+            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_CLUSTER_STATE_KEY_PREFIX: "cloud-platform/"
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            TF_VAR_concourse_url: "https://concourse.apps.gitops-test.cloud-platform.service.justice.gov.uk"
+            TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
+            TF_VAR_concourse_basic_auth_password: ((concourse-basic-auth.password))
+            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                (
+                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
+                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
+                )
+                ./bin/apply-namespace-changes
