@@ -101,6 +101,17 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
+  
+  statement {
+    actions = [
+      "es:*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
 
   statement {
     actions = [
@@ -127,7 +138,20 @@ data "aws_iam_policy_document" "policy" {
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*-autoscaler",
     ]
   }
+  
+    statement {
+    actions = [
+      "iam:CreateRole",
+      "iam:GetRole",
+      "iam:PutRolePolicy",
+      "iam:GetRolePolicy",
+    ]
 
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cloud-platform-*",
+    ]
+  }
+  
   statement {
     actions = [
       "ec2:AuthorizeSecurityGroupEgress",
