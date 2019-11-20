@@ -10,6 +10,10 @@ In order to setup concourse initially on a cluster, you will need to have `terra
 
   `kubectl config use-context <cluster-name>.cloud-platform.service.justice.gov.uk`
 
+Or, if you have `kops` installed:
+
+  `kops export kubecfg <cluster-name>.cloud-platform.service.justice.gov.uk`
+
 2. Select the workspace to match the cluster you want to nstall Concourse CI on
 
   `terraform workspace select <cluster-name>`
