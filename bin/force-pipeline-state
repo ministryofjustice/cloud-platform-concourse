@@ -27,8 +27,8 @@ _tf() {
   echo ">>> creating pipeline resources for $(basename ${2})"
   (
     set -x
-    terraform init
-    terraform "${1}" -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'
+    terraform12 init
+    terraform12 "${1}" -auto-approve | sed -E 's/((content|template):[[:space:]]+)".+"/\1<REDACTED>/'
   )
   cd $OLDPWD
 }
