@@ -20,14 +20,16 @@ Or, if you have `kops` installed:
 
 3. Edit `resources/secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
 
+4. Create namespaces:
 
-4. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager.
-   
-   `terraform apply`
+* `kubectl create namespace concourse`
+* `kubectl create namespace concourse-main`
 
-Two namespaces are created: `concourse` and `concourse-main`. Please make sure you define them in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
+5. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager.
 
-*NOTE*: Due to the way `helm` manages namespaces for concourse secrets (`concourse-main` in this case), it will fail on the first run of the setup script. If this occurs, with an error message complaining about the existence of the `concourse-main` namespace, please run it a second time.
+   `cd resources; terraform apply`
+
+Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 
 ## Removing
 Currently a manual task:
