@@ -3,35 +3,35 @@ variable "clusters" {
 }
 
 data "template_file" "clusters" {
-  count = "${length(var.clusters)}"
+  count = length(var.clusters)
 
-  template = "${file("${path.module}/templates/cluster.tpl")}"
+  template = file("${path.module}/templates/cluster.tpl")
 
-  vars {
-    name    = "${lookup(var.clusters[count.index], "name")}"
-    host    = "${lookup(var.clusters[count.index], "host")}"
-    ca_data = "${lookup(var.clusters[count.index], "ca_data")}"
+  vars = {
+    name    = var.clusters[count.index]["name"]
+    host    = var.clusters[count.index]["host"]
+    ca_data = var.clusters[count.index]["ca_data"]
   }
 }
 
 data "template_file" "users" {
-  count = "${length(var.clusters)}"
+  count = length(var.clusters)
 
-  template = "${file("${path.module}/templates/user.tpl")}"
+  template = file("${path.module}/templates/user.tpl")
 
-  vars {
-    name  = "${lookup(var.clusters[count.index], "name")}"
-    token = "${lookup(var.clusters[count.index], "token")}"
+  vars = {
+    name  = var.clusters[count.index]["name"]
+    token = var.clusters[count.index]["token"]
   }
 }
 
 data "template_file" "contexts" {
-  count = "${length(var.clusters)}"
+  count = length(var.clusters)
 
-  template = "${file("${path.module}/templates/context.tpl")}"
+  template = file("${path.module}/templates/context.tpl")
 
-  vars {
-    name = "${lookup(var.clusters[count.index], "name")}"
+  vars = {
+    name = var.clusters[count.index]["name"]
   }
 }
 
@@ -54,7 +54,7 @@ resource "aws_s3_bucket" "kubeconfig" {
 
 resource "aws_s3_bucket_object" "kubeconfig" {
   key    = "kubeconfig"
-  bucket = "${aws_s3_bucket.kubeconfig.id}"
+  bucket = aws_s3_bucket.kubeconfig.id
 
   content = <<EOF
 apiVersion: v1
@@ -69,5 +69,7 @@ users:
 ${join("", data.template_file.users.*.rendered)}
 EOF
 
+
   server_side_encryption = "AES256"
 }
+

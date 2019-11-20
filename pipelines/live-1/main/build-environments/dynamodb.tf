@@ -6,19 +6,20 @@
 // terraform can use it to lock the state of each namespace.
 
 resource "aws_dynamodb_table" "cloud-platform-environments-terraform-lock" {
-  name = "cloud-platform-environments-terraform-lock"
-  hash_key = "LockID"
-  read_capacity = 20
+  name           = "cloud-platform-environments-terraform-lock"
+  hash_key       = "LockID"
+  read_capacity  = 20
   write_capacity = 20
 
-  provider = "aws.ireland"
+  provider = aws.ireland
 
   attribute {
     name = "LockID"
     type = "S"
   }
 
-  tags {
+  tags = {
     Name = "Terraform Lock Table for namespaces in the cloud-platform-environments repository"
   }
 }
+
