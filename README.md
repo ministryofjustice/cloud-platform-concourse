@@ -7,8 +7,8 @@ Concourse CI for the Cloud Platform
 In order to setup concourse initially on a cluster, you will need to have `terraform` (version >= 0.12.13), `kubectl` and `helm` installed.
 
 1. Select the name of the cluster you want to install Concourse CI on, as it appears in the terraform workspaces [here](https://github.com/ministryofjustice/cloud-platform-infrastructure/tree/master/terraform/cloud-platform).
-  
-  `kubectl config use-context <cluster-name>.k8s.integration.dsd.io`
+
+  `kubectl config use-context <cluster-name>.cloud-platform.service.justice.gov.uk`
 
 2. Select the workspace to match the cluster you want to nstall Concourse CI on
 
