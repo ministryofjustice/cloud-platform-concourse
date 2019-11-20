@@ -53,7 +53,12 @@ terraform select workspace default
 terraform workspace delete <cluster-name>
 ```
 
-The created namespaces are not deleted by `helm` but `terraform` *does* manage the two starting ones (`concourse` and `concourse-main`) and will delete them during `destroy`.
+3. Destroy the namespaces
+
+```
+kubectl delete namespace concourse-main
+kubectl delete namespace concourse
+```
 
 ## Pipelines
 
