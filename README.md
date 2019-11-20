@@ -22,8 +22,10 @@ Or, if you have `kops` installed:
 
 4. Create namespaces:
 
-* `kubectl create namespace concourse`
-* `kubectl create namespace concourse-main`
+```
+kubectl create namespace concourse
+kubectl create namespace concourse-main
+```
 
 5. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager.
 
