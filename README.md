@@ -33,6 +33,24 @@ kubectl create namespace concourse-main
 
 Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 
+6. Access your concourse instance
+
+Your concourse instance should be accessible at the URL:
+
+`https://concourse.apps.<cluster-name>.cloud-platform.service.justice.gov.uk/`
+
+However, you will not be able to login via github unless you:
+
+1. create a new github app. for your concourse instance
+2. have a github admin add the app to the ministryofjustice organisation
+3. update `resources/secrets.tf` and change the `github_auth_client_id` to the ID of the new app.
+
+You can login using basic authentication. The username and password will be in
+the secret named `concourse-basic-auth` in the `concourse-main` namespace.
+
+Be aware that the basic auth. credentials give you full admin access to your
+concourse instance.
+
 ## Removing
 
 Currently a manual task:
