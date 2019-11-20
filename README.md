@@ -32,12 +32,17 @@ Or, if you have `kops` installed:
 Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 
 ## Removing
+
 Currently a manual task:
+
 1. Remove `helm` deployment:
+
 ```sh
 helm --kube-context=<context> --tiller-namespace kube-system delete --purge concourse
 ```
+
 2. Destroy terraform managed resources:
+
 ```sh
 cd resources
 terraform select workspace <cluster-name>
@@ -49,4 +54,5 @@ terraform workspace delete <cluster-name>
 The created namespaces are not deleted by `helm` but `terraform` *does* manage the two starting ones (`concourse` and `concourse-main`) and will delete them during `destroy`.
 
 ## Pipelines
+
 Pipeline configuration can be managed in this repository, please read the documentation [here](pipelines/README.md).
