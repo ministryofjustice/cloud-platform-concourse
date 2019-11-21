@@ -48,9 +48,6 @@ jobs:
             KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
-            PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
-            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
-            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
             # the variables prefixed with PIPELINE_ are used by the plan script
             PIPELINE_CLUSTER: david-test1.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
