@@ -20,3 +20,9 @@ kubectl -n concourse-main edit secret generic digitalronin-environments-pr-git-a
 ```
 
 Add `data.value` of base64-encoded github personal access token
+
+## Setup AWS secrets
+
+Copy the aws-live-1 secret from the live-1 cluster.
+
+
