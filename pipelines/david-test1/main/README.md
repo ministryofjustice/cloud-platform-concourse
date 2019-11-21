@@ -1,0 +1,22 @@
+# Concourse
+
+## Login
+
+```
+fly -t david-test1 login --concourse-url https://concourse.apps.david-test1.cloud-platform.service.justice.gov.uk
+```
+
+## Create/update pipeline
+
+```
+fly -t david-test1 set-pipeline -p plan -c pipelines/david-test1/main/plan-environments.yaml
+```
+
+## Setup github personal access token secret
+
+```
+kubectl -n concourse-main create secret generic digitalronin-environments-pr-git-access-token
+kubectl -n concourse-main edit secret generic digitalronin-environments-pr-git-access-token
+```
+
+Add `data.value` of base64-encoded github personal access token
