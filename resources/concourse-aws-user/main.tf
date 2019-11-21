@@ -145,6 +145,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:GetRole",
       "iam:PutRolePolicy",
       "iam:GetRolePolicy",
+      "iam:TagRole"
     ]
 
     resources = [
