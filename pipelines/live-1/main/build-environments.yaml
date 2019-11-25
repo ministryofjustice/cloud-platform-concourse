@@ -46,8 +46,6 @@ jobs:
     serial: true
     plan:
       - aggregate:
-        - get: every-60m
-          trigger: true
         - get: cloud-platform-environments-repo
           trigger: false
         - get: tools-image
