@@ -30,55 +30,10 @@ resource_types:
     tag: latest
 
 groups:
-- name: live-0
-  jobs: [check-live-0]
 - name: live-1
   jobs: [check-live-1]
 
 jobs:
-- name: check-live-0
-  serial: true
-  plan:
-    - aggregate:
-      - get: every-week
-        trigger: true
-      - get: orphaned-namespace-checker-image
-    - task: check-environments
-      image: orphaned-namespace-checker-image
-      config:
-        platform: linux
-        params:
-          KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-          KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-          KUBECONFIG_AWS_REGION: eu-west-2
-          KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
-          KUBECONFIG_S3_KEY: kubeconfig
-          KUBE_CTX: cloud-platform-live-0.k8s.integration.dsd.io
-          KUBE_CONFIG: /tmp/kubeconfig
-          KUBERNETES_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
-          TFSTATE_AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
-          TFSTATE_AWS_REGION: eu-west-1
-          TFSTATE_AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
-          TFSTATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
-          TFSTATE_BUCKET_PREFIX: cloud-platform-live-0.k8s.integration.dsd.io
-          GITHUB_TOKEN: ((cloud-platform-environments-pr-git-access-token))
-        run:
-          path: /app/bin/orphaned_namespaces.rb
-        outputs:
-          - name: output
-      on_success:
-        put: slack-alert
-        params:
-          <<: *SLACK_NOTIFICATION_DEFAULTS
-          text_file: output/check.txt
-      on_failure:
-        put: slack-alert
-        params:
-          <<: *SLACK_NOTIFICATION_DEFAULTS
-          attachments:
-            - color: "danger"
-              <<: *SLACK_ATTACHMENTS_DEFAULTS
-
 - name: check-live-1
   serial: true
   plan:

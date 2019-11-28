@@ -5,14 +5,6 @@ resource_types:
     repository: teliaoss/github-pr-resource
 
 resources:
-- name: cloud-platform-environments-live-0-pull-requests
-  type: pull-request
-  check_every: 1m
-  source:
-    repository: ministryofjustice/cloud-platform-environments
-    access_token: ((cloud-platform-environments-pr-git-access-token))
-    paths:
-    - namespaces/cloud-platform-live-0.k8s.integration.dsd.io
 - name: cloud-platform-environments-live-1-pull-requests
   type: pull-request
   check_every: 1m
@@ -28,71 +20,10 @@ resources:
     tag: 1.5
 
 groups:
-- name: live-0
-  jobs: [plan-live-0]
 - name: live-1
   jobs: [plan-live-1]
 
 jobs:
-  - name: plan-live-0
-    serial: true
-    plan:
-      - get: cloud-platform-environments-live-0-pull-requests
-        trigger: true
-        version: every
-      - put: cloud-platform-environments-live-0-pull-requests
-        params:
-          path: cloud-platform-environments-live-0-pull-requests
-          status: pending
-      - get: tools-image
-      - task: plan-environments
-        image: tools-image
-        config:
-          platform: linux
-          inputs:
-            - name: cloud-platform-environments-live-0-pull-requests
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
-            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-            KUBECONFIG: /tmp/kubeconfig
-            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
-            PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
-            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
-            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
-            # the variables prefixed with PIPELINE_ are used by the plan script
-            PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
-            PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
-            PIPELINE_STATE_KEY_PREFIX: ""
-            PIPELINE_STATE_REGION: "eu-west-1"
-            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
-          run:
-            path: /bin/sh
-            dir: cloud-platform-environments-live-0-pull-requests
-            args:
-              - -c
-              - |
-                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-                (
-                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
-                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-                )
-                export branch_head_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "head_sha") | .value')
-                export master_base_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "base_sha") | .value')
-                ./bin/plan
-        on_failure:
-            put: cloud-platform-environments-live-0-pull-requests
-            params:
-              path: cloud-platform-environments-live-0-pull-requests
-              status: failure
-        on_success:
-            put: cloud-platform-environments-live-0-pull-requests
-            params:
-              path: cloud-platform-environments-live-0-pull-requests
-              status: success
-
   - name: plan-live-1
     serial: true
     plan:
