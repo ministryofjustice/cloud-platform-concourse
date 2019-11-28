@@ -36,62 +36,10 @@ resource_types:
     tag: latest
 
 groups:
-- name: live-0
-  jobs: [apply-live-0]
 - name: live-1
   jobs: [apply-live-1]
 
 jobs:
-  - name: apply-live-0
-    serial: true
-    plan:
-      - aggregate:
-        - get: cloud-platform-environments-repo
-          trigger: false
-        - get: tools-image
-      - task: apply-environments
-        image: tools-image
-        config:
-          platform: linux
-          inputs:
-            - name: cloud-platform-environments-repo
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
-            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-            KUBECONFIG: /tmp/kubeconfig
-            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
-            PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
-            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
-            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
-            # the variables prefixed with PIPELINE_ are used by the apply script
-            PIPELINE_CLUSTER: cloud-platform-live-0.k8s.integration.dsd.io
-            PIPELINE_STATE_BUCKET: moj-cp-k8s-investigation-environments-terraform
-            PIPELINE_STATE_KEY_PREFIX: ""
-            PIPELINE_STATE_REGION: "eu-west-1"
-            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
-          run:
-            path: /bin/sh
-            dir: cloud-platform-environments-repo
-            args:
-              - -c
-              - |
-                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
-                (
-                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
-                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
-                )
-                ./bin/apply
-        on_failure:
-          put: slack-alert
-          params:
-            <<: *SLACK_NOTIFICATION_DEFAULTS
-            attachments:
-              - color: "danger"
-                <<: *SLACK_ATTACHMENTS_DEFAULTS
-
   - name: apply-live-1
     serial: true
     plan:
