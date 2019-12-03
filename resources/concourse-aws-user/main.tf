@@ -1,14 +1,16 @@
+
 variable "aws_profile" {}
 
 provider "aws" {
-  profile = "${var.aws_profile}"
+  profile = var.aws_profile
 
   // AWS region does not matter since we're only dealing with IAM but is
   // required for the provider.
   region = "eu-west-2"
 }
 
-data "aws_caller_identity" "current" {}
+data "aws_caller_identity" "current" {
+}
 
 resource "aws_iam_user" "concourse_user" {
   name = "${terraform.workspace}-concourse"
@@ -16,7 +18,7 @@ resource "aws_iam_user" "concourse_user" {
 }
 
 resource "aws_iam_access_key" "iam_access_key" {
-  user = "${aws_iam_user.concourse_user.name}"
+  user = aws_iam_user.concourse_user.name
 }
 
 data "aws_iam_policy_document" "policy" {
@@ -101,7 +103,7 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
-  
+
   statement {
     actions = [
       "es:*",
@@ -111,7 +113,6 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
-
 
   statement {
     actions = [
@@ -138,21 +139,21 @@ data "aws_iam_policy_document" "policy" {
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*-autoscaler",
     ]
   }
-  
-    statement {
+
+  statement {
     actions = [
       "iam:CreateRole",
       "iam:GetRole",
       "iam:PutRolePolicy",
       "iam:GetRolePolicy",
-      "iam:TagRole"
+      "iam:TagRole",
     ]
 
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cloud-platform-*",
     ]
   }
-  
+
   statement {
     actions = [
       "ec2:AuthorizeSecurityGroupEgress",
@@ -304,27 +305,27 @@ data "aws_iam_policy_document" "policy" {
       "*",
     ]
   }
-
   /* End of permissions for concourse pipeline integration tests */
 }
 
 resource "aws_iam_policy" "policy" {
   name        = "${terraform.workspace}-concourse-user-policy"
   path        = "/cloud-platform/"
-  policy      = "${data.aws_iam_policy_document.policy.json}"
+  policy      = data.aws_iam_policy_document.policy.json
   description = "Policy for ${terraform.workspace}-concourse"
 }
 
 resource "aws_iam_policy_attachment" "attach_policy" {
   name       = "attached-policy"
-  users      = ["${aws_iam_user.concourse_user.name}"]
-  policy_arn = "${aws_iam_policy.policy.arn}"
+  users      = [aws_iam_user.concourse_user.name]
+  policy_arn = aws_iam_policy.policy.arn
 }
 
 output "id" {
-  value = "${aws_iam_access_key.iam_access_key.id}"
+  value = aws_iam_access_key.iam_access_key.id
 }
 
 output "secret" {
-  value = "${aws_iam_access_key.iam_access_key.secret}"
+  value = aws_iam_access_key.iam_access_key.secret
 }
+
