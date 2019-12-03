@@ -5,7 +5,7 @@ terraform {
     key                  = "terraform.tfstate"
     workspace_key_prefix = "cloud-platform-concourse"
   }
-  required_version = "0.12.13"
+  required_version = ">= 0.12"
 }
 
 provider "aws" {
