@@ -14,22 +14,31 @@ Or, if you have `kops` installed:
 
   `kops export kubecfg <cluster-name>.cloud-platform.service.justice.gov.uk`
 
-2. Select the workspace to match the cluster you want to nstall Concourse CI on
+2. cd to the `resources` directory, containing the terraform source code
+
+`cd resources`
+
+3. Select the workspace to match the cluster you want to nstall Concourse CI on
 
   `terraform workspace select <cluster-name>`
 
-3. Edit `resources/secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
+Use `new` instead of `select` if the workspace doesn't exist.
 
-4. Create namespaces:
+4. Edit `secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
+
+5. Create namespaces:
 
 ```
 kubectl create namespace concourse
 kubectl create namespace concourse-main
 ```
 
-5. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager.
+6. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager.
 
-   `cd resources; terraform apply`
+```
+terraform init
+terraform apply
+```
 
 Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 
