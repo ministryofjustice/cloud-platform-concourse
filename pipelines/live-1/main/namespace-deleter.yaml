@@ -32,9 +32,6 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
-            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            KUBECONFIG_AWS_REGION: eu-west-2
-            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
             KUBECONFIG_S3_KEY: kubeconfig
             KUBE_CONFIG: /tmp/kubeconfig
