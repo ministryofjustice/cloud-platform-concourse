@@ -1,0 +1,57 @@
+resources:
+- name: cloud-platform-environments-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
+    branch: master
+    git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+- name: tools-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-tools
+    tag: 1.8
+
+groups:
+- name: live-1
+  jobs: [detect-deleted-namespaces]
+
+jobs:
+  - name: detect-deleted-namespaces
+    serial: true
+    plan:
+      - aggregate:
+        - get: cloud-platform-environments-repo
+          trigger: true
+        - get: tools-image
+      - task: detect-deleted-namespaces
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+            KUBECONFIG_AWS_REGION: eu-west-2
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+            KUBECONFIG_S3_KEY: kubeconfig
+            KUBE_CONFIG: /tmp/kubeconfig
+            KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
+            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
+            SLACK_WEBHOOK: ((slack-hook-id))
+            TF_VAR_cluster_name: live-1.cloud-platform.service.justice.gov.uk
+            TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
+            TF_VAR_cluster_state_key: "cloud-platform/live-1/terraform.tfstate"
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                bundle install --without development test
+                ./bin/deleted-namespaces.rb
