@@ -176,6 +176,7 @@ data "aws_iam_policy_document" "policy" {
       "ec2:RevokeSecurityGroupIngress",
       "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
       "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+      "ec2:TerminateInstances",
     ]
 
     resources = [
