@@ -1,0 +1,83 @@
+slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
+  channel: '#lower-priority-alarms'
+slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
+  fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.cloud-platform.service.justice.gov.uk
+
+resources:
+- name: cloud-platform-infrastructure-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
+    branch: master
+- name: tools-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-tools
+    tag: 1.7
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: https://hooks.slack.com/services/((slack-hook-id))
+- name: every-weekday
+  type: time
+  source:
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+    start: 11:00
+    stop: 11:30
+    location: Europe/London
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+groups:
+- name: live-1
+  jobs: [recycle-node-live-1]
+
+jobs:
+- name: recycle-node-live-1
+  serial: true
+  plan:
+    - aggregate:
+      - get: every-weekday
+        trigger: true
+      - get: tools-image
+      - get: cloud-platform-infrastructure-repo
+        trigger: false
+    - task: recycle-oldest-node-live-1
+      image: tools-image
+      config:
+        platform: linux
+        inputs:
+          - name: cloud-platform-infrastructure-repo
+        params:
+          AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
+          AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+          AWS_REGION: eu-west-2
+          KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+          KUBECONFIG_S3_KEY: kubeconfig
+          KUBECONFIG: /tmp/kubeconfig
+          K8S_CLUSTER_NAME: live-1.cloud-platform.service.justice.gov.uk
+        run:
+          path: /bin/sh
+          dir: cloud-platform-infrastructure-repo
+          args:
+            - -c
+            - |
+              aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
+              kubectl config use-context ${K8S_CLUSTER_NAME}
+              ./recycle-node.rb
+        outputs:
+          - name: metadata
+      on_failure:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          attachments:
+            - color: "danger"
+              <<: *SLACK_ATTACHMENTS_DEFAULTS
