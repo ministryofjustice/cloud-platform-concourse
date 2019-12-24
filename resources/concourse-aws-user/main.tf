@@ -147,6 +147,9 @@ data "aws_iam_policy_document" "policy" {
       "iam:PutRolePolicy",
       "iam:GetRolePolicy",
       "iam:TagRole",
+      "iam:ListInstanceProfilesForRole",
+      "iam:DeleteRolePolicy",
+      "iam:DeleteRole",
     ]
 
     resources = [
