@@ -42,7 +42,7 @@ terraform apply
 
 Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 
-6. Access your concourse instance
+7. Access your concourse instance
 
 Your concourse instance should be accessible at the URL:
 
