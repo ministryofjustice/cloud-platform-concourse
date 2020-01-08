@@ -42,7 +42,7 @@ terraform apply
 
 Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
 
-6. Access your concourse instance
+7. Access your concourse instance
 
 Your concourse instance should be accessible at the URL:
 
@@ -74,9 +74,9 @@ helm --kube-context=<context> --tiller-namespace kube-system delete --purge conc
 
 ```sh
 cd resources
-terraform select workspace <cluster-name>
+terraform workspace select <cluster-name>
 terraform destroy
-terraform select workspace default
+terraform workspace select default
 terraform workspace delete <cluster-name>
 ```
 
