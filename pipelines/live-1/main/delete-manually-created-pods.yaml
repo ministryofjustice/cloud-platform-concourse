@@ -61,7 +61,7 @@ jobs:
               - |
                 aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 bundle install --without development test
-                ./bin/delete_manually_created_pods.rb --dry-run # TODO: remove --dry-run
+                ./bin/delete_manually_created_pods.rb
 
         on_failure:
           put: slack-alert
