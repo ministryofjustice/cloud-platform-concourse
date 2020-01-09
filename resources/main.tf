@@ -13,13 +13,23 @@ provider "aws" {
   region  = "eu-west-2"
 }
 
+data "terraform_remote_state" "network" {
+  backend = "s3"
+
+  config = {
+    bucket = "cloud-platform-terraform-state"
+    region = "eu-west-1"
+    key    = "cloud-platform-network/${local.vpc}/terraform.tfstate"
+  }
+}
+
 data "terraform_remote_state" "cluster" {
   backend = "s3"
 
   config = {
     bucket = "cloud-platform-terraform-state"
     region = "eu-west-1"
-    key    = "cloud-platform/${terraform.workspace}/terraform.tfstate"
+    key    = "${local.state_location}/${local.cluster}/terraform.tfstate"
   }
 }
 
@@ -31,13 +41,13 @@ data "terraform_remote_state" "cluster" {
 resource "aws_security_group" "concourse" {
   name        = "${terraform.workspace}-concourse"
   description = "Allow all inbound traffic from the VPC"
-  vpc_id      = data.terraform_remote_state.cluster.outputs.vpc_id
+  vpc_id      = data.terraform_remote_state.network.outputs.vpc_id
 
   ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    cidr_blocks = data.terraform_remote_state.cluster.outputs.internal_subnets
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = data.terraform_remote_state.network.outputs.internal_subnets
   }
 
   egress {
@@ -55,7 +65,7 @@ resource "aws_security_group" "concourse" {
 resource "aws_db_subnet_group" "concourse" {
   name        = "${terraform.workspace}-concourse"
   description = "Internal subnet groups"
-  subnet_ids = data.terraform_remote_state.cluster.outputs.internal_subnets_ids
+  subnet_ids  = data.terraform_remote_state.network.outputs.internal_subnets_ids
 }
 
 resource "random_string" "db_password" {
@@ -65,7 +75,7 @@ resource "random_string" "db_password" {
 
 resource "aws_db_instance" "concourse" {
   depends_on             = [aws_security_group.concourse]
-  identifier             = "${terraform.workspace}-concourse"
+  identifier             = local.rds_name
   allocated_storage      = var.rds_storage
   engine                 = "postgres"
   engine_version         = var.rds_postgresql_version
@@ -146,7 +156,7 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
 
   metadata {
     name      = "aws-${terraform.workspace}"
-    namespace = "concourse-main"
+    namespace = kubernetes_namespace.concourse_main.id
   }
 
   data = {
@@ -155,31 +165,12 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   }
 }
 
-module "concourse_user_pi" {
-  source      = "./concourse-aws-user"
-  aws_profile = "moj-pi"
-}
-
-resource "kubernetes_secret" "concourse_aws_credentials_pi" {
-  depends_on = [helm_release.concourse]
-
-  metadata {
-    name      = "aws-live-0"
-    namespace = "concourse-main"
-  }
-
-  data = {
-    access-key-id     = module.concourse_user_pi.id
-    secret-access-key = module.concourse_user_pi.secret
-  }
-}
-
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   depends_on = [helm_release.concourse]
 
   metadata {
     name      = "concourse-basic-auth"
-    namespace = "concourse-main"
+    namespace = kubernetes_namespace.concourse_main.id
   }
 
   data = {
@@ -190,7 +181,7 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
 
 resource "helm_release" "concourse" {
   name          = "concourse"
-  namespace     = "concourse"
+  namespace     = kubernetes_namespace.concourse.id
   repository    = "stable"
   chart         = "concourse"
   version       = var.concourse_chart_version
@@ -208,7 +199,7 @@ resource "helm_release" "concourse" {
 resource "kubernetes_config_map" "concourse_mainteam_config_map" {
   metadata {
     name      = "role-config"
-    namespace = "concourse"
+    namespace = kubernetes_namespace.concourse.id
   }
 
   data = {
@@ -228,10 +219,317 @@ ROLES
   }
 }
 
+########################
+# Namespace: concourse #
+########################
+
+resource "kubernetes_namespace" "concourse" {
+  metadata {
+    name = "concourse"
+
+    labels = {
+      "cloud-platform.justice.gov.uk/environment-name" = "production"
+      "cloud-platform.justice.gov.uk/is-production"    = "true"
+    }
+
+    annotations = {
+      "cloud-platform.justice.gov.uk/application"   = "Concourse CI"
+      "cloud-platform.justice.gov.uk/business-unit" = "cloud-platform"
+      "cloud-platform.justice.gov.uk/owner"         = "Cloud Platform: platforms@digital.justice.gov.uk"
+      "cloud-platform.justice.gov.uk/source-code"   = "https://github.com/ministryofjustice/cloud-platform-concourse"
+    }
+  }
+}
+
+resource "kubernetes_limit_range" "concourse" {
+  metadata {
+    name      = "limitrange"
+    namespace = kubernetes_namespace.concourse.id
+  }
+
+  spec {
+    limit {
+      type = "Container"
+      default = {
+        cpu    = "2000m"
+        memory = "4000Mi"
+      }
+      default_request = {
+        cpu    = "100m"
+        memory = "100Mi"
+      }
+    }
+  }
+}
+
+resource "kubernetes_resource_quota" "concourse" {
+  metadata {
+    name      = "namespace-quota"
+    namespace = kubernetes_namespace.concourse.id
+  }
+  spec {
+    hard = {
+      pods = 50
+    }
+  }
+}
+
+resource "kubernetes_network_policy" "concourse_default" {
+  metadata {
+    name      = "default"
+    namespace = kubernetes_namespace.concourse.id
+  }
+
+  spec {
+    pod_selector {}
+
+    ingress {
+      from {
+        pod_selector {}
+      }
+    }
+
+    egress {} # single empty rule to allow all egress traffic
+    policy_types = ["Ingress"]
+  }
+}
+
+resource "kubernetes_network_policy" "concourse_allow_ingress_controllers" {
+  metadata {
+    name      = "allow-ingress-controllers"
+    namespace = kubernetes_namespace.concourse.id
+  }
+
+  spec {
+    pod_selector {}
+
+    ingress {
+      from {
+        namespace_selector {
+          match_labels = {
+            component = "ingress-controllers"
+          }
+        }
+      }
+    }
+
+    egress {} # single empty rule to allow all egress traffic
+    policy_types = ["Ingress"]
+  }
+}
+
+resource "kubernetes_network_policy" "concourse_prom_scrapping" {
+  metadata {
+    name      = "allow-prometheus-scraping"
+    namespace = kubernetes_namespace.concourse.id
+  }
+
+  spec {
+    pod_selector {}
+
+    ingress {
+      from {
+        namespace_selector {
+          match_labels = {
+            component = "monitoring"
+          }
+        }
+      }
+    }
+
+    egress {} # single empty rule to allow all egress traffic
+    policy_types = ["Ingress"]
+  }
+}
+
+#############################
+# Namespace: concourse-main #
+#############################
+
+resource "kubernetes_namespace" "concourse_main" {
+  metadata {
+    name = "concourse-main"
+
+    labels = {
+      "cloud-platform.justice.gov.uk/environment-name" = "production"
+      "cloud-platform.justice.gov.uk/is-production"    = "true"
+    }
+
+    annotations = {
+      "cloud-platform.justice.gov.uk/application"   = "Concourse"
+      "cloud-platform.justice.gov.uk/business-unit" = "cloud-platform"
+      "cloud-platform.justice.gov.uk/owner"         = "Cloud Platform: platforms@digital.justice.gov.uk"
+      "cloud-platform.justice.gov.uk/source-code"   = "https://github.com/ministryofjustice/cloud-platform-concourse"
+    }
+  }
+}
+
+resource "kubernetes_limit_range" "concourse_main" {
+  metadata {
+    name      = "limitrange"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  spec {
+    limit {
+      type = "Container"
+      default = {
+        cpu    = "1000m"
+        memory = "1000Mi"
+      }
+      default_request = {
+        cpu    = "10m"
+        memory = "100Mi"
+      }
+    }
+  }
+}
+
+
+resource "kubernetes_resource_quota" "concourse_main" {
+  metadata {
+    name      = "namespace-quota"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+  spec {
+    hard = {
+      pods = 50
+    }
+  }
+}
+
+resource "kubernetes_network_policy" "concourse_main_default" {
+  metadata {
+    name      = "default"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  spec {
+    pod_selector {}
+
+    ingress {
+      from {
+        pod_selector {}
+      }
+    }
+
+    egress {} # single empty rule to allow all egress traffic
+    policy_types = ["Ingress"]
+  }
+}
+
+resource "kubernetes_network_policy" "concourse_main_allow_ingress_controllers" {
+  metadata {
+    name      = "allow-ingress-controllers"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  spec {
+    pod_selector {}
+
+    ingress {
+      from {
+        namespace_selector {
+          match_labels = {
+            component = "ingress-controllers"
+          }
+        }
+      }
+    }
+
+    egress {} # single empty rule to allow all egress traffic
+    policy_types = ["Ingress"]
+  }
+}
+
+resource "kubernetes_secret" "concourse_main_slack_hook" {
+
+  metadata {
+    name      = "slack-hook-id"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  data = {
+    value = local.secrets["slack_hook_id"]
+  }
+}
+
+resource "kubernetes_secret" "concourse_main_git_crypt" {
+
+  metadata {
+    name      = "cloud-platform-concourse-git-crypt"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  data = {
+    key = local.secrets["concourse-git-crypt"]
+  }
+}
+
+resource "kubernetes_secret" "concourse_main_environments_git_crypt" {
+
+  metadata {
+    name      = "cloud-platform-environments-git-crypt"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  data = {
+    key = local.secrets["environments-git-crypt"]
+  }
+}
+
+resource "kubernetes_secret" "concourse_main_pr_github_access_token" {
+
+  metadata {
+    name      = "cloud-platform-environments-pr-git-access-token"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  data = {
+    key = local.secrets["github_token"]
+  }
+}
+
+
+resource "kubernetes_secret" "concourse_main_pingdom" {
+
+  metadata {
+    name      = "cloud-platform-environments-pingdom"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  data = {
+    pingdom_user     = local.secrets["pingdom_user"]
+    pingdom_password = local.secrets["pingdom_password"]
+    pingdom_api_key  = local.secrets["pingdom_api_key"]
+  }
+}
+
+resource "kubernetes_secret" "concourse_main_dockerhub" {
+
+  metadata {
+    name      = "cloud-platform-environments-dockerhub"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  data = {
+    dockerhub_username     = local.secrets["dockerhub_username"]
+    dockerhub_access_token = local.secrets["dockerhub_username"]
+  }
+}
+
+##########
+# Locals #
+##########
+
 locals {
   # This is the list of Route53 Hosted Zones in the DSD account that
   # cert-manager and external-dns will be given access to.
   live_workspace = "live-1"
+  vpc            = var.vpc_name == "" ? terraform.workspace : var.vpc_name
+  cluster        = var.cluster_name == "" ? terraform.workspace : var.cluster_name
+  state_location = var.kops_or_eks == "kops" ? "cloud-platform" : "cloud-platform-eks"
+  rds_name       = var.is_prod ? "ci" : "${terraform.workspace}-concourse"
 
   live_domain = "cloud-platform.service.justice.gov.uk"
 }
