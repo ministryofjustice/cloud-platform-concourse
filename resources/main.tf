@@ -289,7 +289,7 @@ resource "kubernetes_network_policy" "concourse_default" {
       }
     }
 
-    egress {} # single empty rule to allow all egress traffic
+    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -313,7 +313,7 @@ resource "kubernetes_network_policy" "concourse_allow_ingress_controllers" {
       }
     }
 
-    egress {} # single empty rule to allow all egress traffic
+    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -337,7 +337,7 @@ resource "kubernetes_network_policy" "concourse_prom_scrapping" {
       }
     }
 
-    egress {} # single empty rule to allow all egress traffic
+    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -413,7 +413,7 @@ resource "kubernetes_network_policy" "concourse_main_default" {
       }
     }
 
-    egress {} # single empty rule to allow all egress traffic
+    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -437,7 +437,7 @@ resource "kubernetes_network_policy" "concourse_main_allow_ingress_controllers" 
       }
     }
 
-    egress {} # single empty rule to allow all egress traffic
+    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -486,10 +486,9 @@ resource "kubernetes_secret" "concourse_main_pr_github_access_token" {
   }
 
   data = {
-    key = local.secrets["github_token"]
+    value = local.secrets["github_token"]
   }
 }
-
 
 resource "kubernetes_secret" "concourse_main_pingdom" {
 
