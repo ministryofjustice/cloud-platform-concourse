@@ -94,6 +94,19 @@ data "aws_iam_policy_document" "policy" {
     ]
   }
 
+  # In order to create the kubeadmin file using: 
+  # aws eks --region REGION update-kubeconfig --name CLUSTER
+  statement {
+    actions = [
+      "eks:DescribeCluster",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+
   statement {
     actions = [
       "dynamodb:*",
