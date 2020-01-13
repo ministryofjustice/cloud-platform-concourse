@@ -251,7 +251,7 @@ resource "kubernetes_limit_range" "concourse" {
     limit {
       type = "Container"
       default = {
-        cpu    = "2000m"
+        cpu    = "2"
         memory = "4000Mi"
       }
       default_request = {
@@ -374,7 +374,7 @@ resource "kubernetes_limit_range" "concourse_main" {
     limit {
       type = "Container"
       default = {
-        cpu    = "1000m"
+        cpu    = "1"
         memory = "1000Mi"
       }
       default_request = {
