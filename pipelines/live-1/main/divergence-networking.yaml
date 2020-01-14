@@ -1,10 +1,10 @@
-# slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
-#   channel: '#lower-priority-alarms'
-# slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
-#   fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-#   title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
-#   title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
-#   footer: concourse.cloud-platform.service.justice.gov.uk
+slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
+  channel: '#lower-priority-alarms'
+slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
+  fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.cloud-platform.service.justice.gov.uk
 
 resources:
 - name: cloud-platform-infrastructure-repo
@@ -17,21 +17,21 @@ resources:
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools-terraform
     tag: 0.1
-# - name: slack-alert
-#   type: slack-notification
-#   source:
-#     url: https://hooks.slack.com/services/((slack-hook-id))
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: https://hooks.slack.com/services/((slack-hook-id))
 - name: every-hour
   type: time
   source:
     interval: 1h
 
-# resource_types:
-# - name: slack-notification
-#   type: docker-image
-#   source:
-#     repository: cfcommunity/slack-notification-resource
-#     tag: latest
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
 
 jobs:
   - name: divergence-networking
@@ -71,10 +71,10 @@ jobs:
                 cp-tools terraform check-divergence --workspace live-1
           outputs:
             - name: metadata
-        # on_failure:
-        #   put: slack-alert
-        #   params:
-        #     <<: *SLACK_NOTIFICATION_DEFAULTS
-        #     attachments:
-        #       - color: "danger"
-        #         <<: *SLACK_ATTACHMENTS_DEFAULTS
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
