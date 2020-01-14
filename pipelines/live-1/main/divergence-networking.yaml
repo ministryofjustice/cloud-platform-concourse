@@ -56,6 +56,7 @@ jobs:
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+            TF_VAR_cluster_names: '["live-1.cloud-platform.service.justice.gov.uk","manager"]'
           inputs:
           - name: cloud-platform-infrastructure-repo
             path: ./
