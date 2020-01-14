@@ -21,10 +21,10 @@ resources:
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
-- name: every-hour
+- name: every-4-hours
   type: time
   source:
-    interval: 1h
+    interval: 4h
 
 resource_types:
 - name: slack-notification
@@ -38,7 +38,7 @@ jobs:
     serial: true
     plan:
       - aggregate:
-        - get: every-hour
+        - get: every-4-hours
           trigger: true
         - get: cloud-platform-infrastructure-repo
           trigger: false
