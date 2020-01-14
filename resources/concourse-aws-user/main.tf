@@ -334,6 +334,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "iam:GetRole",
+      "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
       "iam:ListRoles",
     ]

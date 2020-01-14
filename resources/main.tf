@@ -34,9 +34,9 @@ resource "aws_security_group" "concourse" {
   vpc_id      = data.terraform_remote_state.cluster.outputs.vpc_id
 
   ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = data.terraform_remote_state.cluster.outputs.internal_subnets
   }
 
@@ -55,7 +55,7 @@ resource "aws_security_group" "concourse" {
 resource "aws_db_subnet_group" "concourse" {
   name        = "${terraform.workspace}-concourse"
   description = "Internal subnet groups"
-  subnet_ids = data.terraform_remote_state.cluster.outputs.internal_subnets_ids
+  subnet_ids  = data.terraform_remote_state.cluster.outputs.internal_subnets_ids
 }
 
 resource "random_string" "db_password" {
@@ -141,6 +141,10 @@ module "concourse_user_cp" {
   aws_profile = "moj-cp"
 }
 
+######################
+# Kubernetes Secrets #
+######################
+
 resource "kubernetes_secret" "concourse_aws_credentials" {
   depends_on = [helm_release.concourse]
 
@@ -155,25 +159,6 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   }
 }
 
-module "concourse_user_pi" {
-  source      = "./concourse-aws-user"
-  aws_profile = "moj-pi"
-}
-
-resource "kubernetes_secret" "concourse_aws_credentials_pi" {
-  depends_on = [helm_release.concourse]
-
-  metadata {
-    name      = "aws-live-0"
-    namespace = "concourse-main"
-  }
-
-  data = {
-    access-key-id     = module.concourse_user_pi.id
-    secret-access-key = module.concourse_user_pi.secret
-  }
-}
-
 resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   depends_on = [helm_release.concourse]
 
@@ -185,6 +170,20 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   data = {
     username = random_string.basic_auth_username.result
     password = random_string.basic_auth_password.result
+  }
+}
+
+resource "kubernetes_secret" "concourse_tf_auth0_credentials" {
+  depends_on = [helm_release.concourse]
+
+  metadata {
+    name      = "concourse-tf-auth0-credentials"
+    namespace = "concourse-main"
+  }
+
+  data = {
+    client-id     = local.secrets["tf_provider_auth0_client_id"]
+    client_secret = local.secrets["tf_provider_auth0_client_secret"]
   }
 }
 
