@@ -12,6 +12,7 @@ resources:
   source:
     uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
     branch: master
+    git_crypt_key: ((cloud-platform-infrastructure-git-crypt.key))
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
@@ -34,7 +35,7 @@ resource_types:
     tag: latest
 
 jobs:
-  - name: divergence-networking
+  - name: divergence-cloud-platform
     serial: true
     plan:
       - aggregate:
@@ -44,7 +45,7 @@ jobs:
           trigger: false
         - get: cloud-platform-tools-terraform
           trigger: false
-      - task: check-divergence-networking
+      - task: check-divergence-k8s-components
         image: cloud-platform-tools-terraform
         config:
           platform: linux
@@ -56,7 +57,6 @@ jobs:
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-            TF_VAR_cluster_names: '["live-1.cloud-platform.service.justice.gov.uk","manager"]'
           inputs:
           - name: cloud-platform-infrastructure-repo
             path: ./
@@ -68,7 +68,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 kubectl get nodes
-                cd terraform/cloud-platform-network/
+                cd terraform/cloud-platform/
                 cp-tools terraform check-divergence --workspace live-1
           outputs:
             - name: metadata

@@ -7,11 +7,12 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   footer: concourse.cloud-platform.service.justice.gov.uk
 
 resources:
-- name: cloud-platform-infrastructure-repo
+- name: cloud-platform-concourse-repo
   type: git
   source:
-    uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
+    uri: https://github.com/ministryofjustice/cloud-platform-concourse.git
     branch: master
+    git_crypt_key: ((cloud-platform-concourse-git-crypt.key))
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
@@ -34,17 +35,17 @@ resource_types:
     tag: latest
 
 jobs:
-  - name: divergence-networking
+  - name: divergence-cloud-platform-concourse
     serial: true
     plan:
       - aggregate:
         - get: every-4-hours
           trigger: true
-        - get: cloud-platform-infrastructure-repo
+        - get: cloud-platform-concourse-repo
           trigger: false
         - get: cloud-platform-tools-terraform
           trigger: false
-      - task: check-divergence-networking
+      - task: divergence-cloud-platform-concourse
         image: cloud-platform-tools-terraform
         config:
           platform: linux
@@ -56,9 +57,8 @@ jobs:
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-            TF_VAR_cluster_names: '["live-1.cloud-platform.service.justice.gov.uk","manager"]'
           inputs:
-          - name: cloud-platform-infrastructure-repo
+          - name: cloud-platform-concourse-repo
             path: ./
           run:
             path: /bin/sh
@@ -68,7 +68,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 kubectl get nodes
-                cd terraform/cloud-platform-network/
+                cd resources
                 cp-tools terraform check-divergence --workspace live-1
           outputs:
             - name: metadata
