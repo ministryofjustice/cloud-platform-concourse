@@ -46,13 +46,30 @@ data "aws_iam_policy_document" "policy" {
       "iam:DeleteUserPolicy",
       "iam:ListGroupsForUser",
       "iam:PutUserPermissionsBoundary",
+      "iam:GetPolicy",
+      "iam:ListEntitiesForPolicy",
+      "iam:GetPolicyVersion",
       "iam:DeleteUserPermissionsBoundary",
+
     ]
 
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/system/*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/*",
     ]
   }
+
+  statement {
+    actions = [
+      "iam:GetUser",
+      "iam:ListAccessKeys",
+    ]
+
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*",
+    ]
+  }
+
 
   statement {
     actions = [
@@ -181,47 +198,8 @@ data "aws_iam_policy_document" "policy" {
       "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
       "ec2:TerminateInstances",
       # Required by terraform-aws module
-      "ec2:DescribeAccountAttributes",
-      "ec2:DescribeAddresses",
-      "ec2:DescribeClassicLinkInstances",
-      "ec2:DescribeClientVpnEndpoints",
-      "ec2:DescribeCustomerGateways",
-      "ec2:DescribeDhcpOptions",
-      "ec2:DescribeEgressOnlyInternetGateways",
-      "ec2:DescribeFlowLogs",
-      "ec2:DescribeInternetGateways",
-      "ec2:DescribeMovingAddresses",
-      "ec2:DescribeNatGateways",
-      "ec2:DescribeNetworkAcls",
-      "ec2:DescribeNetworkInterfaceAttribute",
-      "ec2:DescribeNetworkInterfacePermissions",
-      "ec2:DescribeNetworkInterfaces",
-      "ec2:DescribePrefixLists",
-      "ec2:DescribeRouteTables",
-      "ec2:DescribeSecurityGroupReferences",
-      "ec2:DescribeSecurityGroups",
-      "ec2:DescribeStaleSecurityGroups",
-      "ec2:DescribeSubnets",
-      "ec2:DescribeTags",
-      "ec2:DescribeTrafficMirrorFilters",
-      "ec2:DescribeTrafficMirrorSessions",
-      "ec2:DescribeTrafficMirrorTargets",
-      "ec2:DescribeTransitGateways",
-      "ec2:DescribeTransitGatewayVpcAttachments",
-      "ec2:DescribeTransitGatewayRouteTables",
-      "ec2:DescribeVpcAttribute",
-      "ec2:DescribeVpcClassicLink",
-      "ec2:DescribeVpcClassicLinkDnsSupport",
-      "ec2:DescribeVpcEndpoints",
-      "ec2:DescribeVpcEndpointConnectionNotifications",
-      "ec2:DescribeVpcEndpointConnections",
-      "ec2:DescribeVpcEndpointServiceConfigurations",
-      "ec2:DescribeVpcEndpointServicePermissions",
-      "ec2:DescribeVpcEndpointServices",
-      "ec2:DescribeVpcPeeringConnections",
-      "ec2:DescribeVpcs",
-      "ec2:DescribeVpnConnections",
-      "ec2:DescribeVpnGateways"
+      "ec2:Describe*",
+      "autoscaling:Describe*",
     ]
 
     resources = [
@@ -264,6 +242,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "route53:CreateHostedZone",
+      "route53:ListHostedZones",
     ]
 
     resources = [
@@ -300,6 +279,17 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "sns:*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "acm:DescribeCertificate",
+      "acm:ListTagsForCertificate",
     ]
 
     resources = [
@@ -346,6 +336,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "iam:ListPolicies",
+      "iam:GetInstanceProfile"
     ]
 
     resources = [

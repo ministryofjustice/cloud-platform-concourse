@@ -199,7 +199,6 @@ resource "kubernetes_secret" "concourse_main_cp_infrastructure_git_crypt" {
   }
 }
 
-
 resource "helm_release" "concourse" {
   name          = "concourse"
   namespace     = "concourse"
