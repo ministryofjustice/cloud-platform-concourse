@@ -187,6 +187,19 @@ resource "kubernetes_secret" "concourse_tf_auth0_credentials" {
   }
 }
 
+resource "kubernetes_secret" "concourse_main_cp_infrastructure_git_crypt" {
+
+  metadata {
+    name      = "cloud-platform-infrastructure-git-crypt"
+    namespace = "concourse-main"
+  }
+
+  data = {
+    key = local.secrets["cloud_platform_infrastructure_git_crypt_key"]
+  }
+}
+
+
 resource "helm_release" "concourse" {
   name          = "concourse"
   namespace     = "concourse"
