@@ -4,21 +4,7 @@ resources:
   source:
     branch: master
     uri: https://github.com/ministryofjustice/cloud-platform-tools-image
-- name: image-base-pi
-  type: docker-image
-  source:
-    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools
-    tag: 1.9
-    username: ((cloud-platform-environments-dockerhub.dockerhub_username))
-    password: ((cloud-platform-environments-dockerhub.dockerhub_access_token))
 
-- name: image-circleci-pi
-  type: docker-image
-  source:
-    repository: 926803513772.dkr.ecr.eu-west-1.amazonaws.com/cloud-platform/tools
-    tag: circleci
-    aws_access_key_id: ((aws-live-0.access-key-id))
-    aws_secret_access_key: ((aws-live-0.secret-access-key))
 - name: image-base-cp
   type: docker-image
   source:
@@ -87,51 +73,18 @@ push-image: &push-image-params
     skip_download: true
 
 groups:
-- name: pi
-  jobs: [build-pi]
 - name: cp
   jobs: [build-cp]
 
 jobs:
-  - name: build-pi
-    serial: true
-    plan:
-      - aggregate:
-        - get: repo
-          trigger: true
-        - get: image-base-pi
-      - task: ensure-repository-exists
-        image: image-base-pi
-        config:
-          params:
-            AWS_DEFAULT_REGION: eu-west-1
-            AWS_ACCESS_KEY_ID: ((aws-live-0.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-0.secret-access-key))
-          <<: *ensure-repository-exists-config
-      - task: prepare-image-tags
-        image: image-base-pi
-        config:
-          <<: *prepare-image-tags-config
-      - put: image-base-pi
-        params:
-          dockerfile: build-repo/Dockerfile
-          additional_tags: build-repo/.git/ref
-          <<: *push-image-params
-      - put: image-circleci-pi
-        params:
-          dockerfile: build-repo/Dockerfile.circleci
-          additional_tags: build-repo/.git/ref.circleci
-          <<: *push-image-params
-
   - name: build-cp
     serial: true
     plan:
       - aggregate:
         - get: repo
           trigger: true
-        - get: image-base-pi
       - task: ensure-repository-exists
-        image: image-base-pi
+        image: image-base-cp
         config:
           params:
             AWS_DEFAULT_REGION: eu-west-2
@@ -139,7 +92,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
           <<: *ensure-repository-exists-config
       - task: prepare-image-tags
-        image: image-base-pi
+        image: image-base-cp
         config:
           <<: *prepare-image-tags-config
       - put: image-base-cp
