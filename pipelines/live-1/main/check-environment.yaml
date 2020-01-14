@@ -11,7 +11,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
-    tag: 2.16
+    tag: 2.17
 - name: slack-alert
   type: slack-notification
   source:
