@@ -23,3 +23,23 @@ variable "concourse_chart_version" {
   description = "The Helm chart version"
 }
 
+variable "vpc_name" {
+  default     = ""
+  description = "The VPC where deployment is going to happen"
+}
+
+variable "cluster_name" {
+  default     = ""
+  description = "The cluster name where is going to be deployed"
+}
+
+variable "kops_or_eks" {
+  default     = "kops"
+  description = "For kops state in cloud-platform/$cluster/terraform.tfstate for EKS state in: cloud-platform-eks/$cluster/terraform.tfstate"
+}
+
+variable "is_prod" {
+  type        = bool
+  default     = false
+  description = "Is it production CI?"
+}
