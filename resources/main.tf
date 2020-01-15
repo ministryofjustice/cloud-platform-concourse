@@ -546,6 +546,24 @@ resource "kubernetes_secret" "concourse_main_dockerhub" {
   }
 }
 
+# For ServiceMonitor
+
+resource "null_resource" "priority_classes" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/concourse-servicemonitor.yaml"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "kubectl delete -f ${path.module}/concourse-servicemonitor.yaml"
+  }
+
+  triggers = {
+    contents = filesha1("${path.module}/concourse-servicemonitor.yaml")
+  }
+}
+
+
 ##########
 # Locals #
 ##########
