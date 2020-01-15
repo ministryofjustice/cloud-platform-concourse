@@ -543,7 +543,7 @@ resource "kubernetes_secret" "concourse_main_dockerhub" {
 
   data = {
     dockerhub_username     = local.secrets["dockerhub_username"]
-    dockerhub_access_token = local.secrets["dockerhub_username"]
+    dockerhub_access_token = local.secrets["dockerhub_access_token"]
   }
 }
 
