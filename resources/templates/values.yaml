@@ -1322,7 +1322,7 @@ worker:
 
   ## Number of replicas.
   ##
-  replicas: 2
+  replicas: 4
 
   ## Array of extra containers to run alongside the Concourse worker
   ## container.

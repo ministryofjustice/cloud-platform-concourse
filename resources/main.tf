@@ -151,6 +151,10 @@ module "concourse_user_cp" {
   aws_profile = "moj-cp"
 }
 
+######################
+# Kubernetes Secrets #
+######################
+
 resource "kubernetes_secret" "concourse_aws_credentials" {
   depends_on = [helm_release.concourse]
 
@@ -170,12 +174,38 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
 
   metadata {
     name      = "concourse-basic-auth"
-    namespace = kubernetes_namespace.concourse_main.id
+    namespace = "concourse-main"
   }
 
   data = {
     username = random_string.basic_auth_username.result
     password = random_string.basic_auth_password.result
+  }
+}
+
+resource "kubernetes_secret" "concourse_tf_auth0_credentials" {
+  depends_on = [helm_release.concourse]
+
+  metadata {
+    name      = "concourse-tf-auth0-credentials"
+    namespace = "concourse-main"
+  }
+
+  data = {
+    client-id     = local.secrets["tf_provider_auth0_client_id"]
+    client_secret = local.secrets["tf_provider_auth0_client_secret"]
+  }
+}
+
+resource "kubernetes_secret" "concourse_main_cp_infrastructure_git_crypt" {
+
+  metadata {
+    name      = "cloud-platform-infrastructure-git-crypt"
+    namespace = "concourse-main"
+  }
+
+  data = {
+    key = local.secrets["cloud_platform_infrastructure_git_crypt_key"]
   }
 }
 

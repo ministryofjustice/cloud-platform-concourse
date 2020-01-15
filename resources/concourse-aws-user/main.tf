@@ -46,13 +46,30 @@ data "aws_iam_policy_document" "policy" {
       "iam:DeleteUserPolicy",
       "iam:ListGroupsForUser",
       "iam:PutUserPermissionsBoundary",
+      "iam:GetPolicy",
+      "iam:ListEntitiesForPolicy",
+      "iam:GetPolicyVersion",
       "iam:DeleteUserPermissionsBoundary",
+
     ]
 
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/system/*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/*",
     ]
   }
+
+  statement {
+    actions = [
+      "iam:GetUser",
+      "iam:ListAccessKeys",
+    ]
+
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*",
+    ]
+  }
+
 
   statement {
     actions = [
@@ -193,6 +210,9 @@ data "aws_iam_policy_document" "policy" {
       "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
       "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
       "ec2:TerminateInstances",
+      # Required by terraform-aws module
+      "ec2:Describe*",
+      "autoscaling:Describe*",
     ]
 
     resources = [
@@ -235,6 +255,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "route53:CreateHostedZone",
+      "route53:ListHostedZones",
     ]
 
     resources = [
@@ -280,6 +301,17 @@ data "aws_iam_policy_document" "policy" {
 
   statement {
     actions = [
+      "acm:DescribeCertificate",
+      "acm:ListTagsForCertificate",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
       "sqs:*",
     ]
 
@@ -305,6 +337,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "iam:GetRole",
+      "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
       "iam:ListRoles",
     ]
@@ -316,6 +349,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "iam:ListPolicies",
+      "iam:GetInstanceProfile"
     ]
 
     resources = [
