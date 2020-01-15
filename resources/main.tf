@@ -174,7 +174,7 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
 
   metadata {
     name      = "concourse-basic-auth"
-    namespace = "concourse-main"
+    namespace = kubernetes_namespace.concourse_main.id
   }
 
   data = {
@@ -188,7 +188,7 @@ resource "kubernetes_secret" "concourse_tf_auth0_credentials" {
 
   metadata {
     name      = "concourse-tf-auth0-credentials"
-    namespace = "concourse-main"
+    namespace = kubernetes_namespace.concourse_main.id
   }
 
   data = {
@@ -201,7 +201,7 @@ resource "kubernetes_secret" "concourse_main_cp_infrastructure_git_crypt" {
 
   metadata {
     name      = "cloud-platform-infrastructure-git-crypt"
-    namespace = "concourse-main"
+    namespace = kubernetes_namespace.concourse_main.id
   }
 
   data = {
@@ -319,7 +319,6 @@ resource "kubernetes_network_policy" "concourse_default" {
       }
     }
 
-    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -343,7 +342,6 @@ resource "kubernetes_network_policy" "concourse_allow_ingress_controllers" {
       }
     }
 
-    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -355,7 +353,11 @@ resource "kubernetes_network_policy" "concourse_prom_scrapping" {
   }
 
   spec {
-    pod_selector {}
+    pod_selector {
+      match_labels = {
+        app = "concourse-web"
+      }
+    }
 
     ingress {
       from {
@@ -367,7 +369,6 @@ resource "kubernetes_network_policy" "concourse_prom_scrapping" {
       }
     }
 
-    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -443,7 +444,6 @@ resource "kubernetes_network_policy" "concourse_main_default" {
       }
     }
 
-    egress {}
     policy_types = ["Ingress"]
   }
 }
@@ -467,7 +467,6 @@ resource "kubernetes_network_policy" "concourse_main_allow_ingress_controllers" 
       }
     }
 
-    egress {}
     policy_types = ["Ingress"]
   }
 }
