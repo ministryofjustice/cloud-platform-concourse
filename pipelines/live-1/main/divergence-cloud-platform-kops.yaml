@@ -53,6 +53,9 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             AWS_REGION: eu-west-2
+            AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
+            AUTH0_CLIENT_ID: ((concourse-tf-auth0-credentials.client-id))
+            AUTH0_CLIENT_SECRET: ((concourse-tf-auth0-credentials.client_secret))
             KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
