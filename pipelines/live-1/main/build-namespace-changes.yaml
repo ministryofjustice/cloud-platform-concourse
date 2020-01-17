@@ -37,7 +37,7 @@ groups:
 
 jobs:
   - name: apply-namespace-changes-live-1
-    serial: true
+    serial: false
     plan:
       - aggregate:
         - get: cloud-platform-environments-repo
