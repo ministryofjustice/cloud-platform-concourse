@@ -8,7 +8,7 @@ The subdirectories within each cluster directory are then used to separate pipel
 
 ## Bootstrap
 
-There is a bootstrap pipeline (see [`boostrap.yaml`](cloud-platform-live-0/main/bootstrap.yaml)) which can be used in any installation to manage pipeline configuration using this git repository as the source of truth. It uses the filename to deduce the pipeline's name (eg. `somejob.yaml` will result in a pipeline named `somejob`).
+There is a bootstrap pipeline (see [`bootstrap.yaml`](live-1/main/bootstrap.yaml)) which can be used in any installation to manage pipeline configuration using this git repository as the source of truth. It uses the filename to deduce the pipeline's name (eg. `somejob.yaml` will result in a pipeline named `somejob`).
 
 ### Setup
 
