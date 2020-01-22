@@ -209,10 +209,15 @@ resource "kubernetes_secret" "concourse_main_cp_infrastructure_git_crypt" {
   }
 }
 
+data "helm_repository" "concourse" {
+  name = "concourse"
+  url  = "https://concourse-charts.storage.googleapis.com/"
+}
+
 resource "helm_release" "concourse" {
   name          = "concourse"
   namespace     = kubernetes_namespace.concourse.id
-  repository    = "stable"
+  repository    = data.helm_repository.concourse.metadata[0].name
   chart         = "concourse"
   version       = var.concourse_chart_version
   recreate_pods = true
@@ -226,28 +231,28 @@ resource "helm_release" "concourse" {
   }
 }
 
-resource "kubernetes_config_map" "concourse_mainteam_config_map" {
-  metadata {
-    name      = "role-config"
-    namespace = kubernetes_namespace.concourse.id
-  }
+# resource "kubernetes_config_map" "concourse_mainteam_config_map" {
+#   metadata {
+#     name      = "role-config"
+#     namespace = kubernetes_namespace.concourse.id
+#   }
 
-  data = {
-    "roles.yml" = <<ROLES
-roles:
-- name: owner
-  local:
-    users: [ "${random_string.basic_auth_username.result}" ]
-- name: member
-  github:
-    teams: [ "${local.secrets["github_teams"]}" ]
-- name: viewer
-  github:
-    orgs: [ "${local.secrets["github_org"]}" ]
-ROLES
+#   data = {
+#     "roles.yml" = <<ROLES
+# roles:
+# - name: owner
+#   local:
+#     users: [ "${random_string.basic_auth_username.result}" ]
+# - name: member
+#   github:
+#     teams: [ "${local.secrets["github_teams"]}" ]
+# - name: viewer
+#   github:
+#     orgs: [ "${local.secrets["github_org"]}" ]
+# ROLES
 
-  }
-}
+#   }
+# }
 
 ########################
 # Namespace: concourse #
