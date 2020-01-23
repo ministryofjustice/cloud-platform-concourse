@@ -5,7 +5,7 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   fallback: 'Finished deleting old, manually-created pods'
   title: 'Delete manually-created-pods'
   title_link: 'https://concourse.apps.manager.cloud-platform.service.justice.gov.uk/teams/main/pipelines/delete-manually-created-pods'
-  footer: concourse.apps.manager.cloud-platform.service.justice.gov.uk/
+  footer: concourse.apps.manager.cloud-platform.service.justice.gov.uk
 resources:
 - name: cloud-platform-environments-repo
   type: git
