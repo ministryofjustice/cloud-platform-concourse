@@ -88,8 +88,8 @@ jobs:
         config:
           params:
             AWS_DEFAULT_REGION: eu-west-2
-            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
           <<: *ensure-repository-exists-config
       - task: prepare-image-tags
         image: image-base-cp
