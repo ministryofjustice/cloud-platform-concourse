@@ -50,8 +50,8 @@ jobs:
         config:
           platform: linux
           params:
-            AWS_ACCESS_KEY_ID: ((aws-manager.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-manager.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             AWS_REGION: eu-west-2
             KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
             KUBECONFIG_S3_KEY: kubeconfig

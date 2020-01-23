@@ -131,7 +131,7 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   depends_on = [helm_release.concourse]
 
   metadata {
-    name      = "aws-${terraform.workspace}"
+    name      = "aws-creds"
     namespace = kubernetes_namespace.concourse_main.id
   }
 

@@ -50,8 +50,8 @@ jobs:
         config:
           platform: linux
           params:
-            AWS_ACCESS_KEY_ID: ((aws-manager.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-manager.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             AWS_REGION: eu-west-2
             AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
             AUTH0_CLIENT_ID: ((concourse-tf-auth0-credentials.client-id))
