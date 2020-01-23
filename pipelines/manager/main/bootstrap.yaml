@@ -30,8 +30,8 @@ jobs:
         config:
           platform: linux
           params:
-            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             CONCOURSE_FLY_VERSION: 5.8.0
             CONCOURSE_URL: 'http://concourse-web.concourse.svc.cluster.local:8080'
             CONCOURSE_TEAM: main
