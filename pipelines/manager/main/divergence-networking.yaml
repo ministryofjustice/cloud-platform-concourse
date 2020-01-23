@@ -7,17 +7,16 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   footer: concourse.cloud-platform.service.justice.gov.uk
 
 resources:
-- name: cloud-platform-concourse-repo
+- name: cloud-platform-infrastructure-repo
   type: git
   source:
-    uri: https://github.com/ministryofjustice/cloud-platform-concourse.git
+    uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
     branch: master
-    git_crypt_key: ((cloud-platform-concourse-git-crypt.key))
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools-terraform
-    tag: 0.2
+    tag: 0.3
 - name: slack-alert
   type: slack-notification
   source:
@@ -35,30 +34,31 @@ resource_types:
     tag: latest
 
 jobs:
-  - name: divergence-cloud-platform-concourse
+  - name: divergence-networking
     serial: true
     plan:
       - aggregate:
         - get: every-4-hours
           trigger: true
-        - get: cloud-platform-concourse-repo
+        - get: cloud-platform-infrastructure-repo
           trigger: false
         - get: cloud-platform-tools-terraform
           trigger: false
-      - task: divergence-cloud-platform-concourse
+      - task: check-divergence-networking
         image: cloud-platform-tools-terraform
         config:
           platform: linux
           params:
-            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             AWS_REGION: eu-west-2
             KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+            TF_VAR_cluster_names: '["live-1.cloud-platform.service.justice.gov.uk","manager"]'
           inputs:
-          - name: cloud-platform-concourse-repo
+          - name: cloud-platform-infrastructure-repo
             path: ./
           run:
             path: /bin/sh
@@ -67,7 +67,7 @@ jobs:
               - |
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
-                cd resources
+                cd terraform/cloud-platform-network/
                 cp-tools terraform check-divergence --workspace live-1
           outputs:
             - name: metadata

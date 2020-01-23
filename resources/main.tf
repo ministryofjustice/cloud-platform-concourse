@@ -118,34 +118,6 @@ resource "random_string" "basic_auth_password" {
   special = false
 }
 
-data "template_file" "values" {
-  template = file("${path.module}/templates/values.yaml")
-
-  vars = {
-    concourse_image_tag       = var.concourse_image_tag
-    basic_auth_username       = random_string.basic_auth_username.result
-    basic_auth_password       = random_string.basic_auth_password.result
-    github_auth_client_id     = local.secrets["github_auth_client_id"]
-    github_auth_client_secret = local.secrets["github_auth_client_secret"]
-    concourse_hostname = terraform.workspace == local.live_workspace ? format("%s.%s", "concourse", local.live_domain) : format(
-      "%s.%s",
-      "concourse.apps",
-      data.terraform_remote_state.cluster.outputs.cluster_domain_name,
-    )
-    github_org               = local.secrets["github_org"]
-    github_teams             = local.secrets["github_teams"]
-    postgresql_user          = aws_db_instance.concourse.username
-    postgresql_password      = aws_db_instance.concourse.password
-    postgresql_host          = aws_db_instance.concourse.address
-    postgresql_sslmode       = false
-    host_key_priv            = indent(4, tls_private_key.host_key.private_key_pem)
-    host_key_pub             = tls_private_key.host_key.public_key_openssh
-    session_signing_key_priv = indent(4, tls_private_key.session_signing_key.private_key_pem)
-    worker_key_priv          = indent(4, tls_private_key.worker_key.private_key_pem)
-    worker_key_pub           = tls_private_key.worker_key.public_key_openssh
-  }
-}
-
 module "concourse_user_cp" {
   source      = "./concourse-aws-user"
   aws_profile = "moj-cp"
@@ -159,7 +131,7 @@ resource "kubernetes_secret" "concourse_aws_credentials" {
   depends_on = [helm_release.concourse]
 
   metadata {
-    name      = "aws-${terraform.workspace}"
+    name      = "aws-creds"
     namespace = kubernetes_namespace.concourse_main.id
   }
 
@@ -209,43 +181,45 @@ resource "kubernetes_secret" "concourse_main_cp_infrastructure_git_crypt" {
   }
 }
 
+data "helm_repository" "concourse" {
+  name = "concourse"
+  url  = "https://concourse-charts.storage.googleapis.com/"
+}
+
 resource "helm_release" "concourse" {
   name          = "concourse"
   namespace     = kubernetes_namespace.concourse.id
-  repository    = "stable"
+  repository    = data.helm_repository.concourse.metadata[0].name
   chart         = "concourse"
   version       = var.concourse_chart_version
   recreate_pods = true
 
-  values = [
-    data.template_file.values.rendered,
-  ]
+  values = [templatefile("${path.module}/templates/values.yaml", {
+    concourse_image_tag       = var.concourse_image_tag
+    basic_auth_username       = random_string.basic_auth_username.result
+    basic_auth_password       = random_string.basic_auth_password.result
+    github_auth_client_id     = local.secrets["github_auth_client_id"]
+    github_auth_client_secret = local.secrets["github_auth_client_secret"]
+    concourse_hostname = terraform.workspace == local.live_workspace ? format("%s.%s", "concourse", local.live_domain) : format(
+      "%s.%s",
+      "concourse.apps",
+      data.terraform_remote_state.cluster.outputs.cluster_domain_name,
+    )
+    github_org               = local.secrets["github_org"]
+    github_teams             = local.secrets["github_teams"]
+    postgresql_user          = aws_db_instance.concourse.username
+    postgresql_password      = aws_db_instance.concourse.password
+    postgresql_host          = aws_db_instance.concourse.address
+    postgresql_sslmode       = false
+    host_key_priv            = indent(4, tls_private_key.host_key.private_key_pem)
+    host_key_pub             = tls_private_key.host_key.public_key_openssh
+    session_signing_key_priv = indent(4, tls_private_key.session_signing_key.private_key_pem)
+    worker_key_priv          = indent(4, tls_private_key.worker_key.private_key_pem)
+    worker_key_pub           = tls_private_key.worker_key.public_key_openssh
+  })]
 
   lifecycle {
     ignore_changes = [keyring]
-  }
-}
-
-resource "kubernetes_config_map" "concourse_mainteam_config_map" {
-  metadata {
-    name      = "role-config"
-    namespace = kubernetes_namespace.concourse.id
-  }
-
-  data = {
-    "roles.yml" = <<ROLES
-roles:
-- name: owner
-  local:
-    users: [ "${random_string.basic_auth_username.result}" ]
-- name: member
-  github:
-    teams: [ "${local.secrets["github_teams"]}" ]
-- name: viewer
-  github:
-    orgs: [ "${local.secrets["github_org"]}" ]
-ROLES
-
   }
 }
 
