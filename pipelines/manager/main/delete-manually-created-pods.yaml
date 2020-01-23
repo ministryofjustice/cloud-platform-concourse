@@ -4,9 +4,8 @@ slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
 slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   fallback: 'Finished deleting old, manually-created pods'
   title: 'Delete manually-created-pods'
-  title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/main/pipelines/delete-manually-created-pods'
-  footer: concourse.cloud-platform.service.justice.gov.uk
-
+  title_link: 'https://concourse.apps.manager.cloud-platform.service.justice.gov.uk/teams/main/pipelines/delete-manually-created-pods'
+  footer: concourse.apps.manager.cloud-platform.service.justice.gov.uk/
 resources:
 - name: cloud-platform-environments-repo
   type: git
@@ -55,10 +54,10 @@ jobs:
           inputs:
             - name: cloud-platform-environments-repo
           params:
-            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
-            PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+            PIPELINE_CLUSTER: concourse.apps.manager.cloud-platform.service.justice.gov.uk
           run:
             path: /bin/sh
             dir: cloud-platform-environments-repo
