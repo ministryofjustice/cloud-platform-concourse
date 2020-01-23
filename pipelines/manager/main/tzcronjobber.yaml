@@ -4,15 +4,15 @@ resources:
   source:
     repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tools
     tag: latest
-    aws_access_key_id: ((aws-live-1.access-key-id))
-    aws_secret_access_key: ((aws-live-1.secret-access-key))
+    aws_access_key_id: ((aws-creds.access-key-id))
+    aws_secret_access_key: ((aws-creds.secret-access-key))
 - name: cronjobber-image
   type: docker-image
   source:
     repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tzcronjobber
     tag: 0.2.0
-    aws_access_key_id: ((aws-live-1.access-key-id))
-    aws_secret_access_key: ((aws-live-1.secret-access-key))
+    aws_access_key_id: ((aws-creds.access-key-id))
+    aws_secret_access_key: ((aws-creds.secret-access-key))
 jobs:
   - name: cronjobber
     plan:

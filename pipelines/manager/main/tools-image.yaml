@@ -18,8 +18,8 @@ resources:
   source:
     repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tools
     tag: circleci
-    aws_access_key_id: ((aws-live-1.access-key-id))
-    aws_secret_access_key: ((aws-live-1.secret-access-key))
+    aws_access_key_id: ((aws-creds.access-key-id))
+    aws_secret_access_key: ((aws-creds.secret-access-key))
 
 ensure-repository-exists: &ensure-repository-exists-config
   platform: linux
@@ -88,8 +88,8 @@ jobs:
         config:
           params:
             AWS_DEFAULT_REGION: eu-west-2
-            AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
           <<: *ensure-repository-exists-config
       - task: prepare-image-tags
         image: image-base-cp
