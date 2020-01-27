@@ -83,6 +83,8 @@ jobs:
       - aggregate:
         - get: repo
           trigger: true
+        - get: image-base-cp
+          trigger: true
       - task: ensure-repository-exists
         image: image-base-cp
         config:
