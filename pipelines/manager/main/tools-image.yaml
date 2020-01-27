@@ -84,7 +84,7 @@ jobs:
         - get: repo
           trigger: true
         - get: image-base-cp
-          trigger: true
+          trigger: false
       - task: ensure-repository-exists
         image: image-base-cp
         config:
