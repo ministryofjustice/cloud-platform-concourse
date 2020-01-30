@@ -542,7 +542,7 @@ resource "null_resource" "priority_classes" {
 
 resource "kubernetes_service_account" "concourse_build_environments" {
   metadata {
-    name = "concourse-build-environments"
+    name      = "concourse-build-environments"
     namespace = "kube-system"
   }
 }
@@ -552,7 +552,7 @@ resource "kubernetes_cluster_role_binding" "concourse_build_environments" {
   metadata {
     name = "concourse-build-environments"
   }
-  
+
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
