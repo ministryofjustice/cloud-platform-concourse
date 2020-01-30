@@ -200,22 +200,22 @@ resource "helm_release" "concourse" {
     basic_auth_password       = random_string.basic_auth_password.result
     github_auth_client_id     = local.secrets["github_auth_client_id"]
     github_auth_client_secret = local.secrets["github_auth_client_secret"]
-    concourse_hostname = terraform.workspace == local.live_workspace ? format("%s.%s", "concourse", local.live_domain) : format(
+    concourse_hostname        = terraform.workspace == local.live_workspace ? format("%s.%s", "concourse", local.live_domain) : format(
       "%s.%s",
       "concourse.apps",
       data.terraform_remote_state.cluster.outputs.cluster_domain_name,
     )
-    github_org               = local.secrets["github_org"]
-    github_teams             = local.secrets["github_teams"]
-    postgresql_user          = aws_db_instance.concourse.username
-    postgresql_password      = aws_db_instance.concourse.password
-    postgresql_host          = aws_db_instance.concourse.address
-    postgresql_sslmode       = false
-    host_key_priv            = indent(4, tls_private_key.host_key.private_key_pem)
-    host_key_pub             = tls_private_key.host_key.public_key_openssh
-    session_signing_key_priv = indent(4, tls_private_key.session_signing_key.private_key_pem)
-    worker_key_priv          = indent(4, tls_private_key.worker_key.private_key_pem)
-    worker_key_pub           = tls_private_key.worker_key.public_key_openssh
+    github_org                = local.secrets["github_org"]
+    github_teams              = local.secrets["github_teams"]
+    postgresql_user           = aws_db_instance.concourse.username
+    postgresql_password       = aws_db_instance.concourse.password
+    postgresql_host           = aws_db_instance.concourse.address
+    postgresql_sslmode        = false
+    host_key_priv             = indent(4, tls_private_key.host_key.private_key_pem)
+    host_key_pub              = tls_private_key.host_key.public_key_openssh
+    session_signing_key_priv  = indent(4, tls_private_key.session_signing_key.private_key_pem)
+    worker_key_priv           = indent(4, tls_private_key.worker_key.private_key_pem)
+    worker_key_pub            = tls_private_key.worker_key.public_key_openssh
   })]
 
   lifecycle {
@@ -573,7 +573,7 @@ resource "kubernetes_cluster_role_binding" "concourse_build_environments" {
 locals {
   # This is the list of Route53 Hosted Zones in the DSD account that
   # cert-manager and external-dns will be given access to.
-  live_workspace = "live-1"
+  live_workspace = "manager"
   vpc            = var.vpc_name == "" ? terraform.workspace : var.vpc_name
   cluster        = var.cluster_name == "" ? terraform.workspace : var.cluster_name
   state_location = var.kops_or_eks == "kops" ? "cloud-platform" : "cloud-platform-eks"
