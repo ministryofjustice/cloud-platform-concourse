@@ -44,8 +44,6 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-live-1.access-key-id))
-            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-live-1.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
@@ -71,8 +69,6 @@ jobs:
               - |
                 mkdir -p "${TF_PLUGIN_CACHE_DIR}"
                 (
-                  AWS_ACCESS_KEY_ID="${KUBECONFIG_AWS_ACCESS_KEY_ID}"
-                  AWS_SECRET_ACCESS_KEY="${KUBECONFIG_AWS_SECRET_ACCESS_KEY}"
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 export branch_head_sha=$(cat .git/resource/metadata.json | jq -r '.[] | select(.name == "head_sha") | .value')
