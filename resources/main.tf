@@ -563,6 +563,11 @@ resource "kubernetes_cluster_role_binding" "concourse_build_environments" {
     name      = kubernetes_service_account.concourse_build_environments.metadata.0.name
     namespace = "kube-system"
   }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "concourse-web"
+    namespace = "concourse"
+  }
 
 }
 
