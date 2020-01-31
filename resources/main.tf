@@ -573,7 +573,7 @@ resource "kubernetes_cluster_role_binding" "concourse_build_environments" {
 locals {
   # This is the list of Route53 Hosted Zones in the DSD account that
   # cert-manager and external-dns will be given access to.
-  live_workspace = "live-1"
+  live_workspace = "manager"
   vpc            = var.vpc_name == "" ? terraform.workspace : var.vpc_name
   cluster        = var.cluster_name == "" ? terraform.workspace : var.cluster_name
   state_location = var.kops_or_eks == "kops" ? "cloud-platform" : "cloud-platform-eks"
