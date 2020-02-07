@@ -13,6 +13,12 @@ provider "aws" {
   region  = "eu-west-2"
 }
 
+provider "helm" {
+  version = "0.10.4"
+  kubernetes {
+  }
+}
+
 data "terraform_remote_state" "network" {
   backend = "s3"
 
