@@ -2,8 +2,7 @@
 variable "aws_profile" {}
 
 provider "aws" {
-  profile = var.aws_profile
-
+  profile = "moj-cp"
   // AWS region does not matter since we're only dealing with IAM but is
   // required for the provider.
   region = "eu-west-2"
@@ -50,7 +49,6 @@ data "aws_iam_policy_document" "policy" {
       "iam:ListEntitiesForPolicy",
       "iam:GetPolicyVersion",
       "iam:DeleteUserPermissionsBoundary",
-
     ]
 
     resources = [
@@ -186,6 +184,20 @@ data "aws_iam_policy_document" "policy" {
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cloud-platform-*",
     ]
   }
+
+  # This is because of cloud-platform-infrastructure/terraform/global-resources/iam
+  statement {
+    actions = [
+      "iam:ListAccountAliases",
+      "iam:GetGroup",
+      "iam:ListAttachedGroupPolicies",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
 
   statement {
     actions = [
