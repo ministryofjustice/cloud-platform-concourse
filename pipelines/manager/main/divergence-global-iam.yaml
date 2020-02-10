@@ -34,7 +34,7 @@ resource_types:
     tag: latest
 
 jobs:
-  - name: divergence-networking
+  - name: divergence-global-iam
     serial: true
     plan:
       - aggregate:
@@ -44,7 +44,7 @@ jobs:
           trigger: false
         - get: cloud-platform-tools-terraform
           trigger: false
-      - task: check-divergence-networking
+      - task: check-divergence-global-iam
         image: cloud-platform-tools-terraform
         config:
           platform: linux
