@@ -171,6 +171,7 @@ data "aws_iam_policy_document" "policy" {
   statement {
     actions = [
       "iam:CreateRole",
+      "iam:AttachRolePolicy",
       "iam:GetRole",
       "iam:PutRolePolicy",
       "iam:GetRolePolicy",
@@ -182,6 +183,16 @@ data "aws_iam_policy_document" "policy" {
 
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/cloud-platform-*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreatePolicy",
+    ]
+
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/cloud-platform-*",
     ]
   }
 
