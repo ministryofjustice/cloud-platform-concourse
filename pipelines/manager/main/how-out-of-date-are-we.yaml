@@ -1,0 +1,47 @@
+resources:
+- name: tools-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-tools
+    tag: 1.9
+- name: every-24-hours
+  type: time
+  source:
+    interval: 24h
+
+
+jobs:
+  - name: how-out-of-date-are-we
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-4-hours
+          trigger: true
+        - get: tools-image
+      - task: how-out-of-date-are-we
+        image: tools-image
+        config:
+          platform: linux
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+            KUBECONFIG_S3_KEY: kubeconfig
+            KUBECONFIG: /tmp/kubeconfig
+            KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+            HTTP_ENDPOINT: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk/update-data
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                apk add libc6-compat
+                aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
+                kubectl config use-context ${KUBE_CLUSTER}
+                helm init --client-only
+                helm repo update
+                helm plugin install https://github.com/bacongobbler/helm-whatup
+                helm whatup
+                echo "Updating the app endpoint"
+                curl -H "X-API-KEY: $(kubectl -n how-out-of-date-are-we get secrets how-out-of-date-are-we-api-key -o jsonpath='{.data.token}' | base64 -d)" -d "$(helm whatup -o json)" ${HTTP_ENDPOINT}
+
