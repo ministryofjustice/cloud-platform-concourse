@@ -15,7 +15,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-4-hours
+        - get: every-24-hours
           trigger: true
         - get: tools-image
       - task: how-out-of-date-are-we
