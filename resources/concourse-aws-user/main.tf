@@ -112,33 +112,33 @@ data "aws_iam_policy_document" "policy" {
   # Due to build-test-cluster pipeline we need to give moe privileges to the concourse user
   # in order to create/destroy vpc, resources and roles. 
 
-    statement {
-      actions = [
-        "ec2:*",
-        "acm:RequestCertificate",
+  statement {
+    actions = [
+      "ec2:*",
+      "acm:RequestCertificate",
 
-        "iam:CreateRole",
-        "iam:AttachRolePolicy",
-        "iam:GetRole",
-        "iam:PutRolePolicy",
-        "iam:GetRolePolicy",
-        "iam:TagRole",
-        "iam:ListInstanceProfilesForRole",
-        "iam:DeleteRolePolicy",
-        "iam:DeleteRole",
+      "iam:CreateRole",
+      "iam:AttachRolePolicy",
+      "iam:GetRole",
+      "iam:PutRolePolicy",
+      "iam:GetRolePolicy",
+      "iam:TagRole",
+      "iam:ListInstanceProfilesForRole",
+      "iam:DeleteRolePolicy",
+      "iam:DeleteRole",
 
-        "iam:CreateInstanceProfile",      # terraform/cloud-platform (bastion module)
-        "iam:AddRoleToInstanceProfile",   # terraform/cloud-platform (bastion module)
-        "iam:PassRole",                   # terraform/cloud-platform
-        "autoscaling:*",                  # kops create
-        "route53:ListHostedZonesByName",  # kops create
-        "elasticloadbalancing:*",         # kops create
-        "iam:UpdateAssumeRolePolicy"      # because of integration tests ("is not authorized to perform: iam:UpdateAssumeRolePolicy on resource: role integration-test-kiam-iam-role)
-      ]
+      "iam:CreateInstanceProfile",     # terraform/cloud-platform (bastion module)
+      "iam:AddRoleToInstanceProfile",  # terraform/cloud-platform (bastion module)
+      "iam:PassRole",                  # terraform/cloud-platform
+      "autoscaling:*",                 # kops create
+      "route53:ListHostedZonesByName", # kops create
+      "elasticloadbalancing:*",        # kops create
+      "iam:UpdateAssumeRolePolicy"     # because of integration tests ("is not authorized to perform: iam:UpdateAssumeRolePolicy on resource: role integration-test-kiam-iam-role)
+    ]
 
-      resources = [
-        "*",
-      ]
+    resources = [
+      "*",
+    ]
   }
 
   # In order to create the kubeadmin file using: 
