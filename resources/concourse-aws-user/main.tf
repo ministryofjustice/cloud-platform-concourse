@@ -268,6 +268,8 @@ data "aws_iam_policy_document" "policy" {
       # Required by terraform-aws module
       "ec2:Describe*",
       "autoscaling:Describe*",
+      # In order to run the EKS divergence and build EKS test clusters:
+      "eks:*",
     ]
 
     resources = [
