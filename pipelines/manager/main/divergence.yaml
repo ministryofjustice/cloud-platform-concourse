@@ -46,6 +46,7 @@ groups:
   jobs:
     - divergence-global-iam
     - divergence-kops
+    - divergence-eks
     - divergence-networking
     - divergence-k8s-components
     - divergence-cloud-platform-concourse
@@ -82,6 +83,46 @@ jobs:
                 cp-tools terraform check-divergence
           outputs:
             - name: metadata
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
+  - name: divergence-eks
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-4-hours
+          trigger: true
+        - get: cloud-platform-infrastructure-repo
+          trigger: false
+        - get: cloud-platform-tools-terraform
+          trigger: false
+      - task: check-divergence-k8s-components
+        image: cloud-platform-tools-terraform
+        config:
+          platform: linux
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            AWS_REGION: eu-west-2
+            AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
+            AUTH0_CLIENT_ID: ((concourse-tf-auth0-credentials.client-id))
+            AUTH0_CLIENT_SECRET: ((concourse-tf-auth0-credentials.client_secret))
+          inputs:
+          - name: cloud-platform-infrastructure-repo
+            path: ./
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                cd terraform/cloud-platform-eks/
+                cp-tools terraform check-divergence --workspace manager --var-file vars/manager.tfvars
+          outputs:
+            - name: metadata        
         on_failure:
           put: slack-alert
           params:
