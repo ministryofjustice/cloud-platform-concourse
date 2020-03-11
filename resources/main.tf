@@ -74,7 +74,7 @@ resource "aws_db_subnet_group" "concourse" {
   subnet_ids  = data.terraform_remote_state.network.outputs.internal_subnets_ids
 }
 
-resource "random_string" "db_password" {
+resource "random_password" "db_password" {
   length  = 32
   special = false
 }
@@ -88,7 +88,7 @@ resource "aws_db_instance" "concourse" {
   instance_class         = var.rds_instance_class
   name                   = "concourse"
   username               = "concourse"
-  password               = random_string.db_password.result
+  password               = random_password.db_password.result
   vpc_security_group_ids = [aws_security_group.concourse.id]
   db_subnet_group_name   = aws_db_subnet_group.concourse.id
   skip_final_snapshot    = true
@@ -114,12 +114,12 @@ resource "tls_private_key" "worker_key" {
   rsa_bits  = "2048"
 }
 
-resource "random_string" "basic_auth_username" {
+resource "random_password" "basic_auth_username" {
   length  = 16
   special = false
 }
 
-resource "random_string" "basic_auth_password" {
+resource "random_password" "basic_auth_password" {
   length  = 32
   special = false
 }
@@ -156,8 +156,8 @@ resource "kubernetes_secret" "concourse_basic_auth_credentials" {
   }
 
   data = {
-    username = random_string.basic_auth_username.result
-    password = random_string.basic_auth_password.result
+    username = random_password.basic_auth_username.result
+    password = random_password.basic_auth_password.result
   }
 }
 
@@ -202,8 +202,8 @@ resource "helm_release" "concourse" {
 
   values = [templatefile("${path.module}/templates/values.yaml", {
     concourse_image_tag       = var.concourse_image_tag
-    basic_auth_username       = random_string.basic_auth_username.result
-    basic_auth_password       = random_string.basic_auth_password.result
+    basic_auth_username       = random_password.basic_auth_username.result
+    basic_auth_password       = random_password.basic_auth_password.result
     github_auth_client_id     = local.secrets["github_auth_client_id"]
     github_auth_client_secret = local.secrets["github_auth_client_secret"]
     concourse_hostname = terraform.workspace == local.live_workspace ? format("%s.%s", "concourse", local.live_domain) : format(
