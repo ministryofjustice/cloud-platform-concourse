@@ -21,13 +21,11 @@ resources:
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
-- name: every-weekday
+- name: every-8h
   type: time
   source:
-    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
-    start: 11:00
-    stop: 11:30
-    location: Europe/London
+    interval: 8h
+
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -44,7 +42,7 @@ jobs:
   serial: true
   plan:
     - aggregate:
-      - get: every-weekday
+      - get: every-8h
         trigger: true
       - get: tools-image
       - get: cloud-platform-infrastructure-repo
