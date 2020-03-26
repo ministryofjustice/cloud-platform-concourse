@@ -71,7 +71,7 @@ jobs:
             - |
               aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
               kubectl config use-context ${KUBE_CLUSTER}
-              cd ./smoke-tests; rspec
+              cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only
         outputs:
           - name: metadata
       on_failure:
