@@ -1,9 +1,9 @@
 resources:
-- name: tools-image
+- name: updater-image
   type: docker-image
   source:
-    repository: ministryofjustice/cloud-platform-tools
-    tag: 1.12
+    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
+    tag: 1.0
 - name: every-24-hours
   type: time
   source:
@@ -17,9 +17,9 @@ jobs:
       - in_parallel:
         - get: every-24-hours
           trigger: true
-        - get: tools-image
+        - get: updater-image
       - task: how-out-of-date-are-we
-        image: tools-image
+        image: updater-image
         config:
           platform: linux
           params:
@@ -31,18 +31,4 @@ jobs:
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             HTTP_ENDPOINT: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk/update-data
           run:
-            path: /bin/sh
-            args:
-              - -c
-              - |
-                apk add libc6-compat
-                aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
-                kubectl config use-context ${KUBE_CLUSTER}
-                helm init --client-only
-                helm repo add jetstack https://charts.jetstack.io
-                helm repo update
-                helm plugin install https://github.com/bacongobbler/helm-whatup
-                helm whatup
-                echo "Updating the app endpoint"
-                curl -H "X-API-KEY: $(kubectl -n how-out-of-date-are-we get secrets how-out-of-date-are-we-api-key -o jsonpath='{.data.token}' | base64 -d)" -d "$(helm whatup -o json)" ${HTTP_ENDPOINT}
-
+            path: /app/update.sh
