@@ -3,7 +3,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-    tag: 1.0
+    tag: 1.2
 - name: every-24-hours
   type: time
   source:
@@ -29,6 +29,7 @@ jobs:
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-            HTTP_ENDPOINT: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk/update-data
+            DATA_URL: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            GITHUB_TOKEN: ((how-out-of-date-are-we.how-out-of-date-are-we-github-token))
           run:
             path: /app/update.sh
