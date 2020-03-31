@@ -187,6 +187,21 @@ resource "kubernetes_secret" "concourse_main_cp_infrastructure_git_crypt" {
   }
 }
 
+# GitHub personal access token for the how-out-of-date-are-we updater concourse pipeline
+resource "kubernetes_secret" "concourse_main_how_out_of_date_are_we_github_token" {
+  depends_on = [helm_release.concourse]
+
+  metadata {
+    name      = "how-out-of-date-are-we-github-token"
+    namespace = kubernetes_namespace.concourse_main.id
+  }
+
+  data = {
+    token = local.secrets["how_out_of_date_are_we_github_token"]
+  }
+}
+
+
 data "helm_repository" "concourse" {
   name = "concourse"
   url  = "https://concourse-charts.storage.googleapis.com/"
