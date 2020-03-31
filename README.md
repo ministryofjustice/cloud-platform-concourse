@@ -37,7 +37,7 @@ kubectl create namespace concourse-main
 
 ```
 terraform init
-terraform apply
+terraform apply -var-file=prod.tfvars
 ```
 
 Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
