@@ -3,7 +3,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-    tag: 1.2
+    tag: 1.3
 - name: every-24-hours
   type: time
   source:
