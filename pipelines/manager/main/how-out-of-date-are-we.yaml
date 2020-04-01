@@ -30,6 +30,6 @@ jobs:
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             DATA_URL: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
-            GITHUB_TOKEN: ((how-out-of-date-are-we.how-out-of-date-are-we-github-token))
+            GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
           run:
             path: /app/update.sh
