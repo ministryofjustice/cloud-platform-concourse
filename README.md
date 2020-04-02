@@ -26,23 +26,33 @@ Use `new` instead of `select` if the workspace doesn't exist.
 
 4. Edit `secrets.tf` and add a configuration block for the new cluster, if one does not already exist.
 
-5. Create namespaces:
+
+
+Create a file <cluster-name>.tfvars file for example `conc_1.tfvars`, copy and amend with details related to the cluster.
+```
+vpc_name     = "<vpc name>"
+cluster_name = "<cluster name>"
+kops_or_eks  = "<eks or kops>"
+is_prod      = false
+```
+
+An example would look like this:
 
 ```
-kubectl create namespace concourse
-kubectl create namespace concourse-main
-```
+vpc_name     = "conc_1"
+cluster_name = "conc_1"
+kops_or_eks  = "eks"
+is_prod      = false
 
-6. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager.
+```
+5. Run terraform to bootstraps a Concourse deployment on a Kubernetes cluster <cluster-name> using the Helm package manager. You can use the `.tfvars` file created about to pass parameters such as vpc, cluster name.
 
 ```
 terraform init
-terraform apply -var-file=prod.tfvars
+terraform apply -var-file=conc_1.tfvars
 ```
 
-Please make sure you define the namespaces `concourse` and `concourse-main` in the [environments repository](https://github.com/ministryofjustice/cloud-platform-environments).
-
-7. Access your concourse instance
+6. Access your concourse instance
 
 Your concourse instance should be accessible at the URL:
 
@@ -75,7 +85,7 @@ helm --kube-context=<context> --tiller-namespace kube-system delete --purge conc
 ```sh
 cd resources
 terraform workspace select <cluster-name>
-terraform destroy
+terraform destroy -var-file=<tfvars file where the details of vpc an cluster name>
 terraform workspace select default
 terraform workspace delete <cluster-name>
 ```
