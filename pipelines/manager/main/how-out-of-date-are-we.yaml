@@ -4,10 +4,10 @@ resources:
   source:
     repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
     tag: 1.4
-- name: every-24-hours
+- name: every-hour
   type: time
   source:
-    interval: 24h
+    interval: 60m
 
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-24-hours
+        - get: every-hour
           trigger: true
         - get: updater-image
       - task: how-out-of-date-are-we
