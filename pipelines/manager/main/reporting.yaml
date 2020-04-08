@@ -38,7 +38,7 @@ jobs:
 - name: orphaned-namespaces
   serial: true
   plan:
-    - aggregate:
+    - in_parallel:
       - get: every-week
         trigger: true
       - get: orphaned-namespace-checker-image
