@@ -65,7 +65,7 @@ jobs:
   - name: apply-live-1
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: every-120m
           trigger: true
         - get: cloud-platform-environments-repo
@@ -122,7 +122,7 @@ jobs:
   - name: apply-namespace-changes-live-1
     serial: false
     plan:
-      - aggregate:
+      - in_parallel:
         - get: cloud-platform-environments-repo
           trigger: true
         - get: tools-image
@@ -237,7 +237,7 @@ jobs:
   - name: detect-deleted-namespaces
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: cloud-platform-environments-repo
           trigger: true
         - get: tools-image
