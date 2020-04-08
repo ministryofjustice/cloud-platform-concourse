@@ -30,11 +30,12 @@ resource_types:
     tag: latest
 
 groups:
-- name: live-1
-  jobs: [check-live-1]
+- name: reporting
+  jobs:
+    - orphaned-namespaces
 
 jobs:
-- name: check-live-1
+- name: orphaned-namespaces
   serial: true
   plan:
     - aggregate:
