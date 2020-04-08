@@ -7,6 +7,16 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   footer: concourse.cloud-platform.service.justice.gov.uk/
 
 resources:
+- name: cloud-platform-infrastructure-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
+    branch: master
+- name: integration-test-image
+  type: docker-image
+  source:
+    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-smoke-tests
+    tag: 1.7
 - name: orphaned-namespace-checker-image
   type: docker-image
   source:
@@ -43,6 +53,7 @@ groups:
   jobs:
     - orphaned-namespaces
     - how-out-of-date-are-we
+    - integration-tests
 
 jobs:
 - name: orphaned-namespaces
@@ -110,3 +121,47 @@ jobs:
             GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
           run:
             path: /app/update.sh
+
+- name: integration-tests
+  serial: true
+  plan:
+    - in_parallel:
+      - get: every-hour
+        trigger: true
+      - get: integration-test-image
+        trigger: false
+      - get: cloud-platform-infrastructure-repo
+        trigger: false
+    - task: test-live-1
+      image: integration-test-image
+      config:
+        platform: linux
+        inputs:
+          - name: cloud-platform-infrastructure-repo
+        params:
+          AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+          AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+          AWS_REGION: eu-west-2
+          KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+          KUBECONFIG_S3_KEY: kubeconfig
+          KUBECONFIG: /tmp/kubeconfig
+          KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+          EXECUTION_CONTEXT: integration-test-pipeline
+        run:
+          path: /bin/sh
+          dir: cloud-platform-infrastructure-repo
+          args:
+            - -c
+            - |
+              aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
+              kubectl config use-context ${KUBE_CLUSTER}
+              cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only
+        outputs:
+          - name: metadata
+      on_failure:
+        put: slack-alert
+        params:
+          <<: *SLACK_NOTIFICATION_DEFAULTS
+          attachments:
+            - color: "danger"
+              <<: *SLACK_ATTACHMENTS_DEFAULTS
