@@ -67,6 +67,7 @@ groups:
     - orphaned-namespaces
     - how-out-of-date-are-we
     - integration-tests
+    - eks-integration-tests
     - manual-snapshots-checker
 
 jobs:
