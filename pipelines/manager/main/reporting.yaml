@@ -49,6 +49,10 @@ resources:
   source:
     # one week in hours
     interval: 168h
+- name: every-6-hours
+  type: time
+  source:
+    interval: 6h
 
 resource_types:
 - name: slack-notification
@@ -167,7 +171,51 @@ jobs:
               - |
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
-                cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only
+                cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only --tag ~eks-manager
+          outputs:
+            - name: metadata
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
+
+  - name: eks-integration-tests
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-6-hours
+          trigger: true
+        - get: integration-test-image
+          trigger: false
+        - get: cloud-platform-infrastructure-repo
+          trigger: false
+      - task: test-eks
+        image: integration-test-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-infrastructure-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            AWS_REGION: eu-west-2
+            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+            KUBECONFIG_S3_KEY: kubeconfig
+            KUBECONFIG: /tmp/kubeconfig
+            KUBE_CLUSTER: manager.cloud-platform.service.justice.gov.uk
+            EXECUTION_CONTEXT: integration-test-pipeline
+          run:
+            path: /bin/sh
+            dir: cloud-platform-infrastructure-repo
+            args:
+              - -c
+              - |
+                aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
+                kubectl config use-context ${KUBE_CLUSTER}
+                cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only --tag ~live-1 --tag ~kops
           outputs:
             - name: metadata
         on_failure:
