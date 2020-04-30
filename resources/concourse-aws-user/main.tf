@@ -119,13 +119,17 @@ data "aws_iam_policy_document" "policy" {
 
       "iam:CreateRole",
       "iam:AttachRolePolicy",
+      "iam:DetachRolePolicy",
       "iam:GetRole",
       "iam:PutRolePolicy",
       "iam:GetRolePolicy",
       "iam:TagRole",
       "iam:ListInstanceProfilesForRole",
+      "iam:ListPolicyVersions",
+      "iam:DeletePolicyVersion",
       "iam:DeleteRolePolicy",
       "iam:DeleteRole",
+      "iam:DeletePolicy",
 
       "iam:CreateInstanceProfile",     # terraform/cloud-platform (bastion module)
       "iam:AddRoleToInstanceProfile",  # terraform/cloud-platform (bastion module)
@@ -207,6 +211,7 @@ data "aws_iam_policy_document" "policy" {
     actions = [
       "iam:CreateRole",
       "iam:AttachRolePolicy",
+      "iam:DetachRolePolicy",
       "iam:GetRole",
       "iam:PutRolePolicy",
       "iam:GetRolePolicy",
