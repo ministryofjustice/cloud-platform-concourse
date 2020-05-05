@@ -48,6 +48,7 @@ groups:
   jobs:
     - recycle-node-live-1
     - delete-manually-created-pods-live-1
+    - delete-excess-dns
 
 jobs:
   - name: recycle-node-live-1
