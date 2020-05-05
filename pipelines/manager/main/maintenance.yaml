@@ -154,7 +154,7 @@ jobs:
             K8S_CLUSTER_NAME: live-1.cloud-platform.service.justice.gov.uk
           run:
             path: /bin/sh
-            dir: cloud-platform-infrastructure-repo
+            dir: cloud-platform-environments-repo
             args:
               - -c
               - |
