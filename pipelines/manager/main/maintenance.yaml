@@ -138,7 +138,6 @@ jobs:
           trigger: true
         - get: tools-image
         - get: cloud-platform-environments-repo
-          trigger: false
       - task: run-script
         image: tools-image
         config:
