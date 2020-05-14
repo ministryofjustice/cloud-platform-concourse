@@ -26,7 +26,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-    tag: "2.0"
+    tag: "2.1"
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
@@ -136,6 +136,9 @@ jobs:
             DATA_URL: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
             GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
             DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
+            ORGANIZATION: ministryofjustice
+            REGEXP: "^cloud-platform-*"
+            TEAM: WebOps
           run:
             path: /app/update.sh
 
