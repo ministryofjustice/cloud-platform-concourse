@@ -27,6 +27,11 @@ resources:
   source:
     repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
     tag: "2.1"
+- name: repository-checker
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-repository-checker
+    tag: 1.1
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
@@ -136,11 +141,26 @@ jobs:
             DATA_URL: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
             GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
             DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
+          run:
+            path: /app/update.sh
+      - task: hoodaw-updater-repository-checker
+        image: repository-checker
+        config:
+          platform: linux
+          params:
+            DATA_URL: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
+            NAMESPACE:"how-out-of-date-are-we"
             ORGANIZATION: ministryofjustice
             REGEXP: "^cloud-platform-*"
             TEAM: WebOps
           run:
-            path: /app/update.sh
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                json=$(ruby ./bin/list-repos.rb)
+                curl -H "X-API-KEY: ${API_KEY}" -d "${json}" ${DATA_URL}/repositories
 
   - name: integration-tests
     serial: true
