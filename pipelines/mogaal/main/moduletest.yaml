@@ -1,0 +1,173 @@
+slack-notification-defaults: &SLACK_NOTIFICATION_DEFAULTS
+  channel: '#lower-priority-alarms'
+  silent: true
+slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
+  fallback: 'Finished building $BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title: '$BUILD_TEAM_NAME/$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME#$BUILD_NAME'
+  title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
+  footer: concourse.cloud-platform.service.justice.gov.uk
+
+resources:
+- name: cloud-platform-environments-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-environments.git
+    branch: module-test
+    git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+- name: tools-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-tools
+    tag: 1.15
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+groups:
+- name: module-tests
+  jobs: 
+    - all-module-test
+    - ecr-module-test
+    - s3-module-test
+jobs:
+  - name: all-module-test
+    serial: false
+    plan:
+      - aggregate:
+        - get: cloud-platform-environments-repo
+          trigger: true
+        - get: tools-image
+      - task: module-test
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG: /tmp/kubeconfig
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
+            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
+            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
+            # the variables prefixed with PIPELINE_ are used by the apply script
+            PIPELINE_CLUSTER: mogaal.cloud-platform.service.justice.gov.uk
+            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
+            TF_VAR_concourse_url: "https://concourse.apps.mogaal.cloud-platform.service.justice.gov.uk"
+            TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
+            TF_VAR_concourse_basic_auth_password: ((concourse-basic-auth.password))
+            TF_VAR_cluster_name: "mogaal"
+            TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
+            TF_VAR_cluster_state_key: "cloud-platform-eks/mogaal/terraform.tfstate"
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                (
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/mogaal-config /tmp/kubeconfig
+                )
+                bundle install --without development test
+                ./bin/module-test
+
+  - name: ecr-module-test
+    serial: false
+    plan:
+      - aggregate:
+        - get: cloud-platform-environments-repo
+          trigger: true
+        - get: tools-image
+      - task: module-test
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG: /tmp/kubeconfig
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
+            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
+            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
+            # the variables prefixed with PIPELINE_ are used by the apply script
+            PIPELINE_CLUSTER: mogaal.cloud-platform.service.justice.gov.uk
+            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
+            TF_VAR_concourse_url: "https://concourse.apps.mogaal.cloud-platform.service.justice.gov.uk"
+            TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
+            TF_VAR_concourse_basic_auth_password: ((concourse-basic-auth.password))
+            TF_VAR_cluster_name: "mogaal"
+            TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
+            TF_VAR_cluster_state_key: "cloud-platform-eks/mogaal/terraform.tfstate"
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                (
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/mogaal-config /tmp/kubeconfig
+                )
+                bundle install --without development test
+                ./bin/ecr-test
+
+  - name: s3-module-test
+    serial: false
+    plan:
+      - aggregate:
+        - get: cloud-platform-environments-repo
+          trigger: true
+        - get: tools-image
+      - task: module-test
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG: /tmp/kubeconfig
+            TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
+            PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
+            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
+            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
+            # the variables prefixed with PIPELINE_ are used by the apply script
+            PIPELINE_CLUSTER: mogaal.cloud-platform.service.justice.gov.uk
+            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
+            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
+            PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
+            TF_VAR_concourse_url: "https://concourse.apps.mogaal.cloud-platform.service.justice.gov.uk"
+            TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
+            TF_VAR_concourse_basic_auth_password: ((concourse-basic-auth.password))
+            TF_VAR_cluster_name: "mogaal"
+            TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
+            TF_VAR_cluster_state_key: "cloud-platform-eks/mogaal/terraform.tfstate"
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+                (
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/mogaal-config /tmp/kubeconfig
+                )
+                bundle install --without development test
+                ./bin/s3-test
