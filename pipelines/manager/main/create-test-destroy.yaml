@@ -75,7 +75,7 @@ jobs:
                 echo "[moj-cp]" >> ${HOME}/.aws/credentials # Cheating create-cluster.rb script, it forces you to have profiles :-( 
                 export CLUSTER_NAME=xx-$(date +%d%m-%H%M)
                 echo "Executing: ./create-cluster.rb --no-gitcrypt -n $CLUSTER_NAME -v $CLUSTER_NAME -t 900"
-                # ./create-cluster.rb --no-gitcrypt -n $CLUSTER_NAME -v $CLUSTER_NAME -t 900
+                ./create-cluster.rb --no-gitcrypt -n $CLUSTER_NAME -v $CLUSTER_NAME -t 900
 
                 #  env-var-files/clustername file, will pass on the cluster name info to the next task destroy-cluster
                 echo CLUSTER_NAME=$CLUSTER_NAME > env-var-files/clustername
@@ -107,7 +107,7 @@ jobs:
                     mkdir ${HOME}/.aws
                     echo "[moj-cp]" >> ${HOME}/.aws/credentials # Cheating create-cluster.rb script, it forces you to have profiles :-( 
                     echo "Executing: ./destroy-cluster.rb -n $CLUSTER_NAME"
-                    # ./destroy-cluster.rb --name $CLUSTER_NAME 
+                    ./destroy-cluster.rb --name $CLUSTER_NAME 
             on_failure:
               do:
               - put: slack-alert
