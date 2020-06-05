@@ -133,8 +133,8 @@ data "aws_iam_policy_document" "policy" {
       "iam:DeleteRole",
       "iam:DeletePolicy",
 
-      "iam:CreateInstanceProfile",     # terraform/cloud-platform (bastion module)
-      "iam:AddRoleToInstanceProfile",  # terraform/cloud-platform (bastion module)
+      "iam:CreateInstanceProfile",    # terraform/cloud-platform (bastion module)
+      "iam:AddRoleToInstanceProfile", # terraform/cloud-platform (bastion module)
       "iam:RemoveRoleFromInstanceProfile",
       "iam:DeleteInstanceProfile",
       "iam:PassRole",                  # terraform/cloud-platform
