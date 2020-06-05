@@ -125,6 +125,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:GetRolePolicy",
       "iam:TagRole",
       "iam:ListInstanceProfiles",
+      "iam:ListRolePolicies",
       "iam:ListInstanceProfilesForRole",
       "iam:ListPolicyVersions",
       "iam:DeletePolicyVersion",
@@ -132,8 +133,10 @@ data "aws_iam_policy_document" "policy" {
       "iam:DeleteRole",
       "iam:DeletePolicy",
 
-      "iam:CreateInstanceProfile",     # terraform/cloud-platform (bastion module)
-      "iam:AddRoleToInstanceProfile",  # terraform/cloud-platform (bastion module)
+      "iam:CreateInstanceProfile",    # terraform/cloud-platform (bastion module)
+      "iam:AddRoleToInstanceProfile", # terraform/cloud-platform (bastion module)
+      "iam:RemoveRoleFromInstanceProfile",
+      "iam:DeleteInstanceProfile",
       "iam:PassRole",                  # terraform/cloud-platform
       "autoscaling:*",                 # kops create
       "route53:ListHostedZonesByName", # kops create
