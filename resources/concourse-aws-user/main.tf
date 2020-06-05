@@ -124,6 +124,7 @@ data "aws_iam_policy_document" "policy" {
       "iam:PutRolePolicy",
       "iam:GetRolePolicy",
       "iam:TagRole",
+      "iam:ListInstanceProfiles",
       "iam:ListInstanceProfilesForRole",
       "iam:ListPolicyVersions",
       "iam:DeletePolicyVersion",
