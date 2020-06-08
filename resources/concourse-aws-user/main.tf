@@ -116,6 +116,7 @@ data "aws_iam_policy_document" "policy" {
     actions = [
       "ec2:*",
       "acm:RequestCertificate",
+      "acm:DeleteCertificate",
 
       "iam:CreateRole",
       "iam:AttachRolePolicy",
