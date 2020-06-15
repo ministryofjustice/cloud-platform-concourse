@@ -234,14 +234,14 @@ jobs:
               path: cloud-platform-environments-live-1-pull-requests
               status: success
 
-  - name: detect-deleted-namespaces
+  - name: destroy-deleted-namespaces
     serial: true
     plan:
       - in_parallel:
         - get: cloud-platform-environments-repo
           trigger: true
         - get: tools-image
-      - task: detect-deleted-namespaces
+      - task: destroy-deleted-namespaces
         image: tools-image
         config:
           platform: linux
@@ -258,7 +258,6 @@ jobs:
             PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
             PIPELINE_STATE_REGION: "eu-west-1"
             PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
-            SLACK_WEBHOOK: ((slack-hook-id))
             TF_VAR_cluster_name: concourse.cloud-platform.service.justice.gov.uk
             TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
             TF_VAR_cluster_state_key: "cloud-platform/live-1/terraform.tfstate"
@@ -269,4 +268,4 @@ jobs:
               - -c
               - |
                 bundle install --without development test
-                ./bin/deleted-namespaces.rb
+                ./bin/auto-delete-namespace.rb
