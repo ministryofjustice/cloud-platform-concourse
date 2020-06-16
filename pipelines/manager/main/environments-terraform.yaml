@@ -59,7 +59,7 @@ groups:
     - apply-live-1
     - apply-namespace-changes-live-1
     - plan-live-1
-    - detect-deleted-namespaces
+    - destroy-deleted-namespaces
 
 jobs:
   - name: apply-live-1
