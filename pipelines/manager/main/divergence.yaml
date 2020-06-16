@@ -26,12 +26,6 @@ resources:
   type: time
   source:
     interval: 4h
-- name: cloud-platform-concourse-repo
-  type: git
-  source:
-    uri: https://github.com/ministryofjustice/cloud-platform-concourse.git
-    branch: master
-    git_crypt_key: ((cloud-platform-concourse-git-crypt.key))
 
 
 resource_types:
