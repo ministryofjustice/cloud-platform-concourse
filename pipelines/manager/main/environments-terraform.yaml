@@ -257,6 +257,7 @@ jobs:
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
             PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
             PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
             TF_VAR_cluster_name: concourse.cloud-platform.service.justice.gov.uk
             TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
