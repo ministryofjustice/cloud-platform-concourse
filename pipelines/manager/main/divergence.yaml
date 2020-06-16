@@ -120,7 +120,7 @@ jobs:
               - -c
               - |
                 cd terraform/cloud-platform-eks/
-                echo -e "cluster_node_count=\"4\"\nworker_node_machine_type=\"m4.large\"\nvpc_name=\"live-1\"" > manager.tfvars
+                echo -e "vpc_name=\"live-1\"" > manager.tfvars
                 cp-tools terraform check-divergence --workspace manager --var-file manager.tfvars
           outputs:
             - name: metadata        
