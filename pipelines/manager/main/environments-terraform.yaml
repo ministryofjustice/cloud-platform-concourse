@@ -18,7 +18,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ministryofjustice/cloud-platform-terraform-gitops.git
-    branch: master
+    branch: main
 - name: cloud-platform-environments-live-1-pull-requests
   type: pull-request
   check_every: 1m
