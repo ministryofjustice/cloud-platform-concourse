@@ -11,7 +11,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
-    branch: master
+    branch: main
 - name: integration-test-image
   type: docker-image
   source:

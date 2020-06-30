@@ -12,7 +12,7 @@ There is a bootstrap pipeline (see [`bootstrap.yaml`](live-1/main/bootstrap.yaml
 
 ### Setup
 
-To enable it for a Concourse team, copy it inside the appropriate directory (`pipelines/<cluster-name>/<team-name>/`). Make sure to adjust any values such as `CONCOURSE_CLUSTER` and `CONCOURSE_TEAM` and merge it into the master branch.
+To enable it for a Concourse team, copy it inside the appropriate directory (`pipelines/<cluster-name>/<team-name>/`). Make sure to adjust any values such as `CONCOURSE_CLUSTER` and `CONCOURSE_TEAM` and merge it into the main branch.
 
 The bootstrap pipeline uses basic authentication for `fly`. This is automatically configured for team `main` by the `helm` chart, however, the chart does not support configuring additional teams. If you are setting up the bootstrap pipeline for a different team, you need to also setup basic authentication for that team and create a kubernetes secret in the [secrets namespace](https://github.com/kubernetes/charts/tree/master/stable/concourse/#kubernetes-secrets) of your team. Refer to the pipeline configuration for the expected structure of the kubernetes secret.
 
