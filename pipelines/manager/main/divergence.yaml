@@ -11,7 +11,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
-    branch: master
+    branch: main
     git_crypt_key: ((cloud-platform-infrastructure-git-crypt.key))
 - name: cloud-platform-tools-terraform
   type: docker-image
