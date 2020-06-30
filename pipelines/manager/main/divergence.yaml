@@ -116,7 +116,7 @@ jobs:
                 echo -e "vpc_name=\"live-1\"" > manager.tfvars
                 cp-tools terraform check-divergence --workspace manager --var-file manager.tfvars
           outputs:
-            - name: metadata        
+            - name: metadata
         on_failure:
           put: slack-alert
           params:
@@ -162,7 +162,7 @@ jobs:
                 cd terraform/cloud-platform/
                 cp-tools terraform check-divergence --workspace live-1
           outputs:
-            - name: metadata        
+            - name: metadata
         on_failure:
           put: slack-alert
           params:

@@ -66,7 +66,7 @@ jobs:
               - -c
               - |
                 mkdir ${HOME}/.aws
-                echo "[moj-cp]" >> ${HOME}/.aws/credentials # Cheating create-cluster.rb script, it forces you to have profiles :-( 
+                echo "[moj-cp]" >> ${HOME}/.aws/credentials # Cheating create-cluster.rb script, it forces you to have profiles :-(
                 export CLUSTER_NAME=cp-$(date +%d%m-%H%M)
                 echo "Executing: ./create-cluster.rb --no-gitcrypt -n $CLUSTER_NAME -v $CLUSTER_NAME -t 900 --no-integration-test"
                 ./create-cluster.rb --no-gitcrypt -n $CLUSTER_NAME -v $CLUSTER_NAME -t 900 --no-integration-test
@@ -77,4 +77,4 @@ jobs:
             attachments:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
-    
+
