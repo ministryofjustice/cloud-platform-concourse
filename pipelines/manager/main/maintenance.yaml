@@ -16,7 +16,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
-    branch: master
+    branch: main
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
 - name: tools-image
   type: docker-image
