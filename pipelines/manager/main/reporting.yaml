@@ -137,7 +137,7 @@ jobs:
             GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
             DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
             ORGANIZATION: ministryofjustice
-            REPO_EXCEPTIONS: "cloud-platform-user-guide cloud-platform-runbooks"
+            REPO_EXCEPTIONS: "cloud-platform-runbooks cloud-platform-user-guide-publish"
             REGEXP: "^cloud-platform-*"
             TEAM: WebOps
           run:
