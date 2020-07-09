@@ -2,10 +2,8 @@ resources:
 - name: tools-image
   type: docker-image
   source:
-    repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tools
-    tag: latest
-    aws_access_key_id: ((aws-creds.access-key-id))
-    aws_secret_access_key: ((aws-creds.secret-access-key))
+    repository: ministryofjustice/cloud-platform-tools
+    tag: 1.19
 - name: cronjobber-image
   type: docker-image
   source:
