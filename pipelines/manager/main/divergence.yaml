@@ -13,7 +13,7 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
     branch: main
     git_crypt_key: ((cloud-platform-infrastructure-git-crypt.key))
-- name: cloud-platform-tools-terraform
+- name: tools-image
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-tools
@@ -54,10 +54,10 @@ jobs:
           trigger: true
         - get: cloud-platform-infrastructure-repo
           trigger: false
-        - get: cloud-platform-tools-terraform
+        - get: tools-image
           trigger: false
       - task: check-divergence-global-iam
-        image: cloud-platform-tools-terraform
+        image: tools-image
         config:
           platform: linux
           params:
@@ -73,7 +73,7 @@ jobs:
               - -c
               - |
                 cd terraform/global-resources/iam
-                cloud-platform terraform check-divergence
+                /usr/local/bin/cloud-platform terraform check-divergence
           outputs:
             - name: metadata
         on_failure:
@@ -91,10 +91,10 @@ jobs:
           trigger: true
         - get: cloud-platform-infrastructure-repo
           trigger: false
-        - get: cloud-platform-tools-terraform
+        - get: tools-image
           trigger: false
       - task: check-divergence-k8s-components
-        image: cloud-platform-tools-terraform
+        image: tools-image
         config:
           platform: linux
           params:
@@ -114,7 +114,7 @@ jobs:
               - |
                 cd terraform/cloud-platform-eks/
                 echo -e "vpc_name=\"live-1\"" > manager.tfvars
-                cloud-platform terraform check-divergence --workspace manager --var-file manager.tfvars
+                /usr/local/bin/cloud-platform terraform check-divergence --workspace manager --var-file manager.tfvars
           outputs:
             - name: metadata
         on_failure:
@@ -132,10 +132,10 @@ jobs:
           trigger: true
         - get: cloud-platform-infrastructure-repo
           trigger: false
-        - get: cloud-platform-tools-terraform
+        - get: tools-image
           trigger: false
       - task: check-divergence-k8s-components
-        image: cloud-platform-tools-terraform
+        image: tools-image
         config:
           platform: linux
           params:
@@ -160,7 +160,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 cd terraform/cloud-platform/
-                cloud-platform terraform check-divergence --workspace live-1
+                /usr/local/bin/cloud-platform terraform check-divergence --workspace live-1
           outputs:
             - name: metadata
         on_failure:
@@ -178,10 +178,10 @@ jobs:
           trigger: true
         - get: cloud-platform-infrastructure-repo
           trigger: false
-        - get: cloud-platform-tools-terraform
+        - get: tools-image
           trigger: false
       - task: check-divergence-networking
-        image: cloud-platform-tools-terraform
+        image: tools-image
         config:
           platform: linux
           params:
@@ -198,7 +198,7 @@ jobs:
               - -c
               - |
                 cd terraform/cloud-platform-network/
-                cloud-platform terraform check-divergence --workspace live-1
+                /usr/local/bin/cloud-platform terraform check-divergence --workspace live-1
           outputs:
             - name: metadata
         on_failure:
@@ -216,10 +216,10 @@ jobs:
           trigger: true
         - get: cloud-platform-infrastructure-repo
           trigger: false
-        - get: cloud-platform-tools-terraform
+        - get: tools-image
           trigger: false
       - task: check-divergence-k8s-components
-        image: cloud-platform-tools-terraform
+        image: 
         config:
           platform: linux
           params:
@@ -241,7 +241,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 cd terraform/cloud-platform-components/
-                cloud-platform terraform check-divergence --workspace live-1 --display-tf-output=false
+                /usr/local/bin/cloud-platform terraform check-divergence --workspace live-1 --display-tf-output=false
           outputs:
             - name: metadata
         on_failure:
