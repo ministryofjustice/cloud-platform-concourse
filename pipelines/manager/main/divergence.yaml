@@ -16,8 +16,8 @@ resources:
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
-    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools-terraform
-    tag: 0.3
+    repository: ministryofjustice/cloud-platform-tools
+    tag: 1.20
 - name: slack-alert
   type: slack-notification
   source:
@@ -73,7 +73,7 @@ jobs:
               - -c
               - |
                 cd terraform/global-resources/iam
-                cp-tools terraform check-divergence
+                cloud-platform terraform check-divergence
           outputs:
             - name: metadata
         on_failure:
@@ -114,7 +114,7 @@ jobs:
               - |
                 cd terraform/cloud-platform-eks/
                 echo -e "vpc_name=\"live-1\"" > manager.tfvars
-                cp-tools terraform check-divergence --workspace manager --var-file manager.tfvars
+                cloud-platform terraform check-divergence --workspace manager --var-file manager.tfvars
           outputs:
             - name: metadata
         on_failure:
@@ -160,7 +160,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 cd terraform/cloud-platform/
-                cp-tools terraform check-divergence --workspace live-1
+                cloud-platform terraform check-divergence --workspace live-1
           outputs:
             - name: metadata
         on_failure:
@@ -198,7 +198,7 @@ jobs:
               - -c
               - |
                 cd terraform/cloud-platform-network/
-                cp-tools terraform check-divergence --workspace live-1
+                cloud-platform terraform check-divergence --workspace live-1
           outputs:
             - name: metadata
         on_failure:
@@ -241,7 +241,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 cd terraform/cloud-platform-components/
-                cp-tools terraform check-divergence --workspace live-1 --display-tf-output=false
+                cloud-platform terraform check-divergence --workspace live-1 --display-tf-output=false
           outputs:
             - name: metadata
         on_failure:
