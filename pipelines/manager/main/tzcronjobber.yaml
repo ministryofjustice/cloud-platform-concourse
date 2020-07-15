@@ -3,12 +3,12 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-tools
-    tag: 1.19
+    tag: "1.20"
 - name: cronjobber-image
   type: docker-image
   source:
     repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/tzcronjobber
-    tag: 0.2.0
+    tag: "0.2.0"
     aws_access_key_id: ((aws-creds.access-key-id))
     aws_secret_access_key: ((aws-creds.secret-access-key))
 jobs:
