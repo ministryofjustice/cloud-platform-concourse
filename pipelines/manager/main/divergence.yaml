@@ -219,7 +219,7 @@ jobs:
         - get: cloud-platform-cli
           trigger: false
       - task: check-divergence-k8s-components
-        image: 
+        image: cloud-platform-cli
         config:
           platform: linux
           params:
