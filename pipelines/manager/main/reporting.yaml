@@ -6,6 +6,13 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
   footer: concourse.cloud-platform.service.justice.gov.uk/
 
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
 resources:
 - name: cloud-platform-infrastructure-repo
   type: git
@@ -53,13 +60,6 @@ resources:
   type: time
   source:
     interval: 6h
-
-resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-    tag: latest
 
 groups:
 - name: reporting
