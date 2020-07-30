@@ -35,6 +35,10 @@ resources:
   type: time
   source:
     interval: 24h
+- name: every-hour
+  type: time
+  source:
+    interval: 1h
 
 resource_types:
 - name: slack-notification
@@ -49,6 +53,7 @@ groups:
     - recycle-node-live-1
     - delete-manually-created-pods-live-1
     - delete-excess-dns
+    - update-authorized-keys
 
 jobs:
   - name: recycle-node-live-1
@@ -171,3 +176,33 @@ jobs:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
 
+  - name: update-authorized-keys
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-hour
+          trigger: true
+        - get: tools-image
+        - get: cloud-platform-environments-repo
+      - task: run-script 
+        image: tools-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-environments-repo
+          params:
+            GITHUB_TOKEN: ((authorized-keys-github-token.token)) 
+          run:
+            path: /bin/sh
+            dir: cloud-platform-environments-repo
+            args:
+              - -c
+              - |
+                ./bin/update-authorized-keys.rb
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
