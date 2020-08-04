@@ -1,2 +1,0 @@
-terraform.tfstate* filter=git-crypt diff=git-crypt
-secrets.tf filter=git-crypt diff=git-crypt
