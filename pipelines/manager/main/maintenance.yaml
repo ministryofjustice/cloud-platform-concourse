@@ -18,6 +18,11 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
     branch: main
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+- name: cloud-platform-terraform-bastion-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-terraform-bastion.git
+    branch: main
 - name: tools-image
   type: docker-image
   source:
@@ -184,18 +189,18 @@ jobs:
         - get: every-hour
           trigger: true
         - get: tools-image
-        - get: cloud-platform-environments-repo
+        - get: cloud-platform-terraform-bastion-repo
       - task: run-script 
         image: tools-image
         config:
           platform: linux
           inputs:
-            - name: cloud-platform-environments-repo
+            - name: cloud-platform-terraform-bastion-repo
           params:
             GITHUB_TOKEN: ((authorized-keys-github-token.token)) 
           run:
             path: /bin/sh
-            dir: cloud-platform-environments-repo
+            dir: cloud-platform-terraform-bastion-repo
             args:
               - -c
               - |
