@@ -46,43 +46,6 @@ groups:
 
 
 jobs:
-  - name: divergence-global-iam
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-4-hours
-          trigger: true
-        - get: cloud-platform-infrastructure-repo
-          trigger: false
-        - get: cloud-platform-cli
-          trigger: false
-      - task: check-divergence-global-iam
-        image: cloud-platform-cli
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            AWS_REGION: eu-west-2
-          inputs:
-          - name: cloud-platform-infrastructure-repo
-            path: ./
-          run:
-            path: /bin/sh
-            args:
-              - -c
-              - |
-                cd terraform/global-resources/iam
-                cloud-platform terraform check-divergence
-          outputs:
-            - name: metadata
-        on_failure:
-          put: slack-alert
-          params:
-            <<: *SLACK_NOTIFICATION_DEFAULTS
-            attachments:
-              - color: "danger"
-                <<: *SLACK_ATTACHMENTS_DEFAULTS
   - name: divergence-eks
     serial: true
     plan:
