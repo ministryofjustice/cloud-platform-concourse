@@ -33,7 +33,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-    tag: "2.13"
+    tag: "2.15"
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
