@@ -217,7 +217,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-day
+        - get: every-hour
           trigger: true
         - get: cloud-platform-environments-repo
         - get: tools-image
