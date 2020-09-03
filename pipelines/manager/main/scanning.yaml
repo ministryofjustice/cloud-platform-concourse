@@ -11,6 +11,11 @@ resources:
   source:
     repository: ministryofjustice/cloud-platform-sonar-scanner-cli
     tag: 1.1
+
+- name: every-12-hours
+  type: time
+  source:
+    interval: 12h
   
 groups:
 - name: environments-terraform
@@ -23,6 +28,8 @@ jobs:
     plan:
       - in_parallel:
         - get: cloud-platform-environments-repo
+          trigger: true
+        - get: every-12-hours
           trigger: true
         - get: tools-image
       - task: sonar-scan-all-repos
