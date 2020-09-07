@@ -28,7 +28,7 @@ jobs:
     plan:
       - in_parallel:
         - get: cloud-platform-environments-repo
-          trigger: true
+          trigger: false
         - get: every-12-hours
           trigger: true
         - get: tools-image
