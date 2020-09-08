@@ -44,6 +44,11 @@ resources:
   source:
     repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter
     tag: "2.13"
+- name: orphaned-resources-reporter-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-report-orphaned-resources
+    tag: "1.1"
 - name: slack-alert
   type: slack-notification
   source:
@@ -79,6 +84,7 @@ groups:
     - eks-integration-tests
     - manual-snapshots-checker
     - hoodaw-dashboard-reporter
+    - orphaned-resources-report
 
 jobs:
   - name: orphaned-namespaces
@@ -315,3 +321,27 @@ jobs:
                 title: 'How out of date are we - action required:'
                 title_link: 'https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk/dashboard'
                 footer: how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+
+  - name: orphaned-resources-report
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-6-hours
+          trigger: true
+        - get: orphaned-resources-reporter-image
+      - task: post-to-hoodaw
+        image: orphaned-resources-reporter-image
+        config:
+          platform: linux
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            HOODAW_API_KEY: ((hoodaw-creds.api_key))
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data-to-hoodaw.sh
