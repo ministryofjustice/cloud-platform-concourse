@@ -270,3 +270,10 @@ jobs:
               - |
                 bundle install --without development test
                 ./bin/auto-delete-namespace.rb
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
