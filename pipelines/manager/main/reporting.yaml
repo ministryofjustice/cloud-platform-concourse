@@ -377,4 +377,4 @@ jobs:
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
             PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
           run:
-            p%ath: /root/post-namespace-costs.rb
+            path: /root/post-namespace-costs.rb
