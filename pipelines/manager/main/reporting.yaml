@@ -33,7 +33,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator
-    tag: "1.2"
+    tag: "1.3"
 - name: hoodaw-updater-image
   type: docker-image
   source:
