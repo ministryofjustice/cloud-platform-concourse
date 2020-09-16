@@ -376,6 +376,5 @@ jobs:
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
             PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
-            TF_LOG: "DEBUG"
           run:
             path: /root/post-namespace-costs.rb
