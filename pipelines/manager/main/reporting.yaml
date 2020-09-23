@@ -162,6 +162,7 @@ jobs:
             REPO_EXCEPTIONS: "cloud-platform-runbooks cloud-platform-user-guide-publish"
             REGEXP: "^cloud-platform-*"
             TEAM: WebOps
+            HOODAW_API_KEY: ((hoodaw-creds.api_key))
           run:
             path: /app/update.sh
 
