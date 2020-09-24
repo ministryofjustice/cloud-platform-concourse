@@ -356,7 +356,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-24-hours
+        - get: every-12-hours
           trigger: true
         - get: cost-calculator-image
       - task: post-costs-to-hoodaw
