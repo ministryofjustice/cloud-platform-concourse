@@ -28,7 +28,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
-    tag: "2.21"
+    tag: "2.23"
 - name: cost-calculator-image
   type: docker-image
   source:
@@ -91,6 +91,7 @@ groups:
     - hoodaw-dashboard-reporter
     - orphaned-resources-report
     - namespace-cost-report
+    - hosted-services-report
 
 jobs:
   - name: orphaned-namespaces
@@ -379,3 +380,30 @@ jobs:
             PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
           run:
             path: /root/post-namespace-costs.rb
+
+  - name: hosted-services-report
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-12-hours
+          trigger: true
+        - get: orphaned-namespace-checker-image
+      - task: post-hosted-services-to-hoodaw
+        image: orphaned-namespace-checker-image
+        config:
+          platform: linux
+          params:
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG_AWS_REGION: eu-west-2
+            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+            KUBECONFIG_S3_KEY: kubeconfig
+            KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
+            KUBE_CONFIG: /tmp/kubeconfig
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data-to-hoodaw.sh
