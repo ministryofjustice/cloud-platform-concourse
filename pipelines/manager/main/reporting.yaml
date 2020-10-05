@@ -393,8 +393,13 @@ jobs:
         config:
           platform: linux
           params:
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG_AWS_REGION: eu-west-2
+            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+            KUBECONFIG_S3_KEY: kubeconfig
+            KUBECONFIG: /tmp/kubeconfig
             KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
-            KUBE_CONFIG: /tmp/kubeconfig
             HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
             HOODAW_API_KEY: ((hoodaw-creds.api_key))
           run:
