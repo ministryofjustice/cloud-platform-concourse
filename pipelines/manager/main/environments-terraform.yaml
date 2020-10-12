@@ -28,11 +28,11 @@ resources:
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
     paths:
     - namespaces/live-1.cloud-platform.service.justice.gov.uk
-- name: tools-image
+- name: pipeline-tools-image
   type: docker-image
   source:
-    repository: ministryofjustice/cloud-platform-tools
-    tag: "1.21"
+    repository: ministryofjustice/cloud-platform-pipeline-tools
+    tag: "1.24"
 - name: slack-alert
   type: slack-notification
   source:
@@ -73,9 +73,9 @@ jobs:
           trigger: false
         - get: cloud-platform-terraform-gitops-repo
           trigger: true
-        - get: tools-image
+        - get: pipeline-tools-image
       - task: apply-environments
-        image: tools-image
+        image: pipeline-tools-image
         config:
           platform: linux
           inputs:
@@ -126,9 +126,9 @@ jobs:
       - in_parallel:
         - get: cloud-platform-environments-repo
           trigger: true
-        - get: tools-image
+        - get: pipeline-tools-image
       - task: apply-namespace-changes
-        image: tools-image
+        image: pipeline-tools-image
         config:
           platform: linux
           inputs:
@@ -183,9 +183,9 @@ jobs:
         params:
           path: cloud-platform-environments-live-1-pull-requests
           status: pending
-      - get: tools-image
+      - get: pipeline-tools-image
       - task: plan-environments
-        image: tools-image
+        image: pipeline-tools-image
         config:
           platform: linux
           inputs:
@@ -241,9 +241,9 @@ jobs:
       - in_parallel:
         - get: cloud-platform-environments-repo
           trigger: true
-        - get: tools-image
+        - get: pipeline-tools-image
       - task: destroy-deleted-namespaces
-        image: tools-image
+        image: pipeline-tools-image
         config:
           platform: linux
           inputs:
