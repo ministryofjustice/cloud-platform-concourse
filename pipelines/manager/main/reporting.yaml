@@ -33,7 +33,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator
-    tag: "1.4"
+    tag: "2.0"
 - name: hoodaw-updater-image
   type: docker-image
   source:
@@ -358,7 +358,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-12-hours
+        - get: every-6-hours
           trigger: true
         - get: cost-calculator-image
       - task: post-costs-to-hoodaw
@@ -368,16 +368,8 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            AWS_REGION: eu-west-2
             HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
             HOODAW_API_KEY: ((hoodaw-creds.api_key))
-            TF_VAR_cluster_name: live-1
-            TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
-            TF_VAR_cluster_state_key: cloud-platform/live-1/terraform.tfstate
-            KOPS_STATE_STORE: s3://cloud-platform-kops-state
-            PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
-            PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
-            PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
           run:
             path: /root/post-namespace-costs.rb
 
