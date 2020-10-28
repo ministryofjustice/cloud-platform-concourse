@@ -75,8 +75,7 @@ jobs:
               - -c
               - |
                 cd terraform/cloud-platform-eks/
-                echo -e "vpc_name=\"live-1\"" > manager.tfvars
-                cloud-platform terraform check-divergence --workspace manager --var-file manager.tfvars
+                cloud-platform terraform check-divergence --workspace manager
           outputs:
             - name: metadata
         on_failure:
