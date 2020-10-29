@@ -15,7 +15,6 @@ resources:
   check_every: 1m
   source:
     repository: ministryofjustice/cloud-platform-infrastructure
-    # access_token: ((cloud-platform-infrastructure-pr-git-access-token))
     access_token: ((cloud-platform-infrastructure-pr-git-access-token))
     git_crypt_key: ((cloud-platform-infrastructure-git-crypt.key))
 
