@@ -9,7 +9,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-cli
-    tag: "1.5.2"
+    tag: "1.6.0"
 - name: pull-request
   type: pull-request
   check_every: 1m
@@ -61,12 +61,7 @@ jobs:
                 kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
               )
               cd pull-request/
-              if grep -q 'terraform/cloud-platform-components/' .git/resource/changed_files; then
-                cd terraform/cloud-platform-components/
-                cloud-platform terraform plan --workspace live-1
-              else
-                echo "No changes in live-1 components - skipping"
-              fi
+              cloud-platform terraform plan --dirs-file .git/resource/changed_files
       on_failure:
         put: pull-request
         params:
