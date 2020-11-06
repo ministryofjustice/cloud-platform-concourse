@@ -22,10 +22,10 @@ resources:
 groups:
 - name: cp-infra-terraform-automation
   jobs:
-    - plan-live-1-components
+    - plan-cloud-platform-infrastructure
 
 jobs:
-  - name: plan-live-1-components
+  - name: plan-cloud-platform-infrastructure
     serial: true
     plan:
     - get: cloud-platform-cli
@@ -53,6 +53,7 @@ jobs:
         - name: pull-request
         run:
           path: /bin/sh
+          dir: pull-request
           args:
             - -c
             - |
@@ -60,7 +61,6 @@ jobs:
                 aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
               )
-              cd pull-request/
               cloud-platform terraform plan --dirs-file .git/resource/changed_files
       on_failure:
         put: pull-request
