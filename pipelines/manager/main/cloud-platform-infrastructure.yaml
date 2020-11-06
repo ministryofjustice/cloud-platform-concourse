@@ -5,6 +5,12 @@ resource_types:
     repository: teliaoss/github-pr-resource
 
 resources:
+- name: cloud-platform-infrastructure-repo
+  type: git
+  source:
+    uri: https://github.com/ministryofjustice/cloud-platform-infrastructure.git
+    branch: main
+    # git_crypt_key: ((cloud-platform-environments-git-crypt.key))
 - name: cloud-platform-cli
   type: docker-image
   source:
@@ -20,9 +26,10 @@ resources:
 
 
 groups:
-- name: cp-infra-terraform-automation
+- name: cloud-platform-infrastructure-terraform
   jobs:
     - plan-cloud-platform-infrastructure
+    - apply-cloud-platform-infrastructure
 
 jobs:
   - name: plan-cloud-platform-infrastructure
@@ -72,3 +79,45 @@ jobs:
         path: pull-request
         status: success
 
+  - name: apply-cloud-platform-infrastructure
+    serial: false
+    plan:
+      - in_parallel:
+        - get: cloud-platform-cli
+        - get: cloud-platform-infrastructure-repo
+          trigger: true
+          get_params: {list_changed_files: true}
+    - task: execute-terraform-apply
+      image: cloud-platform-cli
+      config:
+        platform: linux
+        inputs:
+        - name: cloud-platform-infrastructure-repo
+        params:
+          AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+          AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+          AWS_REGION: eu-west-2
+          KUBECONFIG: /tmp/kubeconfig
+          AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
+          AUTH0_CLIENT_ID: ((concourse-tf-auth0-credentials.client-id))
+          AUTH0_CLIENT_SECRET: ((concourse-tf-auth0-credentials.client_secret))
+        run:
+          path: /bin/sh
+          dir: pull-request
+          args:
+            - -c
+            - |
+              (
+                aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
+                kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
+              )
+              cloud-platform terraform apply --dirs-file .git/resource/changed_files
+      on_failure:
+        put: pull-request
+        params:
+          path: pull-request
+          status: failure
+    - put: pull-request
+      params:
+        path: pull-request
+        status: success
