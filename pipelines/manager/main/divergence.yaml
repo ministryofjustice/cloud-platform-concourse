@@ -40,6 +40,7 @@ groups:
   jobs:
     - divergence-kops
     - divergence-eks
+    - divergence-eks-components
     - divergence-networking
     - divergence-k8s-components
 
@@ -75,6 +76,52 @@ jobs:
               - -c
               - |
                 cd terraform/cloud-platform-eks/
+                cloud-platform terraform check-divergence --workspace manager
+          outputs:
+            - name: metadata
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
+  - name: divergence-eks-components
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-4-hours
+          trigger: true
+        - get: cloud-platform-infrastructure-repo
+          trigger: false
+        - get: cloud-platform-cli
+          trigger: false
+      - task: check-divergence-eks-components
+        image: cloud-platform-cli
+        config:
+          platform: linux
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            AWS_REGION: eu-west-2
+            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+            KUBECONFIG_S3_KEY: kubeconfig
+            KUBECONFIG: /tmp/kubeconfig
+            KUBE_CLUSTER: manager.cloud-platform.service.justice.gov.uk
+            KUBE_CTX: manager.cloud-platform.service.justice.gov.uk
+          inputs:
+          - name: cloud-platform-infrastructure-repo
+            path: ./
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |
+                (
+                  aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
+                  kubectl config use-context ${KUBE_CLUSTER}
+                )
+                cd terraform/cloud-platform-eks/components
                 cloud-platform terraform check-divergence --workspace manager
           outputs:
             - name: metadata
