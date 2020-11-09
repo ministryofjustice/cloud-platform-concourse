@@ -9,7 +9,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-cli
-    tag: "1.6.0"
+    tag: "1.6.1"
 - name: pull-request
   type: pull-request
   check_every: 1m
@@ -17,12 +17,21 @@ resources:
     repository: ministryofjustice/cloud-platform-infrastructure
     access_token: ((cloud-platform-infrastructure-pr-git-access-token))
     git_crypt_key: ((cloud-platform-infrastructure-git-crypt.key))
+- name: merged-pull-request
+  type: pull-request
+  check_every: 1m
+  source:
+    repository: mogaal/cloud-platform-infrastructure
+    access_token: ((mogaal-cloud-platform-infrastructure-pr-git-access-token))
+    git_crypt_key: ((cloud-platform-infrastructure-git-crypt.key))
+    states: [ "MERGED" ]
 
 
 groups:
 - name: cp-infra-terraform-automation
   jobs:
     - plan-cloud-platform-infrastructure
+    - apply-cloud-platform-infrastructure
 
 jobs:
   - name: plan-cloud-platform-infrastructure
@@ -71,4 +80,40 @@ jobs:
       params:
         path: pull-request
         status: success
+  - name: apply-cloud-platform-infrastructure
+    serial: true
+    plan:
+    - get: cloud-platform-cli
+    - get: merged-pull-request
+      trigger: true
+      version: every
+    - put: merged-pull-request
+      params:
+        path: merged-pull-request
+      get_params: {list_changed_files: true}
+    - task: execute-terraform-apply
+      image: cloud-platform-cli
+      config:
+        platform: linux
+        params:
+          AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+          AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+          AWS_REGION: eu-west-2
+          KUBECONFIG: /tmp/kubeconfig
+          AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
+          AUTH0_CLIENT_ID: ((concourse-tf-auth0-credentials.client-id))
+          AUTH0_CLIENT_SECRET: ((concourse-tf-auth0-credentials.client_secret))
+        inputs:
+        - name: merged-pull-request
+        run:
+          path: /bin/sh
+          dir: merged-pull-request
+          args:
+            - -c
+            - |
+              (
+                aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
+                kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
+              )
+              cloud-platform terraform apply --dirs-file .git/resource/changed_files
 
