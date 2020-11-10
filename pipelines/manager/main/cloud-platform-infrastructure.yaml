@@ -21,8 +21,8 @@ resources:
   type: pull-request
   check_every: 1m
   source:
-    repository: mogaal/cloud-platform-infrastructure
-    access_token: ((mogaal-cloud-platform-infrastructure-pr-git-access-token))
+    repository: ministryofjustice/cloud-platform-infrastructure
+    access_token: ((cloud-platform-infrastructure-pr-git-access-token))
     git_crypt_key: ((cloud-platform-infrastructure-git-crypt.key))
     states: [ "MERGED" ]
 
