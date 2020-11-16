@@ -33,6 +33,8 @@ resources:
   source:
     repository: ministryofjustice/cloud-platform-pipeline-tools
     tag: "1.24"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
   type: slack-notification
   source:
