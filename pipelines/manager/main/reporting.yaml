@@ -54,6 +54,8 @@ resources:
   source:
     repository: ministryofjustice/cloud-platform-report-orphaned-resources
     tag: "1.9"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
   type: slack-notification
   source:
