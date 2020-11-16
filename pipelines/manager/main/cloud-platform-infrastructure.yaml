@@ -10,6 +10,8 @@ resources:
   source:
     repository: ministryofjustice/cloud-platform-cli
     tag: "1.6.2"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: pull-request
   type: pull-request
   check_every: 1m
