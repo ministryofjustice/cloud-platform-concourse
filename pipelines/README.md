@@ -2,13 +2,15 @@
 
 ## Structure
 
-The top level directories separate the configured pipelines for the different Concourse installations. They use the cluster name as it appears in the terraform workspaces (see the [top level README.md file](README.md))
+The top level directories separate the configured pipelines for the different Concourse installations. They use the cluster name as it appears in the terraform workspaces (see the top level directory e.g. [manager](manager) contains the list of pipelines that are running on the cluster named `manager`
 
 The subdirectories within each cluster directory are then used to separate pipelines per Concourse team.
 
+Currently there is only one cluster - `manager` where the Cloud Platform pipelines runs.
+
 ## Bootstrap
 
-There is a bootstrap pipeline (see [`bootstrap.yaml`](live-1/main/bootstrap.yaml)) which can be used in any installation to manage pipeline configuration using this git repository as the source of truth. It uses the filename to deduce the pipeline's name (eg. `somejob.yaml` will result in a pipeline named `somejob`).
+There is a bootstrap pipeline (see [`bootstrap.yaml`](manager/main/bootstrap.yaml)) which can be used in any installation to manage pipeline configuration using this git repository as the source of truth. It uses the filename to deduce the pipeline's name (eg. `somejob.yaml` will result in a pipeline named `somejob`).
 
 ### Setup
 
