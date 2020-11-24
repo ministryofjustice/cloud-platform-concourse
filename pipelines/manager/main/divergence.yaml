@@ -16,8 +16,10 @@ resources:
 - name: cloud-platform-cli
   type: docker-image
   source:
-    repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/cloud-platform-cli
+    repository: ministryofjustice/cloud-platform-cli
     tag: "1.6.3"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
   type: slack-notification
   source:
