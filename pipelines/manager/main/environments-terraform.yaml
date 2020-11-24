@@ -31,8 +31,10 @@ resources:
 - name: pipeline-tools-image
   type: docker-image
   source:
-    repository: 754256621582.dkr.ecr.eu-west-2.amazonaws.com/cloud-platform/cloud-platform-tools-image
-    tag: "1.25"
+    repository: ministryofjustice/cloud-platform-tools
+    tag: "1.24"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
   type: slack-notification
   source:
