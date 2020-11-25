@@ -32,11 +32,11 @@ resources:
 groups:
 - name: cp-infra-terraform-automation
   jobs:
-    - plan-cloud-platform-infrastructure
-    - apply-cloud-platform-infrastructure
+    - plan-cloud-platform-components
+    - apply-cloud-platform-components
 
 jobs:
-  - name: plan-cloud-platform-infrastructure
+  - name: plan-cloud-platform-components
     serial: true
     plan:
     - get: cloud-platform-cli
@@ -82,7 +82,7 @@ jobs:
       params:
         path: pull-request
         status: success
-  - name: apply-cloud-platform-infrastructure
+  - name: apply-cloud-platform-components
     serial: true
     plan:
     - get: cloud-platform-cli
