@@ -50,10 +50,14 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
     tag: latest
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: pull-request
   type: docker-image
   source:
     repository: teliaoss/github-pr-resource
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 
 
 groups:
