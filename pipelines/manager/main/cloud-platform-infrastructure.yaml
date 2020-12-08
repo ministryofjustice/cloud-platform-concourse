@@ -53,8 +53,8 @@ jobs:
       config:
         platform: linux
         params:
-          AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-          AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+          AWS_ACCESS_KEY_ID: ((cloud-platform-admin-user-creds.access-key-id))
+          AWS_SECRET_ACCESS_KEY: ((cloud-platform-admin-user-creds.secret-access-key))
           AWS_REGION: eu-west-2
           KUBECONFIG: /tmp/kubeconfig
           AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
@@ -98,8 +98,8 @@ jobs:
       config:
         platform: linux
         params:
-          AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-          AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+          AWS_ACCESS_KEY_ID: ((cloud-platform-admin-user-creds.access-key-id))
+          AWS_SECRET_ACCESS_KEY: ((cloud-platform-admin-user-creds.secret-access-key))
           AWS_REGION: eu-west-2
           KUBECONFIG: /tmp/kubeconfig
           AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
