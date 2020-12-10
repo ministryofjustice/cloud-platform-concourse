@@ -21,10 +21,21 @@ resources:
     tag: "1.25"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
+- name: orphaned-statefiles-reporter-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-orphaned-terraform-statefiles
+    tag: "1.3"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
+- name: every-day
+  type: time
+  source:
+    interval: 24h
 - name: every-120m
   type: time
   source:
@@ -43,6 +54,7 @@ groups:
 - name: hoodaw
   jobs:
     - hoodaw-namespace-usage
+    - hoodaw-orphaned-statefiles
 
 jobs:
   - name: hoodaw-namespace-usage
@@ -78,6 +90,42 @@ jobs:
                 )
                 kubectl config use-context ${PIPELINE_CLUSTER}
                 ./bin/post_namespace_usage_data.sh
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
+
+  - name: hoodaw-orphaned-statefiles
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-day
+          trigger: true
+        - get: orphaned-statefiles-reporter-image
+      - task: post-data
+        image: orphaned-statefiles-reporter-image
+        config:
+          platform: linux
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            AWS_REGION: "eu-west-2"
+            KOPS_STATE_STORE: s3://cloud-platform-kops-state
+            TF_STATE_BUCKET_REGION: "eu-west-1"
+            TF_STATE_BUCKET_AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            TF_STATE_BUCKET_AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            HOODAW_API_KEY: ((hoodaw-creds.api_key))
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data.sh
         on_failure:
           put: slack-alert
           params:
