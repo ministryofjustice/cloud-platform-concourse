@@ -14,11 +14,6 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
     branch: main
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
-- name: cloud-platform-terraform-gitops-repo
-  type: git
-  source:
-    uri: https://github.com/ministryofjustice/cloud-platform-terraform-gitops.git
-    branch: main
 - name: cloud-platform-environments-live-1-pull-requests
   type: pull-request
   check_every: 1m
@@ -77,8 +72,6 @@ jobs:
           trigger: true
         - get: cloud-platform-environments-repo
           trigger: false
-        - get: cloud-platform-terraform-gitops-repo
-          trigger: true
         - get: pipeline-tools-image
       - task: apply-environments
         image: pipeline-tools-image
