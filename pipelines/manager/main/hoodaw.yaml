@@ -64,7 +64,7 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
-            HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            HOODAW_HOST: ((hoodaw-creds.hostname))
             HOODAW_API_KEY: ((hoodaw-creds.api_key))
             PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
           run:

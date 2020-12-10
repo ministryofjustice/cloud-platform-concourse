@@ -172,7 +172,7 @@ jobs:
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-            DATA_URL: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            DATA_URL: ((hoodaw-creds.hostname))
             GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
             DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
             ORGANIZATION: ministryofjustice
@@ -331,7 +331,7 @@ jobs:
           outputs:
             - name: report
           params:
-            DASHBOARD_URL: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk/dashboard
+            DASHBOARD_URL: ((hoodaw-creds.hostname))/dashboard
             OUTPUT_FILE: report/action_items
           run:
             path: /app/report.rb
@@ -343,8 +343,8 @@ jobs:
             attachments:
               - color: "warning"
                 title: 'How out of date are we - action required:'
-                title_link: 'https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk/dashboard'
-                footer: how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+                title_link: ((hoodaw-creds.hostname))/dashboard
+                footer: ((hoodaw-creds.hostname))
 
   - name: orphaned-resources-report
     serial: true
@@ -360,7 +360,7 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            HOODAW_HOST: ((hoodaw-creds.hostname))
             HOODAW_API_KEY: ((hoodaw-creds.api_key))
           run:
             path: /bin/sh
@@ -384,7 +384,7 @@ jobs:
           params:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            HOODAW_HOST: ((hoodaw-creds.hostname))
             HOODAW_API_KEY: ((hoodaw-creds.api_key))
           run:
             path: /root/post-namespace-costs.rb
@@ -408,7 +408,7 @@ jobs:
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
             KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
-            HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
+            HOODAW_HOST: ((hoodaw-creds.hostname))
             HOODAW_API_KEY: ((hoodaw-creds.api_key))
           run:
             path: /bin/sh
