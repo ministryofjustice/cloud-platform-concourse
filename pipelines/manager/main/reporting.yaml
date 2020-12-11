@@ -6,6 +6,16 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
   footer: concourse.cloud-platform.service.justice.gov.uk/
 
+aws-credentials: &AWS_CREDENTIALS
+  AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+  AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+  AWS_REGION: eu-west-2
+
+kube-config: &KUBECONFIG_PARAMS
+  KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+  KUBECONFIG_S3_KEY: kubeconfig
+  KUBECONFIG: /tmp/kubeconfig
+
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -35,39 +45,11 @@ resources:
     tag: "2.24"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: cost-calculator-image
-  type: docker-image
-  source:
-    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator
-    tag: "2.0"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: hoodaw-updater-image
-  type: docker-image
-  source:
-    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-    tag: "2.27"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tools-terraform
     tag: "0.3"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: dashboard-reporter-image
-  type: docker-image
-  source:
-    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter
-    tag: "2.13"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: orphaned-resources-reporter-image
-  type: docker-image
-  source:
-    repository: ministryofjustice/cloud-platform-report-orphaned-resources
-    tag: "1.10"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
@@ -82,10 +64,6 @@ resources:
   type: time
   source:
     interval: 12h
-- name: every-24-hours
-  type: time
-  source:
-    interval: 24h
 - name: every-week
   type: time
   source:
@@ -100,14 +78,9 @@ groups:
 - name: reporting
   jobs:
     - orphaned-namespaces
-    - how-out-of-date-are-we
     - integration-tests
     - eks-integration-tests
     - manual-snapshots-checker
-    - hoodaw-dashboard-reporter
-    - orphaned-resources-report
-    - namespace-cost-report
-    - hosted-services-report
 
 jobs:
   - name: orphaned-namespaces
@@ -153,36 +126,6 @@ jobs:
                 - color: "danger"
                   <<: *SLACK_ATTACHMENTS_DEFAULTS
 
-  - name: how-out-of-date-are-we
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-hour
-          trigger: true
-        - get: hoodaw-updater-image
-      - task: how-out-of-date-are-we
-        image: hoodaw-updater-image
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            AWS_REGION: eu-west-2
-            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
-            KUBECONFIG_S3_KEY: kubeconfig
-            KUBECONFIG: /tmp/kubeconfig
-            KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-            DATA_URL: ((hoodaw-creds.hostname))
-            GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
-            DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
-            ORGANIZATION: ministryofjustice
-            REPO_EXCEPTIONS: "cloud-platform-runbooks cloud-platform-user-guide-publish"
-            REGEXP: "^cloud-platform-*"
-            TEAM: WebOps
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
-          run:
-            path: /app/update.sh
-
   - name: integration-tests
     serial: true
     plan:
@@ -200,12 +143,8 @@ jobs:
           inputs:
             - name: cloud-platform-infrastructure-repo
           params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            AWS_REGION: eu-west-2
-            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
-            KUBECONFIG_S3_KEY: kubeconfig
-            KUBECONFIG: /tmp/kubeconfig
+            <<: *AWS_CREDENTIALS
+            <<: *KUBECONFIG_PARAMS
             KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             EXECUTION_CONTEXT: integration-test-pipeline
           run:
@@ -244,12 +183,8 @@ jobs:
           inputs:
             - name: cloud-platform-infrastructure-repo
           params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            AWS_REGION: eu-west-2
-            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
-            KUBECONFIG_S3_KEY: kubeconfig
-            KUBECONFIG: /tmp/kubeconfig
+            <<: *AWS_CREDENTIALS
+            <<: *KUBECONFIG_PARAMS
             KUBE_CLUSTER: manager.cloud-platform.service.justice.gov.uk
             EXECUTION_CONTEXT: integration-test-pipeline
           run:
@@ -284,9 +219,7 @@ jobs:
         config:
           platform: linux
           params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            AWS_REGION: eu-west-2
+            <<: *AWS_CREDENTIALS
             ALERT_WHEN_SNAPSHOTS_PERCENT_GT: 70
           run:
             path: /bin/bash
@@ -316,104 +249,3 @@ jobs:
             attachments:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
-
-  - name: hoodaw-dashboard-reporter
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-24-hours
-          trigger: true
-        - get: dashboard-reporter-image
-      - task: generate-report
-        image: dashboard-reporter-image
-        config:
-          platform: linux
-          outputs:
-            - name: report
-          params:
-            DASHBOARD_URL: ((hoodaw-creds.hostname))/dashboard
-            OUTPUT_FILE: report/action_items
-          run:
-            path: /app/report.rb
-        on_failure:
-          put: slack-alert
-          params:
-            channel: '#cloud-platform'
-            text_file: report/action_items
-            attachments:
-              - color: "warning"
-                title: 'How out of date are we - action required:'
-                title_link: ((hoodaw-creds.hostname))/dashboard
-                footer: ((hoodaw-creds.hostname))
-
-  - name: orphaned-resources-report
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-6-hours
-          trigger: true
-        - get: orphaned-resources-reporter-image
-      - task: post-to-hoodaw
-        image: orphaned-resources-reporter-image
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            HOODAW_HOST: ((hoodaw-creds.hostname))
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
-          run:
-            path: /bin/sh
-            args:
-              - -c
-              - |-
-                cd /app
-                ./bin/post-data-to-hoodaw.sh
-
-  - name: namespace-cost-report
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-6-hours
-          trigger: true
-        - get: cost-calculator-image
-      - task: post-costs-to-hoodaw
-        image: cost-calculator-image
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            HOODAW_HOST: ((hoodaw-creds.hostname))
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
-          run:
-            path: /root/post-namespace-costs.rb
-
-  - name: hosted-services-report
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-12-hours
-          trigger: true
-        - get: orphaned-namespace-checker-image
-      - task: post-hosted-services-to-hoodaw
-        image: orphaned-namespace-checker-image
-        config:
-          platform: linux
-          params:
-            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            KUBECONFIG_AWS_REGION: eu-west-2
-            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
-            KUBECONFIG_S3_KEY: kubeconfig
-            KUBECONFIG: /tmp/kubeconfig
-            KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
-            HOODAW_HOST: ((hoodaw-creds.hostname))
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
-          run:
-            path: /bin/sh
-            args:
-              - -c
-              - |-
-                cd /app
-                ./bin/post-data-to-hoodaw.sh

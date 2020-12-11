@@ -7,6 +7,23 @@ slack-attachments-defaults: &SLACK_ATTACHMENTS_DEFAULTS
   title_link: 'https://concourse.cloud-platform.service.justice.gov.uk/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME'
   footer: concourse.cloud-platform.service.justice.gov.uk
 
+aws-credentials: &AWS_CREDENTIALS
+  AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+  AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+
+hoodaw-credentials: &HOODAW_CREDENTIALS
+  HOODAW_HOST: ((hoodaw-creds.hostname))
+  HOODAW_API_KEY: ((hoodaw-creds.api_key))
+
+aws-plus-hoodaw: &AWS_AND_HOODAW_CREDENTIALS
+  <<: *AWS_CREDENTIALS
+  <<: *HOODAW_CREDENTIALS
+
+kube-config: &KUBECONFIG_PARAMS
+  KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+  KUBECONFIG_S3_KEY: kubeconfig
+  KUBECONFIG: /tmp/kubeconfig
+
 resources:
 - name: cloud-platform-environments-repo
   type: git
@@ -14,6 +31,41 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
     branch: main
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+- name: orphaned-namespace-checker-image
+  type: docker-image
+  source:
+    repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
+    tag: "2.24"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
+- name: cost-calculator-image
+  type: docker-image
+  source:
+    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator
+    tag: "2.0"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
+- name: orphaned-resources-reporter-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-report-orphaned-resources
+    tag: "1.10"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
+- name: dashboard-reporter-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter
+    tag: "2.13"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
+- name: hoodaw-updater-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
+    tag: "2.27"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: pipeline-tools-image
   type: docker-image
   source:
@@ -32,6 +84,18 @@ resources:
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
+- name: every-hour
+  type: time
+  source:
+    interval: 60m
+- name: every-6-hours
+  type: time
+  source:
+    interval: 6h
+- name: every-12-hours
+  type: time
+  source:
+    interval: 12h
 - name: every-day
   type: time
   source:
@@ -40,6 +104,10 @@ resources:
   type: time
   source:
     interval: 120m
+- name: every-24-hours
+  type: time
+  source:
+    interval: 24h
 
 resource_types:
 - name: slack-notification
@@ -53,10 +121,71 @@ resource_types:
 groups:
 - name: hoodaw
   jobs:
+    - hoodaw-dashboard-reporter
+    - how-out-of-date-are-we
     - hoodaw-namespace-usage
     - hoodaw-orphaned-statefiles
+    - orphaned-resources-report
+    - namespace-cost-report
+    - hosted-services-report
 
 jobs:
+  - name: hoodaw-dashboard-reporter
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-24-hours
+          trigger: true
+        - get: dashboard-reporter-image
+      - task: generate-report
+        image: dashboard-reporter-image
+        config:
+          platform: linux
+          outputs:
+            - name: report
+          params:
+            DASHBOARD_URL: ((hoodaw-creds.hostname))/dashboard
+            OUTPUT_FILE: report/action_items
+          run:
+            path: /app/report.rb
+        on_failure:
+          put: slack-alert
+          params:
+            channel: '#cloud-platform'
+            text_file: report/action_items
+            attachments:
+              - color: "warning"
+                title: 'How out of date are we - action required:'
+                title_link: ((hoodaw-creds.hostname))/dashboard
+                footer: ((hoodaw-creds.hostname))
+
+  - name: how-out-of-date-are-we
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-hour
+          trigger: true
+        - get: hoodaw-updater-image
+      - task: how-out-of-date-are-we
+        image: hoodaw-updater-image
+        config:
+          platform: linux
+          params:
+            AWS_REGION: eu-west-2
+            <<: *AWS_CREDENTIALS
+            <<: *KUBECONFIG_PARAMS
+            KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+            DATA_URL: ((hoodaw-creds.hostname))
+            GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
+            DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
+            ORGANIZATION: ministryofjustice
+            REPO_EXCEPTIONS: "cloud-platform-runbooks cloud-platform-user-guide-publish"
+            REGEXP: "^cloud-platform-*"
+            TEAM: WebOps
+            HOODAW_API_KEY: ((hoodaw-creds.api_key))
+          run:
+            path: /app/update.sh
+
   - name: hoodaw-namespace-usage
     serial: true
     plan:
@@ -73,11 +202,8 @@ jobs:
           inputs:
             - name: cloud-platform-environments-repo
           params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            <<: *AWS_AND_HOODAW_CREDENTIALS
             KUBECONFIG: /tmp/kubeconfig
-            HOODAW_HOST: ((hoodaw-creds.hostname))
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
             PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
           run:
             path: /bin/sh
@@ -110,15 +236,12 @@ jobs:
         config:
           platform: linux
           params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            <<: *AWS_AND_HOODAW_CREDENTIALS
             AWS_REGION: "eu-west-2"
             KOPS_STATE_STORE: s3://cloud-platform-kops-state
             TF_STATE_BUCKET_REGION: "eu-west-1"
             TF_STATE_BUCKET_AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             TF_STATE_BUCKET_AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            HOODAW_HOST: https://how-out-of-date-are-we.apps.live-1.cloud-platform.service.justice.gov.uk
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
           run:
             path: /bin/sh
             args:
@@ -133,3 +256,66 @@ jobs:
             attachments:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
+
+  - name: orphaned-resources-report
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-6-hours
+          trigger: true
+        - get: orphaned-resources-reporter-image
+      - task: post-to-hoodaw
+        image: orphaned-resources-reporter-image
+        config:
+          platform: linux
+          params:
+            <<: *AWS_AND_HOODAW_CREDENTIALS
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data-to-hoodaw.sh
+
+  - name: namespace-cost-report
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-6-hours
+          trigger: true
+        - get: cost-calculator-image
+      - task: post-costs-to-hoodaw
+        image: cost-calculator-image
+        config:
+          platform: linux
+          params:
+            <<: *AWS_AND_HOODAW_CREDENTIALS
+          run:
+            path: /root/post-namespace-costs.rb
+
+  - name: hosted-services-report
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-12-hours
+          trigger: true
+        - get: orphaned-namespace-checker-image
+      - task: post-hosted-services-to-hoodaw
+        image: orphaned-namespace-checker-image
+        config:
+          platform: linux
+          params:
+            <<: *KUBECONFIG_PARAMS
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG_AWS_REGION: eu-west-2
+            KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
+            <<: *HOODAW_CREDENTIALS
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data-to-hoodaw.sh
