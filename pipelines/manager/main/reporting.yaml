@@ -49,13 +49,6 @@ resources:
     tag: "0.3"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: orphaned-resources-reporter-image
-  type: docker-image
-  source:
-    repository: ministryofjustice/cloud-platform-report-orphaned-resources
-    tag: "1.10"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
   type: slack-notification
   source:
@@ -85,7 +78,6 @@ groups:
     - integration-tests
     - eks-integration-tests
     - manual-snapshots-checker
-    - orphaned-resources-report
     - namespace-cost-report
     - hosted-services-report
 
@@ -267,30 +259,6 @@ jobs:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
 
-
-  - name: orphaned-resources-report
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-6-hours
-          trigger: true
-        - get: orphaned-resources-reporter-image
-      - task: post-to-hoodaw
-        image: orphaned-resources-reporter-image
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            HOODAW_HOST: ((hoodaw-creds.hostname))
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
-          run:
-            path: /bin/sh
-            args:
-              - -c
-              - |-
-                cd /app
-                ./bin/post-data-to-hoodaw.sh
 
   - name: namespace-cost-report
     serial: true
