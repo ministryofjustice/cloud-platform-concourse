@@ -14,6 +14,13 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
     branch: main
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+- name: dashboard-reporter-image
+  type: docker-image
+  source:
+    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter
+    tag: "2.13"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: hoodaw-updater-image
   type: docker-image
   source:
@@ -51,6 +58,10 @@ resources:
   type: time
   source:
     interval: 120m
+- name: every-24-hours
+  type: time
+  source:
+    interval: 24h
 
 resource_types:
 - name: slack-notification
@@ -64,11 +75,41 @@ resource_types:
 groups:
 - name: hoodaw
   jobs:
+    - hoodaw-dashboard-reporter
     - how-out-of-date-are-we
     - hoodaw-namespace-usage
     - hoodaw-orphaned-statefiles
 
 jobs:
+  - name: hoodaw-dashboard-reporter
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-24-hours
+          trigger: true
+        - get: dashboard-reporter-image
+      - task: generate-report
+        image: dashboard-reporter-image
+        config:
+          platform: linux
+          outputs:
+            - name: report
+          params:
+            DASHBOARD_URL: ((hoodaw-creds.hostname))/dashboard
+            OUTPUT_FILE: report/action_items
+          run:
+            path: /app/report.rb
+        on_failure:
+          put: slack-alert
+          params:
+            channel: '#cloud-platform'
+            text_file: report/action_items
+            attachments:
+              - color: "warning"
+                title: 'How out of date are we - action required:'
+                title_link: ((hoodaw-creds.hostname))/dashboard
+                footer: ((hoodaw-creds.hostname))
+
   - name: how-out-of-date-are-we
     serial: true
     plan:

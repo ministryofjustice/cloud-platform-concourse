@@ -49,13 +49,6 @@ resources:
     tag: "0.3"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: dashboard-reporter-image
-  type: docker-image
-  source:
-    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter
-    tag: "2.13"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: orphaned-resources-reporter-image
   type: docker-image
   source:
@@ -75,10 +68,6 @@ resources:
   type: time
   source:
     interval: 12h
-- name: every-24-hours
-  type: time
-  source:
-    interval: 24h
 - name: every-week
   type: time
   source:
@@ -96,7 +85,6 @@ groups:
     - integration-tests
     - eks-integration-tests
     - manual-snapshots-checker
-    - hoodaw-dashboard-reporter
     - orphaned-resources-report
     - namespace-cost-report
     - hosted-services-report
@@ -279,34 +267,6 @@ jobs:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
 
-  - name: hoodaw-dashboard-reporter
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-24-hours
-          trigger: true
-        - get: dashboard-reporter-image
-      - task: generate-report
-        image: dashboard-reporter-image
-        config:
-          platform: linux
-          outputs:
-            - name: report
-          params:
-            DASHBOARD_URL: ((hoodaw-creds.hostname))/dashboard
-            OUTPUT_FILE: report/action_items
-          run:
-            path: /app/report.rb
-        on_failure:
-          put: slack-alert
-          params:
-            channel: '#cloud-platform'
-            text_file: report/action_items
-            attachments:
-              - color: "warning"
-                title: 'How out of date are we - action required:'
-                title_link: ((hoodaw-creds.hostname))/dashboard
-                footer: ((hoodaw-creds.hostname))
 
   - name: orphaned-resources-report
     serial: true
