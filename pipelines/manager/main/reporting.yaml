@@ -35,13 +35,6 @@ resources:
     tag: "2.24"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: cost-calculator-image
-  type: docker-image
-  source:
-    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator
-    tag: "2.0"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
@@ -78,7 +71,6 @@ groups:
     - integration-tests
     - eks-integration-tests
     - manual-snapshots-checker
-    - namespace-cost-report
     - hosted-services-report
 
 jobs:
@@ -259,25 +251,6 @@ jobs:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
 
-
-  - name: namespace-cost-report
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-6-hours
-          trigger: true
-        - get: cost-calculator-image
-      - task: post-costs-to-hoodaw
-        image: cost-calculator-image
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            HOODAW_HOST: ((hoodaw-creds.hostname))
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
-          run:
-            path: /root/post-namespace-costs.rb
 
   - name: hosted-services-report
     serial: true

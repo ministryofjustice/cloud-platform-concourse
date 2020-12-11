@@ -14,6 +14,13 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
     branch: main
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+- name: cost-calculator-image
+  type: docker-image
+  source:
+    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator
+    tag: "2.0"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: orphaned-resources-reporter-image
   type: docker-image
   source:
@@ -91,6 +98,7 @@ groups:
     - hoodaw-namespace-usage
     - hoodaw-orphaned-statefiles
     - orphaned-resources-report
+    - namespace-cost-report
 
 jobs:
   - name: hoodaw-dashboard-reporter
@@ -252,4 +260,23 @@ jobs:
               - |-
                 cd /app
                 ./bin/post-data-to-hoodaw.sh
+
+  - name: namespace-cost-report
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-6-hours
+          trigger: true
+        - get: cost-calculator-image
+      - task: post-costs-to-hoodaw
+        image: cost-calculator-image
+        config:
+          platform: linux
+          params:
+            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            HOODAW_HOST: ((hoodaw-creds.hostname))
+            HOODAW_API_KEY: ((hoodaw-creds.api_key))
+          run:
+            path: /root/post-namespace-costs.rb
 
