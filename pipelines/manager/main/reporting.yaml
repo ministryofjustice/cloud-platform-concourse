@@ -42,13 +42,6 @@ resources:
     tag: "2.0"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
-- name: hoodaw-updater-image
-  type: docker-image
-  source:
-    repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-    tag: "2.27"
-    username: ((ministryofjustice-dockerhub.dockerhub_username))
-    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: cloud-platform-tools-terraform
   type: docker-image
   source:
@@ -100,7 +93,6 @@ groups:
 - name: reporting
   jobs:
     - orphaned-namespaces
-    - how-out-of-date-are-we
     - integration-tests
     - eks-integration-tests
     - manual-snapshots-checker
@@ -152,36 +144,6 @@ jobs:
               attachments:
                 - color: "danger"
                   <<: *SLACK_ATTACHMENTS_DEFAULTS
-
-  - name: how-out-of-date-are-we
-    serial: true
-    plan:
-      - in_parallel:
-        - get: every-hour
-          trigger: true
-        - get: hoodaw-updater-image
-      - task: how-out-of-date-are-we
-        image: hoodaw-updater-image
-        config:
-          platform: linux
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            AWS_REGION: eu-west-2
-            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
-            KUBECONFIG_S3_KEY: kubeconfig
-            KUBECONFIG: /tmp/kubeconfig
-            KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-            DATA_URL: ((hoodaw-creds.hostname))
-            GITHUB_TOKEN: ((how-out-of-date-are-we-github-token.token))
-            DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
-            ORGANIZATION: ministryofjustice
-            REPO_EXCEPTIONS: "cloud-platform-runbooks cloud-platform-user-guide-publish"
-            REGEXP: "^cloud-platform-*"
-            TEAM: WebOps
-            HOODAW_API_KEY: ((hoodaw-creds.api_key))
-          run:
-            path: /app/update.sh
 
   - name: integration-tests
     serial: true
