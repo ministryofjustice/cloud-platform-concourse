@@ -14,6 +14,13 @@ resources:
     uri: https://github.com/ministryofjustice/cloud-platform-environments.git
     branch: main
     git_crypt_key: ((cloud-platform-environments-git-crypt.key))
+- name: orphaned-namespace-checker-image
+  type: docker-image
+  source:
+    repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
+    tag: "2.24"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: cost-calculator-image
   type: docker-image
   source:
@@ -68,6 +75,10 @@ resources:
   type: time
   source:
     interval: 6h
+- name: every-12-hours
+  type: time
+  source:
+    interval: 12h
 - name: every-day
   type: time
   source:
@@ -99,6 +110,7 @@ groups:
     - hoodaw-orphaned-statefiles
     - orphaned-resources-report
     - namespace-cost-report
+    - hosted-services-report
 
 jobs:
   - name: hoodaw-dashboard-reporter
@@ -280,3 +292,31 @@ jobs:
           run:
             path: /root/post-namespace-costs.rb
 
+  - name: hosted-services-report
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-12-hours
+          trigger: true
+        - get: orphaned-namespace-checker-image
+      - task: post-hosted-services-to-hoodaw
+        image: orphaned-namespace-checker-image
+        config:
+          platform: linux
+          params:
+            KUBECONFIG_AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
+            KUBECONFIG_AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
+            KUBECONFIG_AWS_REGION: eu-west-2
+            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+            KUBECONFIG_S3_KEY: kubeconfig
+            KUBECONFIG: /tmp/kubeconfig
+            KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
+            HOODAW_HOST: ((hoodaw-creds.hostname))
+            HOODAW_API_KEY: ((hoodaw-creds.api_key))
+          run:
+            path: /bin/sh
+            args:
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data-to-hoodaw.sh
