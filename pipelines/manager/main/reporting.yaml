@@ -42,7 +42,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker
-    tag: "2.24"
+    tag: "2.25"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: cloud-platform-tools-terraform
@@ -110,6 +110,7 @@ jobs:
             TFSTATE_BUCKET_PREFIX: cloud-platform-environments/live-1.cloud-platform.service.justice.gov.uk
             GITHUB_TOKEN: ((cloud-platform-environments-pr-git-access-token))
           run:
+            user: root
             path: /app/bin/orphaned_namespaces.rb
           outputs:
             - name: output
