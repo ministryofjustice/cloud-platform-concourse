@@ -53,7 +53,7 @@ jobs:
           outputs:
             - name: report
           params:
-            DASHBOARD_URL: ((hoodaw-creds.hostname))/dashboard
+            DASHBOARD_URL: ((cloud-platform-reports-api-key.hostname))/dashboard
             OUTPUT_FILE: report/action_items
           run:
             path: /app/report.rb
@@ -65,5 +65,5 @@ jobs:
             attachments:
               - color: "warning"
                 title: 'How out of date are we - action required:'
-                title_link: ((hoodaw-creds.hostname))/dashboard
-                footer: ((hoodaw-creds.hostname))
+                title_link: ((cloud-platform-reports-api-key.hostname))/dashboard
+                footer: ((cloud-platform-reports-api-key.hostname))
