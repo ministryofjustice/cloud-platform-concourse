@@ -46,7 +46,10 @@ resources:
   type: time
   source:
     interval: 1h
-
+- name: every-30m
+  type: time
+  source:
+    interval: 30m
 resource_types:
 - name: slack-notification
   type: docker-image
