@@ -83,6 +83,7 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
+            KUBE_CONFIG_PATH: /tmp/kubeconfig
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
@@ -136,6 +137,7 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
+            KUBE_CONFIG_PATH: /tmp/kubeconfig            
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
@@ -193,6 +195,7 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             KUBECONFIG: /tmp/kubeconfig
+            KUBE_CONFIG_PATH: /tmp/kubeconfig            
             TF_PLUGIN_CACHE_DIR: /tmp/terraform-plugin-cache
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
@@ -253,6 +256,7 @@ jobs:
             KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
             KUBECONFIG_S3_KEY: kubeconfig
             KUBE_CONFIG: /tmp/kubeconfig
+            KUBE_CONFIG_PATH: /tmp/kubeconfig
             KUBE_CTX: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
             PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
