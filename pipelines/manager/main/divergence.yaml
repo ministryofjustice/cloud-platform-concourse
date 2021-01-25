@@ -17,7 +17,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-cli
-    tag: "1.7.0"
+    tag: "1.7.1"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
@@ -80,7 +80,7 @@ jobs:
               - -c
               - |
                 cd terraform/cloud-platform-eks/
-                cloud-platform terraform check-divergence --workspace manager
+                cloud-platform terraform check-divergence --workspace manager --skip-version-check
           outputs:
             - name: metadata
         on_failure:
@@ -126,7 +126,7 @@ jobs:
                   kubectl config use-context ${KUBE_CLUSTER}
                 )
                 cd terraform/cloud-platform-eks/components
-                cloud-platform terraform check-divergence --workspace manager
+                cloud-platform terraform check-divergence --workspace manager --skip-version-check
           outputs:
             - name: metadata
         on_failure:
@@ -172,7 +172,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 cd terraform/cloud-platform/
-                cloud-platform terraform check-divergence --workspace live-1
+                cloud-platform terraform check-divergence --workspace live-1 --skip-version-check
           outputs:
             - name: metadata
         on_failure:
@@ -210,7 +210,7 @@ jobs:
               - -c
               - |
                 cd terraform/cloud-platform-network/
-                cloud-platform terraform check-divergence --workspace live-1
+                cloud-platform terraform check-divergence --workspace live-1 --skip-version-check
           outputs:
             - name: metadata
         on_failure:
@@ -253,7 +253,7 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 cd terraform/cloud-platform-components/
-                cloud-platform terraform check-divergence --workspace live-1
+                cloud-platform terraform check-divergence --workspace live-1 --skip-version-check
           outputs:
             - name: metadata
         on_failure:
