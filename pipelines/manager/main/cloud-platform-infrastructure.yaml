@@ -9,7 +9,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-cli
-    tag: "1.7.0"
+    tag: "1.7.1"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: pull-request
@@ -72,7 +72,7 @@ jobs:
                 aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
               )
-              cloud-platform terraform plan --dirs-file .git/resource/changed_files
+              cloud-platform terraform plan --dirs-file .git/resource/changed_files --skip-version-check
       on_failure:
         put: pull-request
         params:
@@ -117,5 +117,5 @@ jobs:
                 aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 kubectl config use-context live-1.cloud-platform.service.justice.gov.uk
               )
-              cloud-platform terraform apply --dirs-file .git/resource/changed_files
+              cloud-platform terraform apply --dirs-file .git/resource/changed_files --skip-version-check
 
