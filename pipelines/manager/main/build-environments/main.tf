@@ -7,12 +7,12 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-west-2"
+  alias  = "ireland"
+  region = "eu-west-1"
 }
 
 provider "aws" {
-  alias  = "ireland"
-  region = "eu-west-1"
+  region = "eu-west-2"
 }
 
 provider "kubernetes" {
@@ -27,26 +27,23 @@ provider "kubernetes" {
 
 resource "kubernetes_service_account" "manager" {
   metadata {
-    name = "terraform-example"
-  }
-  secret {
-    name = "${kubernetes_secret.example.metadata.0.name}"
+    name      = "concourse-build-environments"
+    namespace = "kube-system"
   }
 
-  providers = {
-    kubernetes = kubernetes.manager
-  }
+  automount_service_account_token = false
+
+  provider = kubernetes.manager
 }
 
 resource "kubernetes_service_account" "live_1" {
   metadata {
-    name = "terraform-example"
+    name      = "concourse-build-environments"
+    namespace = "kube-system"
   }
-  secret {
-    name = "${kubernetes_secret.example.metadata.0.name}"
-  }
-  providers = {
-    kubernetes = kubernetes.live-1
-  }
+  
+  automount_service_account_token = false
+
+  provider = kubernetes.live-1
 }
 
