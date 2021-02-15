@@ -41,7 +41,7 @@ resource "kubernetes_service_account" "live_1" {
     name      = "concourse-build-environments"
     namespace = "kube-system"
   }
-  
+
   automount_service_account_token = false
 
   provider = kubernetes.live-1
