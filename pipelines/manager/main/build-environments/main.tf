@@ -15,14 +15,14 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-provider "kubernetes_live_1" {
-  config_path    = "~/.kube/config"
-  config_context = "live-1"
+provider "kubernetes" {
+  alias          = "live-1"
+  config_context = "live-1.cloud-platform.service.justice.gov.uk"
 }
 
-provider "kubernetes_manager" {
-  config_path    = "~/.kube/config"
-  config_context = "manager"
+provider "kubernetes" {
+  alias          = "manager"
+  config_context = "arn:aws:eks:eu-west-2:754256621582:cluster/manager"
 }
 
 resource "kubernetes_service_account" "manager" {
@@ -32,6 +32,10 @@ resource "kubernetes_service_account" "manager" {
   secret {
     name = "${kubernetes_secret.example.metadata.0.name}"
   }
+
+  providers = {
+    kubernetes = kubernetes.manager
+  }
 }
 
 resource "kubernetes_service_account" "live_1" {
@@ -40,6 +44,9 @@ resource "kubernetes_service_account" "live_1" {
   }
   secret {
     name = "${kubernetes_secret.example.metadata.0.name}"
+  }
+  providers = {
+    kubernetes = kubernetes.live-1
   }
 }
 
