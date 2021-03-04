@@ -27,7 +27,7 @@ resources:
   type: docker-image
   source:
     repository: ministryofjustice/cloud-platform-pipeline-tools
-    tag: "1.29"
+    tag: "1.30"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: slack-alert
@@ -88,6 +88,7 @@ jobs:
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
             PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
+            PINGDOM_API_TOKEN: ((cloud-platform-environments-pingdom.pingdom_api_token))
             # the variables prefixed with PIPELINE_ are used by the apply script
             PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
@@ -144,6 +145,7 @@ jobs:
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
             PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
+            PINGDOM_API_TOKEN: ((cloud-platform-environments-pingdom.pingdom_api_token))
             # the variables prefixed with PIPELINE_ are used by the apply script
             PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
@@ -204,6 +206,7 @@ jobs:
             PINGDOM_USER: ((cloud-platform-environments-pingdom.pingdom_user))
             PINGDOM_PASSWORD: ((cloud-platform-environments-pingdom.pingdom_password))
             PINGDOM_API_KEY: ((cloud-platform-environments-pingdom.pingdom_api_key))
+            PINGDOM_API_TOKEN: ((cloud-platform-environments-pingdom.pingdom_api_token))
             # the variables prefixed with PIPELINE_ are used by the plan script
             PIPELINE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
