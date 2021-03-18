@@ -111,6 +111,7 @@ jobs:
             KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
             KUBECONFIG_S3_KEY: kubeconfig
             KUBECONFIG: /tmp/kubeconfig
+            KUBE_CONFIG_PATH: /tmp/kubeconfig
             KUBE_CLUSTER: manager.cloud-platform.service.justice.gov.uk
             KUBE_CTX: manager.cloud-platform.service.justice.gov.uk
           inputs:
