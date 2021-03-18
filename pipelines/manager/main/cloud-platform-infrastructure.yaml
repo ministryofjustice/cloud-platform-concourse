@@ -57,6 +57,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ((cloud-platform-admin-user-creds.secret-access-key))
           AWS_REGION: eu-west-2
           KUBECONFIG: /tmp/kubeconfig
+          KUBE_CONFIG_PATH: /tmp/kubeconfig
           AUTH0_DOMAIN: "justice-cloud-platform.eu.auth0.com"
           AUTH0_CLIENT_ID: ((concourse-tf-auth0-credentials.client-id))
           AUTH0_CLIENT_SECRET: ((concourse-tf-auth0-credentials.client_secret))
