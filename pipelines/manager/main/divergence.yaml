@@ -79,7 +79,7 @@ jobs:
             args:
               - -c
               - |
-                cd terraform/cloud-platform-eks/
+                cd terraform/aws-accounts/cloud-platform-aws/vpc/eks
                 cloud-platform terraform check-divergence --workspace manager --skip-version-check
           outputs:
             - name: metadata
@@ -126,7 +126,7 @@ jobs:
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                   kubectl config use-context ${KUBE_CLUSTER}
                 )
-                cd terraform/cloud-platform-eks/components
+                cd terraform/aws-accounts/cloud-platform-aws/vpc/eks/components
                 cloud-platform terraform check-divergence --workspace manager --skip-version-check
           outputs:
             - name: metadata
