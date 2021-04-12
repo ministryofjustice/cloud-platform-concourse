@@ -34,6 +34,13 @@ resources:
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
+- name: every-1h-during-workdays
+  type: time
+  source:
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+    interval: 1h
+    start: 8:00 AM
+    stop: 5:00 PM
 - name: every-2h-between-midnight-6am
   type: time
   source:
@@ -44,10 +51,6 @@ resources:
   type: time
   source:
     interval: 24h
-- name: every-hour
-  type: time
-  source:
-    interval: 1h
 - name: every-30m
   type: time
   source:
@@ -195,7 +198,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-hour
+        - get: every-1h-during-workdays
           trigger: true
         - get: tools-image
         - get: cloud-platform-terraform-bastion-repo
