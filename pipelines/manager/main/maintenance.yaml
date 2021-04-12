@@ -40,7 +40,7 @@ resources:
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
     interval: 1h
     start: 8:00 AM
-    stop: 17:00 PM
+    stop: 5:00 PM
 - name: every-2h-between-midnight-6am
   type: time
   source:
