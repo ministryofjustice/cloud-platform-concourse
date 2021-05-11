@@ -70,7 +70,7 @@ resource "kubernetes_cluster_role_binding" "concourse_build_environments_manager
     name      = "concourse-web"
     namespace = "concourse"
   }
- 
+
   provider = kubernetes.manager
 
 }
@@ -92,7 +92,7 @@ resource "kubernetes_cluster_role_binding" "concourse_build_environments_live_1"
     name      = kubernetes_service_account.live_1.metadata.0.name
     namespace = "kube-system"
   }
-  
+
   provider = kubernetes.live-1
 }
 
