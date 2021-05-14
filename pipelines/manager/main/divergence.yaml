@@ -147,7 +147,7 @@ jobs:
           trigger: false
         - get: cloud-platform-cli
           trigger: false
-      - task: check-divergence-k8s-components
+      - task: check-divergence-kops
         image: cloud-platform-cli
         config:
           platform: linux
@@ -173,7 +173,7 @@ jobs:
               - |
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
-                cd terraform/cloud-platform/
+                cd terraform/aws-accounts/cloud-platform-aws/vpc/kops
                 cloud-platform terraform check-divergence --workspace live-1 --skip-version-check
           outputs:
             - name: metadata
@@ -211,7 +211,7 @@ jobs:
             args:
               - -c
               - |
-                cd terraform/cloud-platform-network/
+                cd terraform/aws-accounts/cloud-platform-aws/vpc
                 cloud-platform terraform check-divergence --workspace live-1 --skip-version-check
           outputs:
             - name: metadata
@@ -222,7 +222,7 @@ jobs:
             attachments:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
-  - name: divergence-k8s-components
+  - name: divergence-kops-components
     serial: true
     plan:
       - in_parallel:
@@ -232,7 +232,7 @@ jobs:
           trigger: false
         - get: cloud-platform-cli
           trigger: false
-      - task: check-divergence-k8s-components
+      - task: check-divergence-kops-components
         image: cloud-platform-cli
         config:
           platform: linux
@@ -255,7 +255,7 @@ jobs:
               - |
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
-                cd terraform/cloud-platform-components/
+                cd terraform/aws-accounts/cloud-platform-aws/vpc/kops/components
                 cloud-platform terraform check-divergence --workspace live-1 --skip-version-check
           outputs:
             - name: metadata
