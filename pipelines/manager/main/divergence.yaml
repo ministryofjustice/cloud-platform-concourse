@@ -46,7 +46,7 @@ groups:
     - divergence-eks
     - divergence-eks-components
     - divergence-networking
-    - divergence-k8s-components
+    - divergence-kops-components
 
 
 jobs:
