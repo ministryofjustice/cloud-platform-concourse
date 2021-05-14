@@ -147,7 +147,7 @@ jobs:
           trigger: false
         - get: cloud-platform-cli
           trigger: false
-      - task: check-divergence-k8s-components
+      - task: check-divergence-kops
         image: cloud-platform-cli
         config:
           platform: linux
@@ -222,7 +222,7 @@ jobs:
             attachments:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
-  - name: divergence-k8s-components
+  - name: divergence-kops-components
     serial: true
     plan:
       - in_parallel:
@@ -232,7 +232,7 @@ jobs:
           trigger: false
         - get: cloud-platform-cli
           trigger: false
-      - task: check-divergence-k8s-components
+      - task: check-divergence-kops-components
         image: cloud-platform-cli
         config:
           platform: linux
