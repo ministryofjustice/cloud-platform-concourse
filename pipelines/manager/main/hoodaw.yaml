@@ -47,7 +47,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-24-hours-during-workweek
+        - get: every-24h-during-workweek
           trigger: true
         - get: dashboard-reporter-image
       - task: generate-report
