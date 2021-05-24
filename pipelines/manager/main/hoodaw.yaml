@@ -19,10 +19,14 @@ resources:
   type: slack-notification
   source:
     url: https://hooks.slack.com/services/((slack-hook-id))
-- name: every-24-hours
+
+- name: every-24h-during-workweek
   type: time
   source:
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
     interval: 24h
+    start: 10:00 AM
+    stop: 5:00 PM
 
 resource_types:
 - name: slack-notification
@@ -43,7 +47,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-24-hours
+        - get: every-24-hours-during-workweek
           trigger: true
         - get: dashboard-reporter-image
       - task: generate-report
