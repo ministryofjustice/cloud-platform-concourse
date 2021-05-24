@@ -202,7 +202,6 @@ jobs:
             AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
             AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
             AWS_REGION: eu-west-2
-            TF_VAR_cluster_names: '["live-1.cloud-platform.service.justice.gov.uk","manager"]'
           inputs:
           - name: cloud-platform-infrastructure-repo
             path: ./
