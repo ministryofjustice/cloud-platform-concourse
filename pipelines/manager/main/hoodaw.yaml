@@ -61,7 +61,7 @@ jobs:
             OUTPUT_FILE: report/action_items
           run:
             path: /app/report.rb
-        on_failure:
+        on_success:
           put: slack-alert
           params:
             channel: '#cloud-platform'
@@ -71,3 +71,10 @@ jobs:
                 title: 'How out of date are we - action required:'
                 title_link: ((cloud-platform-reports-api-key.hostname))/dashboard
                 footer: ((cloud-platform-reports-api-key.hostname))
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
