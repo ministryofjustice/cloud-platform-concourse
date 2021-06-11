@@ -61,7 +61,6 @@ groups:
     - apply-live
     - apply-namespace-changes-live
     - plan-live
-    - destroy-deleted-namespaces
 
 jobs:
   - name: apply-live
@@ -111,6 +110,7 @@ jobs:
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 bundle install --without development test
+                exit 0
                 ./bin/apply
         on_failure:
           put: slack-alert
@@ -165,6 +165,7 @@ jobs:
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 bundle install --without development test
+                exit 0
                 ./bin/apply-namespace-changes
         on_failure:
           put: slack-alert
@@ -209,7 +210,7 @@ jobs:
             TF_VAR_concourse_url: "https://concourse.cloud-platform.service.justice.gov.uk"
             TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
             TF_VAR_concourse_basic_auth_password: ((concourse-basic-auth.password))
-            TF_VAR_cluster_state_key: "cloud-platform/live/terraform.tfstate"
+            TF_VAR_cluster_state_key: "cloud-platform/live-1/terraform.tfstate"
             TF_VAR_github_owner: "ministryofjustice"
             TF_VAR_github_token: ((github-actions-secrets-token.token))
           run:
@@ -236,50 +237,3 @@ jobs:
             params:
               path: cloud-platform-environments-live-pull-requests
               status: success
-
-  - name: destroy-deleted-namespaces
-    serial: true
-    plan:
-      - in_parallel:
-        - get: cloud-platform-environments-repo
-          trigger: true
-        - get: pipeline-tools-image
-      - task: destroy-deleted-namespaces
-        image: pipeline-tools-image
-        config:
-          platform: linux
-          inputs:
-            - name: cloud-platform-environments-repo
-          params:
-            AWS_ACCESS_KEY_ID: ((aws-creds.access-key-id))
-            AWS_SECRET_ACCESS_KEY: ((aws-creds.secret-access-key))
-            KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
-            KUBECONFIG_S3_KEY: kubeconfig
-            KUBE_CONFIG: /tmp/kubeconfig
-            KUBE_CONFIG_PATH: /tmp/kubeconfig
-            KUBE_CTX: live.cloud-platform.service.justice.gov.uk
-            PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
-            PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
-            PIPELINE_STATE_REGION: "eu-west-1"
-            PIPELINE_CLUSTER: live.cloud-platform.service.justice.gov.uk
-            PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
-            TF_VAR_cluster_name: concourse.cloud-platform.service.justice.gov.uk
-            TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
-            TF_VAR_cluster_state_key: "cloud-platform/live/terraform.tfstate"
-            TF_VAR_github_owner: "ministryofjustice"
-            TF_VAR_github_token: ((github-actions-secrets-token.token))
-          run:
-            path: /bin/sh
-            dir: cloud-platform-environments-repo
-            args:
-              - -c
-              - |
-                bundle install --without development test
-                ./bin/auto-delete-namespace.rb
-        on_failure:
-          put: slack-alert
-          params:
-            <<: *SLACK_NOTIFICATION_DEFAULTS
-            attachments:
-              - color: "danger"
-                <<: *SLACK_ATTACHMENTS_DEFAULTS
