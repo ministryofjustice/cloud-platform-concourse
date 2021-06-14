@@ -203,7 +203,7 @@ jobs:
             PIPELINE_CLUSTER: live.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
             PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
-            PIPELINE_CLUSTER_STATE: "live-1"
+            PIPELINE_CLUSTER_STATE: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_STATE_REGION: "eu-west-1"
             PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
             # the variable cluster_name here is used to get VPC info
