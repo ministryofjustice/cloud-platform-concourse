@@ -97,7 +97,7 @@ jobs:
             # the variable cluster_name here is used to get VPC info
             TF_VAR_cluster_name: "live-1"
             TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
-            TF_VAR_cluster_state_key: "cloud-platform/live/terraform.tfstate"
+            TF_VAR_cluster_state_key: "cloud-platform/live-1/terraform.tfstate"
             TF_VAR_github_owner: "ministryofjustice"
             TF_VAR_github_token: ((github-actions-secrets-token.token))
           run:
@@ -153,7 +153,7 @@ jobs:
             # the variable cluster_name here is used to get VPC info
             TF_VAR_cluster_name: "live-1"
             TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
-            TF_VAR_cluster_state_key: "cloud-platform/live/terraform.tfstate"
+            TF_VAR_cluster_state_key: "cloud-platform/live-1/terraform.tfstate"
             TF_VAR_github_owner: "ministryofjustice"
             TF_VAR_github_token: ((github-actions-secrets-token.token))
           run:
