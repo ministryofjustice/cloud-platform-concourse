@@ -167,7 +167,6 @@ jobs:
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 bundle install --without development test
-                exit 0
                 ./bin/apply-namespace-changes
         on_failure:
           put: slack-alert
