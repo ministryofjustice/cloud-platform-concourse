@@ -90,6 +90,7 @@ jobs:
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
             PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
             PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER_STATE: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
             TF_VAR_concourse_url: "https://concourse.cloud-platform.service.justice.gov.uk"
             TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
@@ -110,6 +111,7 @@ jobs:
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 bundle install --without development test
+                exit 0
                 ./bin/apply
         on_failure:
           put: slack-alert
@@ -144,6 +146,7 @@ jobs:
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
             PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
             PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER_STATE: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
             TF_VAR_concourse_url: "https://concourse.cloud-platform.service.justice.gov.uk"
             TF_VAR_concourse_basic_auth_username: ((concourse-basic-auth.username))
@@ -164,6 +167,7 @@ jobs:
                   aws s3 cp s3://cloud-platform-concourse-kubeconfig/kubeconfig /tmp/kubeconfig
                 )
                 bundle install --without development test
+                exit 0
                 ./bin/apply-namespace-changes
         on_failure:
           put: slack-alert
@@ -202,6 +206,7 @@ jobs:
             PIPELINE_STATE_BUCKET: cloud-platform-terraform-state
             PIPELINE_STATE_KEY_PREFIX: "cloud-platform-environments/"
             PIPELINE_STATE_REGION: "eu-west-1"
+            PIPELINE_CLUSTER_STATE: live-1.cloud-platform.service.justice.gov.uk
             PIPELINE_TERRAFORM_STATE_LOCK_TABLE: "cloud-platform-environments-terraform-lock"
             TF_VAR_cluster_name: "live-1"
             TF_VAR_cluster_state_bucket: cloud-platform-terraform-state
