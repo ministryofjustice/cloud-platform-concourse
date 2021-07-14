@@ -85,7 +85,8 @@ groups:
   jobs:
     - orphaned-namespaces
     - integration-tests
-    - live-integration-tests
+    - live-integration-tests-golang
+    - live-integration-tests-rspec
     - eks-integration-tests
     - manual-snapshots-checker
 
@@ -173,8 +174,48 @@ jobs:
             attachments:
               - color: "danger"
                 <<: *SLACK_ATTACHMENTS_DEFAULTS
+  
+  - name: live-integration-tests-rspec
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-hour
+          trigger: true
+        - get: integration-test-image
+          trigger: false
+        - get: cloud-platform-infrastructure-repo
+          trigger: false
+      - task: test-live-1
+        image: integration-test-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-infrastructure-repo
+          params:
+            <<: *AWS_CREDENTIALS
+            <<: *KUBECONFIG_PARAMS
+            KUBE_CLUSTER: live.cloud-platform.service.justice.gov.uk
+            EXECUTION_CONTEXT: integration-test-pipeline
+          run:
+            path: /bin/sh
+            dir: cloud-platform-infrastructure-repo
+            args:
+              - -c
+              - |
+                aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
+                kubectl config use-context ${KUBE_CLUSTER}
+                cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only --tag ~live-1 --tag ~kops
+          outputs:
+            - name: metadata
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
 
-  - name: live-integration-tests
+  - name: live-integration-tests-golang
     serial: true
     plan:
       - in_parallel:
