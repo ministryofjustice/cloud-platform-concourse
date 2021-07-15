@@ -42,7 +42,7 @@ resources:
   type: docker-image
   source:
     repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tests
-    tag: "0.4"
+    tag: "0.6"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: orphaned-namespace-checker-image
@@ -244,7 +244,7 @@ jobs:
               - |
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
-                cd ./tests/e2e; e2e-tests -ginkgo.slowSpecThreshold=120 -config ../config/live.yaml
+                cd ./tests/e2e; e2e-tests -test.v -ginkgo.slowSpecThreshold=120 -config ../config/live.yaml
           outputs:
             - name: metadata
         on_failure:
