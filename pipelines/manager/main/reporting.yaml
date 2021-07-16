@@ -38,6 +38,13 @@ resources:
     tag: "1.7"
     username: ((ministryofjustice-dockerhub.dockerhub_username))
     password: ((ministryofjustice-dockerhub.dockerhub_password))
+- name: e2e-test-image
+  type: docker-image
+  source:
+    repository: registry.hub.docker.com/ministryofjustice/cloud-platform-tests
+    tag: "0.6"
+    username: ((ministryofjustice-dockerhub.dockerhub_username))
+    password: ((ministryofjustice-dockerhub.dockerhub_password))
 - name: orphaned-namespace-checker-image
   type: docker-image
   source:
@@ -78,6 +85,8 @@ groups:
   jobs:
     - orphaned-namespaces
     - integration-tests
+    - live-integration-tests-golang
+    - live-integration-tests-rspec
     - eks-integration-tests
     - manual-snapshots-checker
 
@@ -156,6 +165,86 @@ jobs:
                 aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
                 kubectl config use-context ${KUBE_CLUSTER}
                 cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only --tag ~eks-manager
+          outputs:
+            - name: metadata
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
+  
+  - name: live-integration-tests-rspec
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-hour
+          trigger: true
+        - get: integration-test-image
+          trigger: false
+        - get: cloud-platform-infrastructure-repo
+          trigger: false
+      - task: test-live-1
+        image: integration-test-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-infrastructure-repo
+          params:
+            <<: *AWS_CREDENTIALS
+            <<: *KUBECONFIG_PARAMS
+            KUBE_CLUSTER: live.cloud-platform.service.justice.gov.uk
+            EXECUTION_CONTEXT: integration-test-pipeline
+          run:
+            path: /bin/sh
+            dir: cloud-platform-infrastructure-repo
+            args:
+              - -c
+              - |
+                aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
+                kubectl config use-context ${KUBE_CLUSTER}
+                cd ./smoke-tests; rspec --tag ~cluster:test-cluster-only --tag ~live-1 --tag ~kops --tag ~concourse-test
+          outputs:
+            - name: metadata
+        on_failure:
+          put: slack-alert
+          params:
+            <<: *SLACK_NOTIFICATION_DEFAULTS
+            attachments:
+              - color: "danger"
+                <<: *SLACK_ATTACHMENTS_DEFAULTS
+
+  - name: live-integration-tests-golang
+    serial: true
+    plan:
+      - in_parallel:
+        - get: every-hour
+          trigger: true
+        - get: e2e-test-image
+          trigger: false
+        - get: cloud-platform-infrastructure-repo
+          trigger: false
+      - task: test-live-1
+        image: e2e-test-image
+        config:
+          platform: linux
+          inputs:
+            - name: cloud-platform-infrastructure-repo
+          params:
+            <<: *AWS_CREDENTIALS
+            <<: *KUBECONFIG_PARAMS
+            KUBE_CLUSTER: live.cloud-platform.service.justice.gov.uk
+            EXECUTION_CONTEXT: integration-test-pipeline
+          run:
+            path: /bin/sh
+            dir: cloud-platform-infrastructure-repo
+            args:
+              - -c
+              - |
+                aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
+                kubectl config use-context ${KUBE_CLUSTER}
+                cd ./tests/e2e; e2e-tests -test.v -ginkgo.slowSpecThreshold=120 -config ../config/live.yaml
           outputs:
             - name: metadata
         on_failure:
