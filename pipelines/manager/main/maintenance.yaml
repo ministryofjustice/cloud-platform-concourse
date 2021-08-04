@@ -41,12 +41,12 @@ resources:
     interval: 1h
     start: 8:00 AM
     stop: 5:00 PM
-- name: every-2h-between-midnight-6am
+- name: every-1h-between-midnight-3am
   type: time
   source:
-    interval: 2h
+    interval: 1h
     start: 00:00 AM
-    stop: 6:00 AM
+    stop: 03:00 AM
 - name: every-day
   type: time
   source:
@@ -78,7 +78,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-        - get: every-2h-between-midnight-6am
+        - get: every-1h-between-midnight-3am
           trigger: true
         - get: tools-image
         - get: cloud-platform-infrastructure-repo
